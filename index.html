@@ -65,20 +65,20 @@
             cursor: not-allowed;
         }
         .btn-rebirth {
-            background: linear-gradient(180deg, #f59e0b 0%, #d946ef 100%);
-            border: 2px solid #fef08a;
-            box-shadow: 0 4px 0 #701a75;
+            background: linear-gradient(180deg, #c084fc 0%, #7e22ce 100%);
+            border: 2px solid #581c87;
+            box-shadow: 0 4px 0 #3b0764;
             transition: transform 0.08s;
         }
         .btn-rebirth:active:not(:disabled) {
             transform: translateY(3px);
-            box-shadow: 0 1px 0 #701a75;
+            box-shadow: 0 1px 0 #3b0764;
         }
         .btn-rebirth:disabled {
-            background: #6b7280;
-            border-color: #4b5563;
-            box-shadow: 0 4px 0 #374151;
-            opacity: 0.6;
+            background: #9ca3af;
+            border-color: #6b7280;
+            box-shadow: 0 4px 0 #4b5563;
+            opacity: 0.7;
             cursor: not-allowed;
         }
         .glaze-pill {
@@ -112,21 +112,13 @@
 
     <!-- HUD Supérieur -->
     <div class="fixed top-2.5 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
-        <!-- Compteurs Argent, Rebirth, Prix, Vendus & Sauvegarde -->
+        <!-- Compteurs Argent, Prix, Vendus, Rebirth & Sauvegarde -->
         <div class="flex items-center gap-2 pointer-events-auto flex-wrap">
             <div class="wood-panel rounded-2xl px-3 py-1.5 flex items-center gap-2 text-amber-100">
                 <span class="text-xl sm:text-2xl">🪙</span>
                 <div>
                     <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Caisse</div>
                     <div id="hudMoney" class="text-base sm:text-xl font-bold text-yellow-300 leading-tight">25 $</div>
-                </div>
-            </div>
-
-            <div class="wood-panel rounded-2xl px-3 py-1.5 flex items-center gap-2 text-amber-100">
-                <span class="text-xl sm:text-2xl">✨</span>
-                <div>
-                    <div class="text-[10px] uppercase tracking-wider text-purple-300 font-bold leading-none">Rebirth</div>
-                    <div id="hudRebirth" class="text-base sm:text-xl font-bold text-fuchsia-300 leading-tight">0 (x1.0)</div>
                 </div>
             </div>
 
@@ -138,11 +130,20 @@
                 </div>
             </div>
 
-            <div class="hidden lg:flex wood-panel rounded-2xl px-3 py-1.5 items-center gap-2 text-amber-100">
+            <div class="hidden md:flex wood-panel rounded-2xl px-3 py-1.5 items-center gap-2 text-amber-100">
                 <span class="text-xl">⭐</span>
                 <div>
                     <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Vendus</div>
                     <div id="hudSold" class="text-lg font-bold text-amber-100 leading-tight">0</div>
+                </div>
+            </div>
+
+            <!-- Badge Rebirth (visible dès que Rebirth > 0 ou caisse >= 10 000 $) -->
+            <div id="hudRebirthBadge" class="hidden wood-panel rounded-2xl px-3 py-1.5 items-center gap-1.5 text-purple-200 border-purple-400">
+                <span class="text-lg">🔮</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-purple-300 font-bold leading-none">Rebirth</div>
+                    <div id="hudRebirthText" class="text-sm sm:text-base font-bold text-purple-100 leading-tight">0 (x1.0)</div>
                 </div>
             </div>
 
@@ -167,7 +168,7 @@
     <!-- Barre de Sélection Rapide des Glaçages + Commande Client en Bas -->
     <div class="fixed bottom-2.5 left-2.5 right-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none z-10">
         <!-- Sélecteur Rapide de Glaçage (Touches 1-9 ou Clic/Tap) -->
-        <div class="wood-panel rounded-2xl px-3 py-1.5 pointer-events-auto max-w-full sm:max-w-[62%] flex items-center gap-2">
+        <div class="wood-panel rounded-2xl px-3 py-1.5 pointer-events-auto max-w-full sm:max-w-[64%] flex items-center gap-2">
             <div class="text-[11px] font-bold text-amber-200 shrink-0 leading-tight">
                 🎨 Glaçage :<br><span class="text-[10px] text-amber-400 font-normal">Touches 1-9</span>
             </div>
@@ -194,14 +195,17 @@
 
     <!-- Modale Boutique -->
     <div id="shopModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-2.5 sm:p-5 z-30">
-        <div class="wood-panel rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="wood-panel rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <!-- En-tête Boutique -->
             <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b-2 border-amber-800 bg-amber-950/60">
                 <div class="flex items-center gap-3">
                     <span class="text-2xl sm:text-3xl">🎄</span>
                     <div>
                         <h2 class="text-lg sm:text-2xl font-bold text-amber-100">Boutique du Pâtissier</h2>
-                        <p class="text-xs text-amber-300">Solde : <span id="shopBalance" class="font-bold text-yellow-300">25 $</span> • Rebirth : <span id="shopRebirthCount" class="font-bold text-fuchsia-300">0</span></p>
+                        <p class="text-xs text-amber-300">
+                            Solde : <span id="shopBalance" class="font-bold text-yellow-300">25 $</span> • 
+                            Rebirths : <span id="shopRebirthCount" class="font-bold text-purple-300">0</span> • Sauvegarde auto active
+                        </p>
                     </div>
                 </div>
                 <button id="btnCloseShop" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-lg flex items-center justify-center border-2 border-red-900 cursor-pointer">
@@ -210,25 +214,25 @@
             </div>
 
             <!-- Onglets -->
-            <div class="flex gap-1.5 p-2.5 bg-amber-950/40 overflow-x-auto">
+            <div class="flex gap-1.5 p-2.5 bg-amber-950/40 overflow-x-auto no-scrollbar">
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâtes</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="shapes">🍪 Formes (5)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="shapes">🍪 Formes</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 Glaçages (12)</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ Confettis</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="hats">🎩 Chapeaux</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Équipement</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Équipe & Déco</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="hats">🎩 Chapeaux</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-fuchsia-200 cursor-pointer whitespace-nowrap" data-tab="rebirth">✨ Rebirth</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-purple-900/80 text-purple-100 border border-purple-400/50 cursor-pointer whitespace-nowrap" data-tab="rebirth">🔮 Rebirth (15k)</button>
             </div>
 
             <!-- Liste des articles -->
             <div id="shopGrid" class="p-3.5 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1"></div>
 
             <!-- Pied de boutique avec bouton Réinitialiser la sauvegarde -->
-            <div class="px-4 py-2.5 bg-amber-950/70 border-t-2 border-amber-800 flex items-center justify-between text-xs text-amber-300">
+            <div class="px-4 py-2.5 bg-amber-950/70 border-t-2 border-amber-800 flex items-center justify-between gap-2 text-xs text-amber-300">
                 <span>Astuce : +50% de bonus si le glaçage correspond à la demande du client !</span>
                 <button id="btnOpenReset" class="px-3 py-1.5 rounded-xl bg-red-900/80 hover:bg-red-700 text-red-100 font-bold border border-red-600 cursor-pointer whitespace-nowrap">
-                    🗑️ Réinitialiser la sauvegarde
+                    🗑️ Réinitialiser
                 </button>
             </div>
         </div>
@@ -239,10 +243,31 @@
         <div class="cream-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
             <div class="text-4xl mb-2">🍪</div>
             <h3 class="text-xl font-bold mb-2">Réinitialiser la sauvegarde ?</h3>
-            <p class="text-sm text-amber-800 mb-5">Ta caisse, tes glaçages, tes rebirths, tes améliorations et tes statistiques seront remis à zéro.</p>
+            <p class="text-sm text-amber-800 mb-5">Ta caisse, tes glaçages, tes formes, tes chapeaux, tes Rebirths et tes statistiques seront remis à zéro.</p>
             <div class="flex gap-3">
                 <button id="btnCancelReset" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
                 <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Effacer tout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Confirmation Rebirth -->
+    <div id="rebirthModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-40">
+        <div class="cream-card rounded-3xl p-6 max-w-md w-full text-center text-amber-950 border-purple-500">
+            <div class="text-5xl mb-2">🔮✨</div>
+            <h3 class="text-2xl font-bold text-purple-900 mb-2">Faire un Rebirth ?</h3>
+            <p class="text-sm text-amber-900 mb-3">
+                Tu vas recommencer ta boulangerie avec <strong>25 $</strong>, mais tu gagnes des bonus permanents incroyables :
+            </p>
+            <ul class="text-left text-xs sm:text-sm bg-purple-100/90 border-2 border-purple-300 rounded-2xl p-3.5 mb-4 space-y-1.5 text-purple-950 font-semibold">
+                <li>📦 <strong>Présentoir plus gros :</strong> +3 places permanentes sur le présentoir !</li>
+                <li>💰 <strong>Multiplicateur de gains :</strong> +50% de valeur sur TOUS les biscuits !</li>
+                <li>🔓 <strong>Contenu exclusif débloqué :</strong> Nouveaux niveaux d'équipement, formes royales & chapeaux légendaires !</li>
+                <li>🎩 <strong>Tes chapeaux & formes Rebirth</strong> restent conservés !</li>
+            </ul>
+            <div class="flex gap-3">
+                <button id="btnCancelRebirth" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Pas encore</button>
+                <button id="btnConfirmRebirth" class="flex-1 py-2.5 rounded-xl btn-rebirth font-bold text-white cursor-pointer">✨ Rebirth !</button>
             </div>
         </div>
     </div>
@@ -252,7 +277,7 @@
         "use strict";
 
         // ==========================================
-        // 1. CATALOGUE COMPLET (PÂTES, FORMES, 12 GLAÇAGES, CONFETTIS, UPGRADES, CHAPEAUX)
+        // 1. CATALOGUE COMPLET (PÂTES, FORMES, 12 GLAÇAGES, CONFETTIS, CHAPEAUX, UPGRADES)
         // ==========================================
         const CATALOG = {
             dough: [
@@ -261,14 +286,16 @@
                 { id: 'royal', name: 'Épicée Royale', desc: 'Cannelle fine & muscade (+9$ / biscuit, +25% vitesse).', cost: 130, bonus: 9, speedMult: 1.25, color: '#a85327', stroke: '#5c2409' },
                 { id: 'choco', name: 'Choco-Noisette', desc: 'Fondante au cacao pur (+16$ / biscuit, +35% vitesse).', cost: 300, bonus: 16, speedMult: 1.35, color: '#5c3317', stroke: '#291204' },
                 { id: 'starry', name: 'Féerique Étoilée', desc: 'Reflets rosés magiques (+28$ / biscuit, +50% vitesse).', cost: 650, bonus: 28, speedMult: 1.50, color: '#d9778b', stroke: '#873044' },
-                { id: 'gold', name: 'Or Pur', desc: 'Éclat royal comestible (+48$ / biscuit, +70% vitesse).', cost: 1400, bonus: 48, speedMult: 1.70, color: '#f1c40f', stroke: '#9a7d0a' }
+                { id: 'gold', name: 'Or Pur', desc: 'Éclat royal comestible (+48$ / biscuit, +70% vitesse).', cost: 1400, bonus: 48, speedMult: 1.70, color: '#f1c40f', stroke: '#9a7d0a' },
+                { id: 'celestial', name: 'Pâte Céleste ✨', desc: 'Recette Rebirth ultra-rare (+95$ / biscuit, +95% vitesse).', cost: 3200, bonus: 95, speedMult: 1.95, color: '#a29bfe', stroke: '#4834d4', minRebirth: 1 }
             ],
             shapes: [
-                { id: 'man', name: 'Bonhomme Classique', desc: 'Le célèbre petit bonhomme en pain d'épices.', cost: 0, bonus: 0, icon: '🧍' },
-                { id: 'star', name: 'Étoile Filante', desc: 'Emporte-pièce étoilé festif (+5$ / biscuit).', cost: 180, bonus: 5, icon: '⭐' },
-                { id: 'tree', name: 'Sapin de Noël', desc: 'Forme de sapin d'hiver (+12$ / biscuit).', cost: 520, bonus: 12, icon: '🎄' },
-                { id: 'heart', name: 'Cœur Sucré', desc: 'Biscuit en cœur gourmand (+24$ / biscuit).', cost: 1350, bonus: 24, icon: '❤️' },
-                { id: 'snowflake', name: 'Flocon Magique', desc: 'Cristal royal complexe (+45$ / biscuit).', cost: 3200, bonus: 45, icon: '❄️' }
+                { id: 'gingerman', name: 'Bonhomme Classique', desc: 'Le célèbre petit bonhomme souriant.', cost: 0, bonus: 0, icon: '🧑' },
+                { id: 'star', name: 'Étoile de Noël', desc: 'Brillante à 5 branches (+5$ / biscuit).', cost: 90, bonus: 5, icon: '⭐' },
+                { id: 'tree', name: 'Sapin Enchanté', desc: 'Petit sapin festif décoré (+12$ / biscuit).', cost: 260, bonus: 12, icon: '🎄' },
+                { id: 'heart', name: 'Cœur Sucré', desc: 'Plein de tendresse gourmande (+22$ / biscuit).', cost: 620, bonus: 22, icon: '❤️' },
+                { id: 'snowflake', name: 'Flocon Givré', desc: 'Cristal d\'hiver délicat (+38$ / biscuit).', cost: 1350, bonus: 38, icon: '❄️' },
+                { id: 'crown', name: 'Couronne Royale 👑', desc: 'Exclusif Rebirth ! Prestige suprême (+80$ / biscuit).', cost: 2500, bonus: 80, icon: '👑', minRebirth: 1 }
             ],
             icing: [
                 { id: 'vanilla', name: 'Vanille Classique', desc: 'Glaçage blanc onctueux à la vanille.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
@@ -293,35 +320,34 @@
                 { id: 'stars', name: 'Étoiles Dorées', desc: 'Étoiles brillantes (+30$ / biscuit).', cost: 600, bonus: 30, style: 'stars' },
                 { id: 'fairydust', name: 'Poussière de Fée', desc: 'Étincelles enchantées (+45$ / biscuit).', cost: 1100, bonus: 45, style: 'fairydust' }
             ],
+            hats: [
+                { id: 'chef', name: 'Toque de Chef', desc: 'La toque blanche classique du maître pâtissier.', cost: 0, speedBonus: 0, priceBonus: 0, icon: '👨‍🍳' },
+                { id: 'santa', name: 'Bonnet de Noël', desc: 'Festif avec pompon doux (+15 vitesse, +3$ / biscuit).', cost: 120, speedBonus: 15, priceBonus: 3, icon: '🎅' },
+                { id: 'tophat', name: 'Haut-de-Forme Chic', desc: 'Élégance de grand pâtissier (+20 vitesse, +8$ / biscuit).', cost: 380, speedBonus: 20, priceBonus: 8, icon: '🎩' },
+                { id: 'wizard', name: 'Chapeau de Sorcier', desc: 'Magie sucrée étoilée (+30 vitesse, +16$ / biscuit).', cost: 950, speedBonus: 30, priceBonus: 16, icon: '🧙‍♂️' },
+                { id: 'crown', name: 'Couronne d\'Or', desc: 'Majestueux et rapide (+40 vitesse, +28$ / biscuit).', cost: 2200, speedBonus: 40, priceBonus: 28, icon: '👑' },
+                { id: 'rebirthHalo', name: 'Couronne Cosmique 🔮', desc: 'Exclusif Rebirth ! Aura divine (+60 vitesse, +65$ / biscuit).', cost: 1800, speedBonus: 60, priceBonus: 65, icon: '✨', minRebirth: 1 }
+            ],
             upgrades: [
-                { id: 'speed', name: 'Bottes Turbo', desc: 'Augmente ta vitesse de déplacement.', baseCost: 35, mult: 1.75, max: 7, icon: '👢' },
-                { id: 'capacity', name: 'Gants de Chef', desc: 'Porte plus de biscuits en main (jusqu'à 15).', baseCost: 40, mult: 1.85, max: 7, icon: '🧤' },
-                { id: 'roller', name: 'Rouleau Magique', desc: 'Accélère la pâte et fait évoluer la table (Marbre -> Cristal Doré).', baseCost: 45, mult: 1.85, max: 7, icon: '🪄' },
-                { id: 'ovenSpeed', name: 'Four Turbo', desc: 'Cuisson plus rapide et évolution du four (Acier/Cuivre -> Royal).', baseCost: 55, mult: 1.9, max: 6, icon: '🔥' },
-                { id: 'ovenCap', name: 'Four XL', desc: 'Augmente les places du four (4 à 10) et agrandit sa vitre.', baseCost: 70, mult: 2.0, max: 6, icon: '♨️' },
-                { id: 'piping', name: 'Poche à Douille Auto', desc: 'Glace plus vite et transforme la station en machine à bonbons.', baseCost: 65, mult: 1.9, max: 6, icon: '🧁' },
-                { id: 'magnet', name: 'Aimant à Pièces', desc: 'Attire automatiquement les pièces au sol.', baseCost: 85, mult: 2.1, max: 5, icon: '🧲' },
-                { id: 'goldenOven', name: 'Four Divin (Prestige)', desc: 'Double la qualité de cuisson (+25$ / biscuit) !', baseCost: 2500, mult: 2.2, max: 3, icon: '🌟', prestige: true },
-                { id: 'turboShoes', name: 'Ailes d'Hermès (Prestige)', desc: 'Vitesse surhumaine dans toute la boulangerie !', baseCost: 3500, mult: 2.3, max: 3, icon: '🪽', prestige: true }
+                { id: 'speed', name: 'Bottes Turbo', desc: 'Augmente ta vitesse de déplacement.', baseCost: 35, mult: 1.75, max: 6, rebirthExtraMax: 3, icon: '👢' },
+                { id: 'capacity', name: 'Gants de Chef', desc: 'Porte plus de biscuits en main (jusqu\'à 18).', baseCost: 40, mult: 1.85, max: 6, rebirthExtraMax: 3, icon: '🧤' },
+                { id: 'roller', name: 'Rouleau Magique', desc: 'Accélère la pâte et fait évoluer la table (Marbre -> Cristal Doré).', baseCost: 45, mult: 1.85, max: 6, rebirthExtraMax: 3, icon: '🪄' },
+                { id: 'ovenSpeed', name: 'Four Turbo', desc: 'Cuisson plus rapide et évolution du four (Acier/Cuivre -> Royal).', baseCost: 55, mult: 1.9, max: 5, rebirthExtraMax: 3, icon: '🔥' },
+                { id: 'ovenCap', name: 'Four XL', desc: 'Augmente les places du four et agrandit sa vitre.', baseCost: 70, mult: 2.0, max: 5, rebirthExtraMax: 3, icon: '♨️' },
+                { id: 'piping', name: 'Poche à Douille Auto', desc: 'Glace plus vite et transforme la station en machine à bonbons.', baseCost: 65, mult: 1.9, max: 5, rebirthExtraMax: 3, icon: '🧁' },
+                { id: 'elfSpeed', name: 'Vitesse des Lutins ⚡', desc: 'Tes lutins courent et travaillent beaucoup plus vite !', baseCost: 110, mult: 1.95, max: 5, rebirthExtraMax: 4, icon: '👟' },
+                { id: 'magnet', name: 'Aimant à Pièces', desc: 'Attire automatiquement les pièces au sol.', baseCost: 85, mult: 2.1, max: 4, rebirthExtraMax: 2, icon: '🧲' },
+                { id: 'royalCadence', name: 'Cadence Royale 🔮', desc: 'Exclusif Rebirth ! Attire plus de clients et booste les ventes (+15%/niv).', baseCost: 600, mult: 2.2, max: 5, rebirthExtraMax: 3, icon: '🚀', minRebirth: 1 }
             ],
             staff: [
                 { id: 'bakerElf', name: 'Lutin Boulanger', desc: 'Roule la pâte et enfourne automatiquement !', cost: 150, icon: '🧝‍♂️', kind: 'staff' },
-                { id: 'decoratorElf', name: 'Lutin Décorateur', desc: 'Sort du four, glace selon le client et remplit l'étagère !', cost: 240, icon: '🧝‍♀️', kind: 'staff' },
+                { id: 'decoratorElf', name: 'Lutin Décorateur', desc: 'Sort du four, glace selon le client et remplit l\'étagère !', cost: 240, icon: '🧝‍♀️', kind: 'staff' },
+                { id: 'speedElf', name: 'Lutin Express ⚡', desc: '3ème lutin ultra-rapide qui aide au glaçage et au présentoir !', cost: 520, icon: '⚡', kind: 'staff' },
                 { id: 'cashierElf', name: 'Caissier Express', desc: '+25% de pourboire et vitrine dorée de luxe !', cost: 320, icon: '🎩', kind: 'staff' },
-                { id: 'elfCoffee', name: 'Café Épicé (Équipe +40%)', desc: 'Tes lutins courent et travaillent +40% plus vite !', cost: 850, icon: '☕', kind: 'staffSpeed', mult: 0.40 },
-                { id: 'elfSkates', name: 'Patins Turbo (Équipe +50%)', desc: 'Tes lutins glissent à toute vitesse (+50% vitesse) !', cost: 2400, icon: '🛼', kind: 'staffSpeed', mult: 0.50 },
-                { id: 'elfSpirit', name: 'Esprit de Noël (Équipe +75%)', desc: 'Vitesse maximale pour toute ton équipe (+75%) !', cost: 6500, icon: '⚡', kind: 'staffSpeed', mult: 0.75 },
                 { id: 'tree', name: 'Sapin Lumineux', desc: 'Apparaît en boutique (+3$ / vente et +clients).', cost: 175, icon: '🎄', kind: 'decor', bonus: 3 },
                 { id: 'garlands', name: 'Guirlandes Festives', desc: 'Illumine la salle (+4$ / vente).', cost: 340, icon: '✨', kind: 'decor', bonus: 4 },
                 { id: 'stockings', name: 'Chaussettes Festives', desc: 'Ambiance chaleureuse (+6$ / vente).', cost: 580, icon: '🧦', kind: 'decor', bonus: 6 },
-                { id: 'snowman', name: 'Bonhomme de Neige', desc: 'Mascotte à l'entrée (+10$ / vente).', cost: 980, icon: '⛄', kind: 'decor', bonus: 10 }
-            ],
-            hats: [
-                { id: 'chef', name: 'Toque de Chef', desc: 'La toque blanche traditionnelle du grand pâtissier.', cost: 0, icon: '👨‍🍳' },
-                { id: 'santa', name: 'Bonnet de Noël', desc: 'Bonnet rouge festif avec pompon blanc.', cost: 220, icon: '🎅' },
-                { id: 'reindeer', name: 'Oreilles de Renne', desc: 'Bois de renne adorables pour ton équipe.', cost: 650, icon: '🦌' },
-                { id: 'wizard', name: 'Chapeau Magique', desc: 'Chapeau étoilé de maître sorcier sucré.', cost: 1600, icon: '🧙‍♂️' },
-                { id: 'crown', name: 'Couronne Royale', desc: 'Couronne d'or massif et rubis (+10$ / biscuit).', cost: 4500, bonus: 10, icon: '👑' }
+                { id: 'snowman', name: 'Bonhomme de Neige', desc: 'Mascotte à l\'entrée (+10$ / vente).', cost: 980, icon: '⛄', kind: 'decor', bonus: 10 }
             ]
         };
 
@@ -362,12 +388,6 @@
                 setTimeout(() => this.beep(880, 'triangle', 0.1, 0.09), 65);
                 setTimeout(() => this.beep(1175, 'triangle', 0.18, 0.09), 130);
             },
-            rebirth() {
-                this.beep(523, 'triangle', 0.12, 0.1);
-                setTimeout(() => this.beep(659, 'triangle', 0.12, 0.1), 90);
-                setTimeout(() => this.beep(784, 'triangle', 0.14, 0.1), 180);
-                setTimeout(() => this.beep(1046, 'triangle', 0.28, 0.12), 270);
-            },
             coin() {
                 this.beep(980, 'sine', 0.08, 0.07);
                 setTimeout(() => this.beep(1320, 'sine', 0.13, 0.07), 55);
@@ -375,22 +395,30 @@
             upgrade() {
                 this.beep(440, 'triangle', 0.09, 0.08);
                 setTimeout(() => this.beep(660, 'triangle', 0.14, 0.08), 75);
+            },
+            rebirth() {
+                this.beep(440, 'triangle', 0.12, 0.1);
+                setTimeout(() => this.beep(554, 'triangle', 0.12, 0.1), 90);
+                setTimeout(() => this.beep(659, 'triangle', 0.12, 0.1), 180);
+                setTimeout(() => this.beep(880, 'triangle', 0.28, 0.12), 270);
             }
         };
 
         // ==========================================
-        // 3. LOCALSTORAGE AUTO-SAVE & ÉTAT DU JEU
+        // 3. LOCALSTORAGE AUTO-SAVE & ÉTAT DU JEU (MIGRATION DOUCE V2 -> V3)
         // ==========================================
         const SAVE_KEY = 'gingerbread_mart_save_v3';
+        const OLD_SAVE_KEY = 'gingerbread_mart_save_v2';
+
         const DEFAULT_STATE = {
             money: 25,
-            rebirths: 0,
             soldCount: 0,
             perfectCount: 0,
+            rebirths: 0,
             unlockedDough: ['classic'],
             selectedDough: 'classic',
-            unlockedShapes: ['man'],
-            selectedShape: 'man',
+            unlockedShapes: ['gingerman'],
+            selectedShape: 'gingerman',
             unlockedIcing: ['vanilla'],
             selectedIcing: 'vanilla',
             unlockedTopping: ['none'],
@@ -404,17 +432,15 @@
                 ovenSpeed: 1,
                 ovenCap: 1,
                 piping: 1,
+                elfSpeed: 1,
                 magnet: 0,
-                goldenOven: 0,
-                turboShoes: 0
+                royalCadence: 0
             },
             staffAndDecor: {
                 bakerElf: false,
                 decoratorElf: false,
+                speedElf: false,
                 cashierElf: false,
-                elfCoffee: false,
-                elfSkates: false,
-                elfSpirit: false,
                 tree: false,
                 garlands: false,
                 stockings: false,
@@ -427,12 +453,17 @@
 
         function loadGame() {
             try {
-                const raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem('gingerbread_mart_save_v2');
+                const raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem(OLD_SAVE_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     return {
                         ...DEFAULT_STATE,
                         ...parsed,
+                        unlockedShapes: parsed.unlockedShapes || ['gingerman'],
+                        selectedShape: parsed.selectedShape || 'gingerman',
+                        unlockedHats: parsed.unlockedHats || ['chef'],
+                        selectedHat: parsed.selectedHat || 'chef',
+                        rebirths: parsed.rebirths || 0,
                         levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) },
                         staffAndDecor: { ...DEFAULT_STATE.staffAndDecor, ...(parsed.staffAndDecor || {}) }
                     };
@@ -455,23 +486,29 @@
             } catch (e) {}
         }
 
+        function getRebirthCost() {
+            if (state.rebirths === 0) return 15000;
+            return Math.round(15000 * Math.pow(2.4, state.rebirths));
+        }
+
+        function getRebirthMultiplier() {
+            return 1 + state.rebirths * 0.5;
+        }
+
+        function getShelfMaxCookies() {
+            // Présentoir plus gros à chaque Rebirth : 9 de base, +3 par Rebirth jusqu'à 21 !
+            return Math.min(21, 9 + state.rebirths * 3);
+        }
+
+        function getUpgradeMaxLevel(up) {
+            return up.max + (state.rebirths > 0 ? (up.rebirthExtraMax || 0) * Math.min(3, state.rebirths) : 0);
+        }
+
         function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
         function getShape() { return CATALOG.shapes.find(s => s.id === state.selectedShape) || CATALOG.shapes[0]; }
         function getIcing() { return CATALOG.icing.find(i => i.id === state.selectedIcing) || CATALOG.icing[0]; }
         function getTopping() { return CATALOG.topping.find(t => t.id === state.selectedTopping) || CATALOG.topping[0]; }
         function getHat() { return CATALOG.hats.find(h => h.id === state.selectedHat) || CATALOG.hats[0]; }
-
-        function getRebirthMult() {
-            return 1 + (state.rebirths || 0) * 0.5;
-        }
-
-        function getRebirthCost() {
-            return Math.round(15000 * Math.pow(2.2, state.rebirths || 0));
-        }
-
-        function getShelfMaxCookies() {
-            return Math.min(24, 9 + (state.rebirths || 0) * 3);
-        }
 
         function getDecorBonus() {
             let b = 0;
@@ -482,45 +519,43 @@
         }
 
         function getCookieValue() {
-            const hatBonus = getHat().bonus || 0;
-            const goldenOvenBonus = (state.levels.goldenOven || 0) * 25;
-            const rawBase = 5 + getDough().bonus + getShape().bonus + getIcing().bonus + getTopping().bonus + getDecorBonus() + hatBonus + goldenOvenBonus;
-            return Math.round(rawBase * getRebirthMult());
+            const rawBase = 5 + getDough().bonus + getShape().bonus + getIcing().bonus + getTopping().bonus + getHat().priceBonus + getDecorBonus();
+            const royalMult = 1 + (state.levels.royalCadence || 0) * 0.15;
+            return Math.round(rawBase * getRebirthMultiplier() * royalMult);
         }
 
         function getMaxHand() {
-            const table = [3, 5, 7, 9, 11, 13, 15];
-            return table[Math.min(table.length - 1, state.levels.capacity - 1)];
+            return Math.min(20, 3 + (state.levels.capacity - 1) * 2);
         }
 
         function getOvenCapacity() {
-            return Math.min(10, 3 + state.levels.ovenCap);
+            return Math.min(12, 3 + state.levels.ovenCap);
         }
 
         function getPlayerSpeed() {
-            return 230 + (state.levels.speed - 1) * 42 + (state.levels.turboShoes || 0) * 65;
-        }
-
-        function getStaffSpeedMult() {
-            let m = 1 + (state.rebirths || 0) * 0.15;
-            if (state.staffAndDecor.elfCoffee) m += 0.40;
-            if (state.staffAndDecor.elfSkates) m += 0.50;
-            if (state.staffAndDecor.elfSpirit) m += 0.75;
-            return m;
+            return 230 + (state.levels.speed - 1) * 40 + getHat().speedBonus;
         }
 
         function getRollTime() {
             const mult = 1 + (state.levels.roller - 1) * 0.45;
-            return Math.max(0.18, 1.25 / (getDough().speedMult * mult));
+            return Math.max(0.14, 1.25 / (getDough().speedMult * mult));
         }
 
         function getBakeTime() {
-            return Math.max(0.55, 3.0 - (state.levels.ovenSpeed - 1) * 0.45);
+            return Math.max(0.45, 3.0 - (state.levels.ovenSpeed - 1) * 0.48);
         }
 
         function getDecorateTime() {
             const mult = 1 + (state.levels.piping - 1) * 0.65;
-            return Math.max(0.12, 1.1 / mult);
+            return Math.max(0.10, 1.1 / mult);
+        }
+
+        function getElfSpeed() {
+            return 178 + ((state.levels.elfSpeed || 1) - 1) * 52;
+        }
+
+        function getElfWorkFactor() {
+            return Math.max(0.32, 1.15 - ((state.levels.elfSpeed || 1) - 1) * 0.14);
         }
 
         function getMagnetRadius() {
@@ -572,14 +607,24 @@
                 progress: 0
             },
             shelf: {
-                x: 545, y: 215, w: 96, h: 175,
-                zoneX: 515, zoneY: 304, zoneR: 58,
+                x: 552, y: 215, w: 86, h: 168,
+                zoneX: 520, zoneY: 304, zoneR: 58,
                 cookies: []
             },
             cashier: {
                 x: 695, y: 415, w: 94, h: 72
             }
         };
+
+        function updateShelfGeometry() {
+            // Agrandit visuellement le présentoir en fonction des Rebirths !
+            const extra = Math.min(3, state.rebirths);
+            stations.shelf.w = 82 + extra * 14;
+            stations.shelf.h = 162 + extra * 14;
+            stations.shelf.x = 556 - extra * 7;
+            stations.shelf.y = 222 - extra * 7;
+        }
+        updateShelfGeometry();
 
         const player = {
             x: 360,
@@ -603,6 +648,9 @@
             }
             if (state.staffAndDecor.decoratorElf && !helpers.some(h => h.role === 'decorator')) {
                 helpers.push({ role: 'decorator', x: 355, y: 375, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+            }
+            if (state.staffAndDecor.speedElf && !helpers.some(h => h.role === 'express')) {
+                helpers.push({ role: 'express', x: 435, y: 340, holding: [], timer: 0, facing: 1, walkPhase: 0 });
             }
         }
         syncHelpers();
@@ -729,7 +777,7 @@
         // 6. EFFETS VISUELS LÉGERS
         // ==========================================
         function spawnParticles(x, y, color, count) {
-            if (particles.length > 60) return;
+            if (particles.length > 70) return;
             for (let i = 0; i < count; i++) {
                 const ang = Math.random() * Math.PI * 2;
                 const spd = 35 + Math.random() * 80;
@@ -746,8 +794,8 @@
         }
 
         function spawnText(x, y, text, color) {
-            if (floatingTexts.length > 16) floatingTexts.shift();
-            floatingTexts.push({ x, y, text, color, life: 1.0 });
+            if (floatingTexts.length > 18) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life: 1.05 });
         }
 
         // ==========================================
@@ -758,6 +806,7 @@
         }
 
         function update(dt) {
+            // 1. Déplacement joueur
             let mx = joyVec.x;
             let my = joyVec.y;
             if (keys['arrowleft'] || keys['a'] || keys['q']) mx -= 1;
@@ -793,7 +842,7 @@
             player.x = Math.max(245, Math.min(655, player.x));
             player.y = Math.max(200, Math.min(515, player.y));
 
-            // Cuisson au four
+            // 2. Cuisson au four
             const bakeTime = getBakeTime();
             for (let i = stations.oven.slots.length - 1; i >= 0; i--) {
                 const slot = stations.oven.slots[i];
@@ -803,7 +852,7 @@
                     stations.oven.ready.push({
                         type: 'baked',
                         dough: slot.dough,
-                        shape: slot.shape,
+                        shape: slot.shape || getShape(),
                         icing: slot.icing,
                         topping: slot.topping
                     });
@@ -812,10 +861,12 @@
                 }
             }
 
+            // 3. Interactions du joueur avec les stations
             player.activeStation = null;
             const maxHand = getMaxHand();
+            const shelfMax = getShelfMaxCookies();
 
-            // Station 1 : Table à rouleau (crée le biscuit avec la pâte et la forme sélectionnées)
+            // Station 1 : Table à rouleau
             if (Math.hypot(player.x - stations.dough.zoneX, player.y - stations.dough.zoneY) <= stations.dough.zoneR) {
                 player.activeStation = 'dough';
                 if (player.holding.length < maxHand) {
@@ -874,6 +925,7 @@
                         stations.icing.progress = 0;
                         const chosenIcing = getIcing();
                         player.holding[bakedIdx].type = 'decorated';
+                        player.holding[bakedIdx].shape = player.holding[bakedIdx].shape || getShape();
                         player.holding[bakedIdx].icing = chosenIcing;
                         player.holding[bakedIdx].topping = getTopping();
                         sound.pop();
@@ -887,11 +939,10 @@
                 stations.icing.progress = Math.max(0, stations.icing.progress - dt * 1.5);
             }
 
-            // Station 4 : Présentoir (capacité dynamique selon Rebirth !)
-            const maxShelf = getShelfMaxCookies();
+            // Station 4 : Présentoir
             if (Math.hypot(player.x - stations.shelf.zoneX, player.y - stations.shelf.zoneY) <= stations.shelf.zoneR) {
                 player.activeStation = 'shelf';
-                while (stations.shelf.cookies.length < maxShelf) {
+                while (stations.shelf.cookies.length < shelfMax) {
                     const decIdx = player.holding.findIndex(c => c.type === 'decorated');
                     if (decIdx === -1) break;
                     stations.shelf.cookies.push(player.holding.splice(decIdx, 1)[0]);
@@ -900,6 +951,7 @@
                 }
             }
 
+            // 4. Lutins, Clients, Pièces et Particules
             updateHelpers(dt);
             updateCustomers(dt);
             updateMoneyPiles(dt);
@@ -907,12 +959,13 @@
         }
 
         function updateHelpers(dt) {
-            const staffMult = getStaffSpeedMult();
-            const hSpeed = 178 * staffMult;
+            const baseHSpeed = getElfSpeed();
+            const workFactor = getElfWorkFactor();
             const ovenCap = getOvenCapacity();
-            const maxShelf = getShelfMaxCookies();
+            const shelfMax = getShelfMaxCookies();
 
             helpers.forEach(h => {
+                const hSpeed = h.role === 'express' ? baseHSpeed * 1.3 : baseHSpeed;
                 let tx = h.x;
                 let ty = h.y;
 
@@ -929,18 +982,19 @@
                         tx = stations.dough.zoneX - 18;
                         ty = stations.dough.zoneY;
                         if (Math.hypot(h.x - tx, h.y - ty) < 14) {
-                            h.timer += dt * staffMult;
-                            if (h.timer >= getRollTime() * 1.1) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * workFactor) {
                                 h.timer = 0;
                                 h.holding.push({ type: 'raw', dough: getDough(), shape: getShape(), icing: getIcing(), topping: getTopping() });
                             }
                         }
                     }
-                } else if (h.role === 'decorator') {
+                } else if (h.role === 'decorator' || h.role === 'express') {
+                    const cap = h.role === 'express' ? 5 : 3;
                     if (h.holding.some(c => c.type === 'decorated')) {
                         tx = stations.shelf.zoneX;
-                        ty = stations.shelf.zoneY + 24;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && stations.shelf.cookies.length < maxShelf) {
+                        ty = stations.shelf.zoneY + (h.role === 'express' ? -20 : 24);
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && stations.shelf.cookies.length < shelfMax) {
                             const idx = h.holding.findIndex(c => c.type === 'decorated');
                             stations.shelf.cookies.push(h.holding.splice(idx, 1)[0]);
                         }
@@ -948,25 +1002,27 @@
                         tx = stations.icing.zoneX + 18;
                         ty = stations.icing.zoneY;
                         if (Math.hypot(h.x - tx, h.y - ty) < 14) {
-                            h.timer += dt * staffMult;
-                            if (h.timer >= getDecorateTime() * 1.1) {
+                            h.timer += dt;
+                            const factor = h.role === 'express' ? workFactor * 0.75 : workFactor;
+                            if (h.timer >= getDecorateTime() * factor) {
                                 h.timer = 0;
                                 const idx = h.holding.findIndex(c => c.type === 'baked');
                                 const frontCust = getFrontCustomer();
                                 const targetGlaze = frontCust ? frontCust.desiredIcing : getIcing();
                                 h.holding[idx].type = 'decorated';
+                                h.holding[idx].shape = h.holding[idx].shape || getShape();
                                 h.holding[idx].icing = targetGlaze;
                                 h.holding[idx].topping = getTopping();
                             }
                         }
-                    } else if (stations.oven.ready.length > 0 && h.holding.length < 3) {
-                        tx = stations.oven.zoneX + 24;
+                    } else if (stations.oven.ready.length > 0 && h.holding.length < cap) {
+                        tx = stations.oven.zoneX + (h.role === 'express' ? 10 : 24);
                         ty = stations.oven.zoneY;
                         if (Math.hypot(h.x - tx, h.y - ty) < 14) {
                             h.holding.push(stations.oven.ready.shift());
                         }
                     } else {
-                        tx = stations.oven.zoneX + 24;
+                        tx = stations.oven.zoneX + (h.role === 'express' ? 35 : 24);
                         ty = stations.oven.zoneY + 28;
                     }
                 }
@@ -978,7 +1034,7 @@
                     h.x += (dx / dist) * hSpeed * dt;
                     h.y += (dy / dist) * hSpeed * dt;
                     if (Math.abs(dx) > 1) h.facing = dx > 0 ? 1 : -1;
-                    h.walkPhase += dt * 10 * staffMult;
+                    h.walkPhase += dt * (10 + (state.levels.elfSpeed || 1));
                 } else {
                     h.walkPhase = 0;
                 }
@@ -1000,7 +1056,7 @@
 
         function updateCustomers(dt) {
             customerSpawnTimer -= dt;
-            const maxCust = (state.staffAndDecor.tree ? 5 : 4) + Math.min(2, state.rebirths || 0);
+            const maxCust = (state.staffAndDecor.tree ? 5 : 4) + (state.levels.royalCadence > 0 ? 1 : 0);
             if (customerSpawnTimer <= 0 && customers.length < maxCust) {
                 const st = CUST_STYLES[Math.floor(Math.random() * CUST_STYLES.length)];
                 customers.push({
@@ -1013,11 +1069,12 @@
                     style: st,
                     walkPhase: 0
                 });
-                customerSpawnTimer = Math.max(1.6, 4.6 - (state.staffAndDecor.tree ? 0.6 : 0) - (state.rebirths || 0) * 0.25);
+                const cadenceDrop = (state.levels.royalCadence || 0) * 0.25;
+                customerSpawnTimer = Math.max(1.5, 4.8 - (state.staffAndDecor.tree ? 0.7 : 0) - cadenceDrop);
                 updateHUD();
             }
 
-            const cSpeed = (state.staffAndDecor.garlands ? 160 : 140) + (state.rebirths || 0) * 8;
+            const cSpeed = state.staffAndDecor.garlands ? 165 : 140;
 
             for (let i = customers.length - 1; i >= 0; i--) {
                 const c = customers[i];
@@ -1025,7 +1082,7 @@
                 let ty = c.y;
 
                 if (c.state === 'toShelf') {
-                    tx = 674;
+                    tx = 678;
                     ty = 250 + (i % 3) * 48;
                     const d = Math.hypot(tx - c.x, ty - c.y);
                     if (d > 8) {
@@ -1057,13 +1114,12 @@
                         let earned = 0;
                         let matchedCount = 0;
                         const decorExtra = getDecorBonus();
-                        const hatBonus = getHat().bonus || 0;
-                        const goldenOvenBonus = (state.levels.goldenOven || 0) * 25;
-                        const rebMult = getRebirthMult();
+                        const hatBonus = getHat().priceBonus;
+                        const mult = getRebirthMultiplier() * (1 + (state.levels.royalCadence || 0) * 0.15);
 
                         c.bag.forEach(ck => {
-                            let val = 5 + (ck.dough?.bonus || 0) + (ck.shape?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.topping?.bonus || 0) + decorExtra + hatBonus + goldenOvenBonus;
-                            val = Math.round(val * rebMult);
+                            let val = 5 + (ck.dough?.bonus || 0) + (ck.shape?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.topping?.bonus || 0) + decorExtra + hatBonus;
+                            val = Math.round(val * mult);
                             if (ck.icing && ck.icing.id === c.desiredIcing.id) {
                                 val = Math.ceil(val * 1.5);
                                 matchedCount++;
@@ -1152,13 +1208,19 @@
         }
 
         // ==========================================
-        // 8. RENDU CANVAS 60 FPS + FORMES + CHAPEAUX + ÉVOLUTIONS
+        // 8. RENDU CANVAS 60 FPS + FORMES DE BISCUITS & CHAPEAUX
         // ==========================================
         function getIcingRenderColor(ic, nowMs) {
             if (!ic) return '#ffffff';
-            if (ic.mode === 'rainbow') return `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 62%)`;
-            if (ic.mode === 'galaxy') return `hsl(${265 + Math.sin(nowMs * 0.005) * 28}, 82%, 58%)`;
-            if (ic.mode === 'gold24k') return `hsl(46, 98%, ${54 + Math.sin(nowMs * 0.008) * 12}%)`;
+            if (ic.mode === 'rainbow') {
+                return `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 62%)`;
+            }
+            if (ic.mode === 'galaxy') {
+                return `hsl(${265 + Math.sin(nowMs * 0.005) * 28}, 82%, 58%)`;
+            }
+            if (ic.mode === 'gold24k') {
+                return `hsl(46, 98%, ${54 + Math.sin(nowMs * 0.008) * 12}%)`;
+            }
             return ic.color;
         }
 
@@ -1169,38 +1231,59 @@
 
             const isRaw = cookie.type === 'raw';
             const dough = cookie.dough || CATALOG.dough[0];
-            const shapeId = (cookie.shape && cookie.shape.id) ? cookie.shape.id : (state.selectedShape || 'man');
-
+            const shapeId = (cookie.shape && cookie.shape.id) ? cookie.shape.id : 'gingerman';
             ctx.fillStyle = isRaw ? '#f3d5a5' : dough.color;
             ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
             ctx.lineWidth = 2;
 
+            // 1. Silhouette de la pâte selon la forme choisie
             ctx.beginPath();
             if (shapeId === 'star') {
                 for (let i = 0; i < 10; i++) {
-                    const r = i % 2 === 0 ? 15 : 6.5;
+                    const r = i % 2 === 0 ? 13 : 5.5;
                     const a = (i * Math.PI) / 5 - Math.PI / 2;
                     if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
                     else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
                 }
                 ctx.closePath();
             } else if (shapeId === 'tree') {
-                ctx.moveTo(0, -16);
-                ctx.lineTo(13, 8);
+                ctx.moveTo(0, -14);
+                ctx.lineTo(10, -2);
+                ctx.lineTo(5, -2);
+                ctx.lineTo(12, 8);
                 ctx.lineTo(3, 8);
-                ctx.lineTo(3, 14);
-                ctx.lineTo(-3, 14);
+                ctx.lineTo(3, 13);
+                ctx.lineTo(-3, 13);
                 ctx.lineTo(-3, 8);
-                ctx.lineTo(-13, 8);
+                ctx.lineTo(-12, 8);
+                ctx.lineTo(-5, -2);
+                ctx.lineTo(-10, -2);
                 ctx.closePath();
             } else if (shapeId === 'heart') {
-                ctx.moveTo(0, 13);
-                ctx.bezierCurveTo(-16, 1, -16, -14, 0, -5);
-                ctx.bezierCurveTo(16, -14, 16, 1, 0, 13);
+                ctx.moveTo(0, 12);
+                ctx.bezierCurveTo(-15, 2, -14, -12, -5, -12);
+                ctx.bezierCurveTo(-1, -12, 0, -8, 0, -6);
+                ctx.bezierCurveTo(0, -8, 1, -12, 5, -12);
+                ctx.bezierCurveTo(14, -12, 15, 2, 0, 12);
             } else if (shapeId === 'snowflake') {
-                ctx.arc(0, 0, 13, 0, Math.PI * 2);
+                for (let i = 0; i < 12; i++) {
+                    const r = i % 2 === 0 ? 13 : 7;
+                    const a = (i * Math.PI) / 6;
+                    if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+                    else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+                }
+                ctx.closePath();
+            } else if (shapeId === 'crown') {
+                ctx.moveTo(-11, 9);
+                ctx.lineTo(-12, -7);
+                ctx.lineTo(-5, 0);
+                ctx.lineTo(0, -11);
+                ctx.lineTo(5, 0);
+                ctx.lineTo(12, -7);
+                ctx.lineTo(11, 9);
+                ctx.closePath();
             } else {
-                // Bonhomme classique
+                // Bonhomme Classique
                 ctx.arc(0, -10, 7, 0, Math.PI * 2);
                 ctx.roundRect(-9, -3, 18, 5, 2.5);
                 ctx.roundRect(-5, -3, 10, 11, 3);
@@ -1210,12 +1293,16 @@
             ctx.fill();
             ctx.stroke();
 
+            // 2. Glaçage & Confettis
             if (cookie.type === 'decorated') {
                 const ic = cookie.icing || CATALOG.icing[0];
                 const icColor = getIcingRenderColor(ic, nowMs);
 
                 ctx.fillStyle = icColor;
-                if (shapeId === 'man') {
+                ctx.strokeStyle = icColor;
+                ctx.lineWidth = 1.8;
+
+                if (shapeId === 'gingerman') {
                     ctx.beginPath();
                     ctx.arc(-2.5, -11, 1.3, 0, Math.PI * 2);
                     ctx.arc(2.5, -11, 1.3, 0, Math.PI * 2);
@@ -1223,14 +1310,26 @@
                     ctx.arc(0, 4.5, 1.7, 0, Math.PI * 2);
                     ctx.fill();
 
-                    ctx.strokeStyle = icColor;
-                    ctx.lineWidth = 1.7;
                     ctx.beginPath();
                     ctx.arc(0, -9, 3, 0.2, Math.PI - 0.2);
                     ctx.stroke();
-                } else {
+                } else if (shapeId === 'tree') {
                     ctx.beginPath();
-                    ctx.arc(0, 0, 6.2, 0, Math.PI * 2);
+                    ctx.moveTo(-5, -2);
+                    ctx.lineTo(5, -2);
+                    ctx.moveTo(-7, 4);
+                    ctx.lineTo(7, 4);
+                    ctx.stroke();
+                } else if (shapeId === 'crown') {
+                    ctx.beginPath();
+                    ctx.arc(-5, 4, 1.6, 0, Math.PI * 2);
+                    ctx.arc(0, 3, 2, 0, Math.PI * 2);
+                    ctx.arc(5, 4, 1.6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Cœur / Étoile / Flocon : centre glacé brillant
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
                     ctx.fill();
                 }
 
@@ -1255,66 +1354,6 @@
             ctx.restore();
         }
 
-        function drawEquippedHat(hatId) {
-            if (hatId === 'santa') {
-                ctx.fillStyle = '#d63031';
-                ctx.beginPath();
-                ctx.moveTo(-12, -21);
-                ctx.lineTo(12, -21);
-                ctx.lineTo(2, -39);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(-12, -24, 24, 5);
-                ctx.beginPath();
-                ctx.arc(2, -40, 4, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (hatId === 'reindeer') {
-                ctx.strokeStyle = '#6d3619';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(-6, -24); ctx.lineTo(-12, -38);
-                ctx.moveTo(-9, -31); ctx.lineTo(-15, -31);
-                ctx.moveTo(6, -24); ctx.lineTo(12, -38);
-                ctx.moveTo(9, -31); ctx.lineTo(15, -31);
-                ctx.stroke();
-            } else if (hatId === 'wizard') {
-                ctx.fillStyle = '#5f27cd';
-                ctx.beginPath();
-                ctx.moveTo(-15, -21);
-                ctx.lineTo(15, -21);
-                ctx.lineTo(0, -43);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(0, -31, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (hatId === 'crown') {
-                ctx.fillStyle = '#ffd700';
-                ctx.strokeStyle = '#b7840b';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(-11, -22);
-                ctx.lineTo(-11, -34);
-                ctx.lineTo(-5, -28);
-                ctx.lineTo(0, -36);
-                ctx.lineTo(5, -28);
-                ctx.lineTo(11, -34);
-                ctx.lineTo(11, -22);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            } else {
-                // Toque de chef par défaut
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(0, -29, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillRect(-9, -27, 18, 6);
-            }
-        }
-
         function drawBakeryFloor() {
             ctx.fillStyle = '#1f0d05';
             ctx.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -1335,7 +1374,7 @@
             ctx.fillStyle = '#b08968';
             ctx.fillRect(602, 110, 6, 435);
 
-            ctx.strokeStyle = (state.rebirths || 0) > 0 ? '#a55eea' : '#6d3619';
+            ctx.strokeStyle = state.rebirths > 0 ? '#a855f7' : '#6d3619';
             ctx.lineWidth = 12;
             ctx.strokeRect(54, 104, 792, 446);
 
@@ -1543,10 +1582,10 @@
             ctx.fill();
 
             ov.slots.forEach((s, idx) => {
-                drawCookieShape(ov.x + 28 + (idx % 5) * 21, ov.y + 42 + Math.floor(idx / 5) * 20, 0.62, { type: 'raw', dough: s.dough, shape: s.shape }, nowMs);
+                drawCookieShape(ov.x + 30 + (idx % 4) * 25, ov.y + 42 + Math.floor(idx / 4) * 20, 0.62, { type: 'raw', dough: s.dough, shape: s.shape }, nowMs);
             });
             ov.ready.forEach((c, idx) => {
-                drawCookieShape(ov.x + 28 + (idx % 5) * 21, ov.y + 55 + Math.floor(idx / 5) * 18, 0.68, c, nowMs);
+                drawCookieShape(ov.x + 30 + (idx % 4) * 25, ov.y + 55 + Math.floor(idx / 4) * 18, 0.68, c, nowMs);
             });
             if (isBaking) {
                 drawProgressBar(ov.x + ov.w * 0.5, ov.y - 24, 92, ov.slots[0].timer / getBakeTime(), '#ffa502');
@@ -1598,34 +1637,42 @@
             drawProgressBar(ic.x + 61, ic.y - 24, 84, ic.progress, '#ff6b81');
             drawLabel(ic.x + 61, ic.y - 8, `3. Glaçage: ${getIcing().name.split(' ')[0]}`);
 
-            // 4. PRÉSENTOIR (S'agrandit physiquement avec chaque Rebirth !)
+            // 4. PRÉSENTOIR ÉVOLUTIF (Plus gros à chaque Rebirth !)
             const sh = stations.shelf;
-            const maxShelf = getShelfMaxCookies();
-            const extraH = Math.min(80, (state.rebirths || 0) * 16);
-            const shelfTop = sh.y - extraH * 0.5;
-            const shelfH = sh.h + extraH;
+            const shelfMax = getShelfMaxCookies();
+            const cols = state.rebirths >= 1 ? 4 : 3;
+            const rows = Math.ceil(shelfMax / cols);
 
-            ctx.fillStyle = (state.rebirths || 0) > 0 ? '#f3e5f5' : (state.staffAndDecor.cashierElf ? '#f6e58d' : '#d4a373');
-            ctx.strokeStyle = (state.rebirths || 0) > 0 ? '#a55eea' : (state.staffAndDecor.cashierElf ? '#e1b12c' : '#6d3619');
+            ctx.fillStyle = state.rebirths > 0
+                ? (state.staffAndDecor.cashierElf ? '#ffeaa7' : '#e9d8fd')
+                : (state.staffAndDecor.cashierElf ? '#f6e58d' : '#d4a373');
+            ctx.strokeStyle = state.rebirths > 0 ? '#9333ea' : (state.staffAndDecor.cashierElf ? '#e1b12c' : '#6d3619');
             ctx.lineWidth = 3.5;
             ctx.beginPath();
-            ctx.roundRect(sh.x, shelfTop, sh.w, shelfH, 12);
+            ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 12);
             ctx.fill();
             ctx.stroke();
 
-            const rows = Math.ceil(maxShelf / 3);
-            ctx.fillStyle = '#8d5524';
+            ctx.fillStyle = state.rebirths > 0 ? '#7e22ce' : '#8d5524';
             for (let r = 1; r < rows; r++) {
-                ctx.fillRect(sh.x + 6, shelfTop + (shelfH / rows) * r, sh.w - 12, 3.5);
+                const ry = sh.y + (sh.h / rows) * r;
+                ctx.fillRect(sh.x + 6, ry, sh.w - 12, 4);
             }
 
             sh.cookies.forEach((ck, idx) => {
-                const col = idx % 3;
-                const row = Math.floor(idx / 3);
-                const rowSpacing = (shelfH - 28) / Math.max(1, rows);
-                drawCookieShape(sh.x + 22 + col * 26, shelfTop + 22 + row * rowSpacing, 0.62, ck, nowMs);
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const cellW = (sh.w - 16) / cols;
+                const cellH = (sh.h - 14) / rows;
+                drawCookieShape(
+                    sh.x + 8 + cellW * (col + 0.5),
+                    sh.y + 10 + cellH * (row + 0.5),
+                    cols === 4 ? 0.56 : 0.65,
+                    ck,
+                    nowMs
+                );
             });
-            drawLabel(sh.x + sh.w * 0.5, shelfTop - 10, `4. Présentoir (${sh.cookies.length}/${maxShelf})`);
+            drawLabel(sh.x + sh.w * 0.5, sh.y - 10, `4. Présentoir (${sh.cookies.length}/${shelfMax})`);
 
             // Caisse Enregistreuse
             const ca = stations.cashier;
@@ -1648,6 +1695,88 @@
             drawLabel(ca.x + ca.w * 0.5, ca.y - 10, 'Caisse');
         }
 
+        function drawPlayerHat(hatId, nowMs) {
+            if (hatId === 'santa') {
+                // Bonnet de Noël
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(-12, -23);
+                ctx.lineTo(12, -23);
+                ctx.lineTo(4, -41);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-12, -26, 24, 5);
+                ctx.beginPath();
+                ctx.arc(5, -42, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (hatId === 'tophat') {
+                // Haut-de-forme chic
+                ctx.fillStyle = '#2d3436';
+                ctx.fillRect(-14, -26, 28, 4);
+                ctx.fillRect(-9, -42, 18, 16);
+                ctx.fillStyle = '#e17055';
+                ctx.fillRect(-9, -30, 18, 3);
+            } else if (hatId === 'wizard') {
+                // Chapeau de sorcier étoilé
+                ctx.fillStyle = '#6c5ce7';
+                ctx.beginPath();
+                ctx.ellipse(0, -24, 16, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-10, -24);
+                ctx.lineTo(10, -24);
+                ctx.lineTo(2, -45);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#ffeaa7';
+                ctx.beginPath();
+                ctx.arc(0, -33, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (hatId === 'crown') {
+                // Couronne d'or
+                ctx.fillStyle = '#ffd700';
+                ctx.strokeStyle = '#b7840b';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-10, -23);
+                ctx.lineTo(-11, -35);
+                ctx.lineTo(-4, -29);
+                ctx.lineTo(0, -38);
+                ctx.lineTo(4, -29);
+                ctx.lineTo(11, -35);
+                ctx.lineTo(10, -23);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (hatId === 'rebirthHalo') {
+                // Couronne Cosmique Rebirth animée
+                const hue = Math.floor((nowMs * 0.2) % 360);
+                ctx.strokeStyle = `hsl(${hue}, 95%, 65%)`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(0, -35, 13, 4, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#a855f7';
+                ctx.beginPath();
+                ctx.moveTo(-9, -23);
+                ctx.lineTo(-9, -32);
+                ctx.lineTo(0, -27);
+                ctx.lineTo(9, -32);
+                ctx.lineTo(9, -23);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                // Toque de chef classique
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, -29, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillRect(-9, -27, 18, 6);
+            }
+        }
+
         function drawCharacter(ent, role, nowMs) {
             ctx.save();
             const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
@@ -1660,6 +1789,7 @@
 
             if (role === 'baker') ctx.fillStyle = '#2ed573';
             else if (role === 'decorator') ctx.fillStyle = '#a55eea';
+            else if (role === 'express') ctx.fillStyle = '#00cec9';
             else if (role === 'cashier') ctx.fillStyle = '#ffa502';
             else ctx.fillStyle = '#c67d3b';
 
@@ -1675,8 +1805,17 @@
             ctx.fill();
             ctx.stroke();
 
-            // Chapeau équipé pour le joueur et son équipe
-            drawEquippedHat(state.selectedHat || 'chef');
+            if (role === 'player') {
+                drawPlayerHat(state.selectedHat, nowMs);
+            } else {
+                ctx.fillStyle = role === 'express' ? '#ffeaa7' : '#ff4757';
+                ctx.beginPath();
+                ctx.moveTo(-11, -22);
+                ctx.lineTo(11, -22);
+                ctx.lineTo(0, -38);
+                ctx.closePath();
+                ctx.fill();
+            }
 
             const look = ent.facing * 3;
             ctx.fillStyle = '#2f3542';
@@ -1798,18 +1937,23 @@
         }
 
         // ==========================================
-        // 9. INTERFACE HUD, BARRE RAPIDE GLAÇAGES & BOUTIQUE
+        // 9. INTERFACE HUD, BARRE RAPIDE GLAÇAGES, REBIRTH & BOUTIQUE
         // ==========================================
         const elMoney = document.getElementById('hudMoney');
-        const elRebirth = document.getElementById('hudRebirth');
         const elPrice = document.getElementById('hudPrice');
         const elSold = document.getElementById('hudSold');
         const elHand = document.getElementById('hudHandCount');
         const elShopBal = document.getElementById('shopBalance');
-        const elShopReb = document.getElementById('shopRebirthCount');
+        const elShopRebirthCount = document.getElementById('shopRebirthCount');
         const elOrderText = document.getElementById('hudOrderText');
         const elOrderSwatch = document.getElementById('hudOrderSwatch');
+        const elRebirthBadge = document.getElementById('hudRebirthBadge');
+        const elRebirthText = document.getElementById('hudRebirthText');
         const glazeQuickBar = document.getElementById('glazeQuickBar');
+
+        function formatMoney(n) {
+            return n.toLocaleString('fr-FR') + ' $';
+        }
 
         function getSwatchBackground(item) {
             if (item.mode === 'rainbow') return 'linear-gradient(90deg,#ff6b81,#feca57,#1dd1a1,#54a0ff)';
@@ -1841,13 +1985,21 @@
         }
 
         function updateHUD() {
-            elMoney.textContent = `${state.money.toLocaleString('fr-FR')} $`;
-            elShopBal.textContent = `${state.money.toLocaleString('fr-FR')} $`;
-            elRebirth.textContent = `${state.rebirths || 0} (x${getRebirthMult().toFixed(1)})`;
-            elShopReb.textContent = `${state.rebirths || 0} (x${getRebirthMult().toFixed(1)})`;
-            elPrice.textContent = `${getCookieValue()} $`;
+            elMoney.textContent = formatMoney(state.money);
+            elShopBal.textContent = formatMoney(state.money);
+            elShopRebirthCount.textContent = state.rebirths;
+            elPrice.textContent = formatMoney(getCookieValue());
             elSold.textContent = state.soldCount;
             elHand.textContent = `${player.holding.length}/${getMaxHand()}`;
+
+            if (state.rebirths > 0 || state.money >= 10000) {
+                elRebirthBadge.classList.remove('hidden');
+                elRebirthBadge.classList.add('flex');
+                elRebirthText.textContent = `${state.rebirths} (x${getRebirthMultiplier().toFixed(1)})`;
+            } else {
+                elRebirthBadge.classList.add('hidden');
+                elRebirthBadge.classList.remove('flex');
+            }
 
             const frontCust = getFrontCustomer();
             if (frontCust && frontCust.desiredIcing) {
@@ -1879,52 +2031,18 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.shop-tab').forEach(b => {
                     b.classList.remove('bg-amber-400', 'text-amber-950');
-                    b.classList.add('bg-amber-900/70');
+                    if (b.dataset.tab === 'rebirth') {
+                        b.classList.add('bg-purple-900/80', 'text-purple-100');
+                    } else {
+                        b.classList.add('bg-amber-900/70', 'text-amber-100');
+                    }
                 });
-                btn.classList.remove('bg-amber-900/70');
+                btn.classList.remove('bg-amber-900/70', 'text-amber-100', 'bg-purple-900/80', 'text-purple-100');
                 btn.classList.add('bg-amber-400', 'text-amber-950');
                 currentTab = btn.dataset.tab;
                 renderShop();
             });
         });
-
-        function performRebirth() {
-            const cost = getRebirthCost();
-            if (state.money < cost) return;
-
-            const nextRebirths = (state.rebirths || 0) + 1;
-            const keepShapes = [...state.unlockedShapes];
-            const keepSelectedShape = state.selectedShape;
-            const keepHats = [...state.unlockedHats];
-            const keepSelectedHat = state.selectedHat;
-            const keepSold = state.soldCount;
-            const keepPerfect = state.perfectCount;
-
-            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-            state.rebirths = nextRebirths;
-            state.unlockedShapes = keepShapes;
-            state.selectedShape = keepSelectedShape;
-            state.unlockedHats = keepHats;
-            state.selectedHat = keepSelectedHat;
-            state.soldCount = keepSold;
-            state.perfectCount = keepPerfect;
-
-            helpers = [];
-            customers = [];
-            moneyPiles = [];
-            player.holding = [];
-            stations.oven.slots = [];
-            stations.oven.ready = [];
-            stations.shelf.cookies = [];
-
-            sound.rebirth();
-            spawnParticles(player.x, player.y, '#e879f9', 24);
-            spawnText(player.x, player.y - 30, `✨ REBIRTH #${nextRebirths} ! Présentoir agrandi !`, '#f5d0fe');
-            saveGame();
-            updateHUD();
-            renderGlazeQuickBar();
-            renderShop();
-        }
 
         function renderShop() {
             shopGrid.innerHTML = '';
@@ -1933,10 +2051,11 @@
 
             if (currentTab === 'dough') {
                 CATALOG.dough.forEach(item => {
+                    const lockedByRebirth = (item.minRebirth || 0) > state.rebirths;
                     const unlocked = state.unlockedDough.includes(item.id);
                     const equipped = state.selectedDough === item.id;
-                    addRecipeCard(item, unlocked, equipped, '🥣', () => {
-                        if (!unlocked && state.money >= item.cost) {
+                    addRecipeCard(item, unlocked, equipped, '🥣', lockedByRebirth, () => {
+                        if (!unlocked && !lockedByRebirth && state.money >= item.cost) {
                             state.money -= item.cost;
                             state.unlockedDough.push(item.id);
                             state.selectedDough = item.id;
@@ -1951,10 +2070,11 @@
                 });
             } else if (currentTab === 'shapes') {
                 CATALOG.shapes.forEach(item => {
+                    const lockedByRebirth = (item.minRebirth || 0) > state.rebirths;
                     const unlocked = state.unlockedShapes.includes(item.id);
                     const equipped = state.selectedShape === item.id;
-                    addRecipeCard(item, unlocked, equipped, item.icon, () => {
-                        if (!unlocked && state.money >= item.cost) {
+                    addRecipeCard(item, unlocked, equipped, item.icon, lockedByRebirth, () => {
+                        if (!unlocked && !lockedByRebirth && state.money >= item.cost) {
                             state.money -= item.cost;
                             state.unlockedShapes.push(item.id);
                             state.selectedShape = item.id;
@@ -1971,7 +2091,7 @@
                 CATALOG.icing.forEach(item => {
                     const unlocked = state.unlockedIcing.includes(item.id);
                     const equipped = state.selectedIcing === item.id;
-                    addRecipeCard(item, unlocked, equipped, '🎨', () => {
+                    addRecipeCard(item, unlocked, equipped, '🎨', false, () => {
                         if (!unlocked && state.money >= item.cost) {
                             state.money -= item.cost;
                             state.unlockedIcing.push(item.id);
@@ -1989,7 +2109,7 @@
                 CATALOG.topping.forEach(item => {
                     const unlocked = state.unlockedTopping.includes(item.id);
                     const equipped = state.selectedTopping === item.id;
-                    addRecipeCard(item, unlocked, equipped, '✨', () => {
+                    addRecipeCard(item, unlocked, equipped, '✨', false, () => {
                         if (!unlocked && state.money >= item.cost) {
                             state.money -= item.cost;
                             state.unlockedTopping.push(item.id);
@@ -2003,30 +2123,50 @@
                         renderShop();
                     });
                 });
+            } else if (currentTab === 'hats') {
+                CATALOG.hats.forEach(item => {
+                    const lockedByRebirth = (item.minRebirth || 0) > state.rebirths;
+                    const unlocked = state.unlockedHats.includes(item.id);
+                    const equipped = state.selectedHat === item.id;
+                    addRecipeCard(item, unlocked, equipped, item.icon, lockedByRebirth, () => {
+                        if (!unlocked && !lockedByRebirth && state.money >= item.cost) {
+                            state.money -= item.cost;
+                            state.unlockedHats.push(item.id);
+                            state.selectedHat = item.id;
+                            sound.upgrade();
+                        } else if (unlocked) {
+                            state.selectedHat = item.id;
+                            sound.pop();
+                        }
+                        saveGame();
+                        renderShop();
+                    });
+                });
             } else if (currentTab === 'upgrades') {
                 CATALOG.upgrades.forEach(up => {
-                    if (up.prestige && (state.rebirths || 0) < 1) return;
+                    const lockedByRebirth = (up.minRebirth || 0) > state.rebirths;
                     const lvl = state.levels[up.id] || 0;
-                    const isMax = lvl >= up.max;
-                    const zeroBased = (up.id === 'magnet' || up.prestige);
+                    const maxLvl = getUpgradeMaxLevel(up);
+                    const isMax = lvl >= maxLvl;
+                    const zeroBased = (up.id === 'magnet' || up.id === 'royalCadence');
                     const cost = Math.round(up.baseCost * Math.pow(up.mult, zeroBased ? lvl : lvl - 1));
-                    const canBuy = !isMax && state.money >= cost;
+                    const canBuy = !lockedByRebirth && !isMax && state.money >= cost;
 
                     const card = document.createElement('div');
-                    card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${up.prestige ? 'ring-2 ring-fuchsia-500' : ''}`;
+                    card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${lockedByRebirth ? 'opacity-75' : ''}`;
                     card.innerHTML = `
                         <div class="flex items-start gap-3">
                             <span class="text-3xl">${up.icon}</span>
                             <div class="flex-1">
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-1">
                                     <span class="font-bold text-base">${up.name}</span>
-                                    <span class="text-xs font-bold bg-amber-200 px-2 py-0.5 rounded-lg">Niv. ${lvl}/${up.max}</span>
+                                    <span class="text-xs font-bold bg-amber-200 px-2 py-0.5 rounded-lg">Niv. ${lvl}/${maxLvl}</span>
                                 </div>
                                 <p class="text-xs text-amber-800 mt-1">${up.desc}</p>
                             </div>
                         </div>
-                        <button ${(!canBuy || isMax) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
-                            ${isMax ? '✓ Niveau Maximum' : `Améliorer • ${cost.toLocaleString('fr-FR')} $`}
+                        <button ${(!canBuy || isMax || lockedByRebirth) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
+                            ${lockedByRebirth ? `🔮 Requiert Rebirth ${up.minRebirth}` : (isMax ? '✓ Niveau Maximum' : `Améliorer • ${formatMoney(cost)}`)}
                         </button>
                     `;
                     const btn = card.querySelector('button');
@@ -2057,7 +2197,7 @@
                             </div>
                         </div>
                         <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
-                            ${owned ? '✓ Actif en boutique' : `Acheter • ${st.cost.toLocaleString('fr-FR')} $`}
+                            ${owned ? '✓ Actif en boutique' : `Acheter • ${formatMoney(st.cost)}`}
                         </button>
                     `;
                     const btn = card.querySelector('button');
@@ -2073,71 +2213,66 @@
                     }
                     shopGrid.appendChild(card);
                 });
-            } else if (currentTab === 'hats') {
-                CATALOG.hats.forEach(item => {
-                    const unlocked = state.unlockedHats.includes(item.id);
-                    const equipped = state.selectedHat === item.id;
-                    addRecipeCard(item, unlocked, equipped, item.icon, () => {
-                        if (!unlocked && state.money >= item.cost) {
-                            state.money -= item.cost;
-                            state.unlockedHats.push(item.id);
-                            state.selectedHat = item.id;
-                            sound.upgrade();
-                        } else if (unlocked) {
-                            state.selectedHat = item.id;
-                            sound.pop();
-                        }
-                        saveGame();
-                        renderShop();
-                    });
-                });
             } else if (currentTab === 'rebirth') {
-                const cost = getRebirthCost();
-                const canRebirth = state.money >= cost;
-                const nextMult = (1 + ((state.rebirths || 0) + 1) * 0.5).toFixed(1);
-                const nextShelf = Math.min(24, 9 + ((state.rebirths || 0) + 1) * 3);
+                const rCost = getRebirthCost();
+                const canRebirth = state.money >= rCost;
+                const nextShelf = Math.min(21, 9 + (state.rebirths + 1) * 3);
+                const nextMult = (1 + (state.rebirths + 1) * 0.5).toFixed(1);
 
                 const banner = document.createElement('div');
-                banner.className = 'col-span-full rounded-2xl p-5 bg-gradient-to-br from-purple-950 via-fuchsia-950 to-amber-950 border-2 border-fuchsia-400 text-amber-100 flex flex-col gap-3';
+                banner.className = 'sm:col-span-2 cream-card rounded-3xl p-4 sm:p-5 text-amber-950 border-purple-500 flex flex-col gap-3';
                 banner.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-fuchsia-200">✨ Renaissance (Rebirth #${(state.rebirths || 0) + 1})</h3>
-                        <span class="px-3 py-1 rounded-xl bg-fuchsia-900/80 border border-fuchsia-400 text-xs font-bold">Actuel : Rebirth ${state.rebirths || 0}</span>
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">🔮</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-purple-950">Renaissance Pâtissière (Rebirth ${state.rebirths})</h3>
+                                <p class="text-xs text-amber-800">Multiplicateur actuel : <strong class="text-purple-800">x${getRebirthMultiplier().toFixed(1)}</strong> • Présentoir actuel : <strong class="text-purple-800">${getShelfMaxCookies()} places</strong></p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl bg-purple-200 text-purple-950 font-bold text-xs">Objectif : ${formatMoney(rCost)}</span>
                     </div>
-                    <p class="text-sm text-amber-200 leading-relaxed">
-                        Prêt pour un nouveau départ encore plus grand ? En faisant un Rebirth, ta caisse et tes améliorations de base sont réinitialisées, mais tu gagnes des bonus permanents :
-                    </p>
-                    <ul class="text-xs sm:text-sm space-y-1.5 bg-black/30 p-3 rounded-xl border border-fuchsia-500/40">
-                        <li>💰 <strong>Multiplicateur de revenus :</strong> passe à <span class="text-yellow-300 font-bold">x${nextMult}</span> sur tous tes biscuits !</li>
-                        <li>🍪 <strong>Présentoir plus grand :</strong> passe à <span class="text-emerald-300 font-bold">${nextShelf} places</span> visibles en boutique !</li>
-                        <li>🌟 <strong>Upgrades Prestige :</strong> débloque le <em>Four Divin</em> et les <em>Ailes d'Hermès</em> dans l'onglet Équipement !</li>
-                        <li>🎩 <strong>Conservés :</strong> tes <em>Formes de biscuits</em>, tes <em>Chapeaux</em> et tes statistiques sont gardés !</li>
-                    </ul>
-                    <button id="btnDoRebirth" ${!canRebirth ? 'disabled' : ''} class="btn-rebirth w-full py-3 rounded-2xl font-bold text-white text-base cursor-pointer mt-1">
-                        ✨ Faire un Rebirth • ${cost.toLocaleString('fr-FR')} $
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs bg-amber-100/80 p-3 rounded-2xl border border-amber-300">
+                        <div>📦 <strong>Présentoir plus gros :</strong> Passe à <strong>${nextShelf} places</strong> et s'agrandit en salle !</div>
+                        <div>💰 <strong>Valeur des biscuits :</strong> Passe à <strong>x${nextMult}</strong> en permanence !</div>
+                        <div>⚡ <strong>Nouveaux niveaux max :</strong> Équipement & Lutins débloqués !</div>
+                        <div>👑 <strong>Exclusivités :</strong> Pâte Céleste, Forme Couronne & Couronne Cosmique !</div>
+                    </div>
+
+                    <button ${!canRebirth ? 'disabled' : ''} id="btnTriggerRebirth" class="btn-rebirth w-full py-3 rounded-2xl text-white font-bold text-base cursor-pointer">
+                        ${canRebirth ? `✨ Faire un Rebirth maintenant (${formatMoney(rCost)})` : `🔒 Il te faut ${formatMoney(rCost)} (Tu as ${formatMoney(state.money)})`}
                     </button>
                 `;
                 shopGrid.appendChild(banner);
-                const btnDoRebirth = banner.querySelector('#btnDoRebirth');
+
+                const btnTrig = banner.querySelector('#btnTriggerRebirth');
                 if (canRebirth) {
-                    btnDoRebirth.addEventListener('click', performRebirth);
+                    btnTrig.addEventListener('click', () => {
+                        rebirthModal.classList.remove('hidden');
+                        rebirthModal.classList.add('flex');
+                    });
                 }
             }
         }
 
-        function addRecipeCard(item, unlocked, equipped, icon, onAction) {
-            const canBuy = !unlocked && state.money >= item.cost;
+        function addRecipeCard(item, unlocked, equipped, icon, lockedByRebirth, onAction) {
+            const canBuy = !lockedByRebirth && !unlocked && state.money >= item.cost;
             const card = document.createElement('div');
-            card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${equipped ? 'ring-4 ring-amber-500' : ''}`;
+            card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${equipped ? 'ring-4 ring-amber-500' : ''} ${lockedByRebirth ? 'opacity-75' : ''}`;
 
             let swatch = '';
             if (item.color) {
                 swatch = `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>`;
             }
 
-            let btnLabel = equipped ? '✓ Équipé' : (unlocked ? 'Équiper' : `Débloquer • ${item.cost.toLocaleString('fr-FR')} $`);
-            let btnClass = equipped ? 'bg-amber-500 text-amber-950' : (unlocked ? 'bg-amber-200 hover:bg-amber-300 text-amber-950' : 'btn-mint text-white');
-            let disabledAttr = (!unlocked && !canBuy) ? 'disabled' : '';
+            let btnLabel = lockedByRebirth
+                ? `🔮 Requiert Rebirth ${item.minRebirth}`
+                : (equipped ? '✓ Équipé' : (unlocked ? 'Équiper' : `Débloquer • ${formatMoney(item.cost)}`));
+            let btnClass = lockedByRebirth
+                ? 'bg-purple-200 text-purple-900'
+                : (equipped ? 'bg-amber-500 text-amber-950' : (unlocked ? 'bg-amber-200 hover:bg-amber-300 text-amber-950' : 'btn-mint text-white'));
+            let disabledAttr = (lockedByRebirth || (!unlocked && !canBuy)) ? 'disabled' : '';
 
             card.innerHTML = `
                 <div class="flex items-start gap-2.5">
@@ -2165,6 +2300,58 @@
             btnSound.textContent = sound.muted ? '🔇' : '🔊';
         });
 
+        // Gestion Modale Rebirth
+        const rebirthModal = document.getElementById('rebirthModal');
+        document.getElementById('btnCancelRebirth').addEventListener('click', () => {
+            rebirthModal.classList.add('hidden');
+            rebirthModal.classList.remove('flex');
+        });
+        document.getElementById('btnConfirmRebirth').addEventListener('click', () => {
+            const rCost = getRebirthCost();
+            if (state.money < rCost) return;
+
+            const keptRebirths = state.rebirths + 1;
+            const keptSold = state.soldCount;
+            const keptPerfect = state.perfectCount;
+            const keptHats = [...state.unlockedHats];
+            const keptSelectedHat = state.selectedHat;
+            const keptShapes = [...state.unlockedShapes];
+            const keptSelectedShape = state.selectedShape;
+
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            state.rebirths = keptRebirths;
+            state.soldCount = keptSold;
+            state.perfectCount = keptPerfect;
+            state.unlockedHats = keptHats;
+            state.selectedHat = keptSelectedHat;
+            state.unlockedShapes = keptShapes;
+            state.selectedShape = keptSelectedShape;
+
+            helpers = [];
+            customers = [];
+            moneyPiles = [];
+            player.holding = [];
+            stations.oven.slots = [];
+            stations.oven.ready = [];
+            stations.shelf.cookies = [];
+
+            updateShelfGeometry();
+            sound.rebirth();
+            spawnParticles(player.x, player.y, '#c084fc', 25);
+            spawnText(player.x, player.y - 30, `✨ REBIRTH ${state.rebirths} ! (x${getRebirthMultiplier().toFixed(1)})`, '#e9d5ff');
+
+            saveGame();
+            updateHUD();
+            renderGlazeQuickBar();
+            renderShop();
+
+            rebirthModal.classList.add('hidden');
+            rebirthModal.classList.remove('flex');
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        // Gestion Modale Reset
         const resetModal = document.getElementById('resetModal');
         document.getElementById('btnOpenReset').addEventListener('click', () => {
             resetModal.classList.remove('hidden');
@@ -2176,7 +2363,7 @@
         });
         document.getElementById('btnConfirmReset').addEventListener('click', () => {
             localStorage.removeItem(SAVE_KEY);
-            localStorage.removeItem('gingerbread_mart_save_v2');
+            localStorage.removeItem(OLD_SAVE_KEY);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
             helpers = [];
             customers = [];
@@ -2185,6 +2372,7 @@
             stations.oven.slots = [];
             stations.oven.ready = [];
             stations.shelf.cookies = [];
+            updateShelfGeometry();
             updateHUD();
             renderGlazeQuickBar();
             renderShop();
