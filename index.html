@@ -30,7 +30,7 @@
         .wood-panel {
             background: linear-gradient(180deg, #5d2e14 0%, #3e1d0b 100%);
             border: 3px solid #9c5a2b;
-            box-shadow: 0 6px 0 #261005;
+            box-shadow: 0 5px 0 #261005;
         }
         .cream-card {
             background: #fff8eb;
@@ -64,9 +64,17 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
-        /* Scrollbar fine pour la boutique */
-        .shop-scroll::-webkit-scrollbar {
-            width: 8px;
+        .glaze-pill {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .glaze-pill.active {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 0 0 3px #ffd166, 0 5px 0 #261005;
+        }
+        .shop-scroll::-webkit-scrollbar,
+        .no-scrollbar::-webkit-scrollbar {
+            width: 7px;
+            height: 5px;
         }
         .shop-scroll::-webkit-scrollbar-track {
             background: #2c1408;
@@ -76,6 +84,9 @@
             background: #9c5a2b;
             border-radius: 8px;
         }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -83,92 +94,115 @@
     <canvas id="gameCanvas"></canvas>
 
     <!-- HUD Supérieur -->
-    <div class="fixed top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
-        <!-- Compteurs Argent & Biscuits -->
-        <div class="flex items-center gap-2 pointer-events-auto">
-            <div class="wood-panel rounded-2xl px-3.5 py-2 flex items-center gap-2 text-amber-100">
-                <span class="text-2xl">🪙</span>
+    <div class="fixed top-2.5 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Compteurs Argent, Prix, Vendus & Sauvegarde -->
+        <div class="flex items-center gap-2 pointer-events-auto flex-wrap">
+            <div class="wood-panel rounded-2xl px-3 py-1.5 flex items-center gap-2 text-amber-100">
+                <span class="text-xl sm:text-2xl">🪙</span>
                 <div>
                     <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Caisse</div>
-                    <div id="hudMoney" class="text-lg sm:text-xl font-bold text-yellow-300 leading-tight">25 $</div>
+                    <div id="hudMoney" class="text-base sm:text-xl font-bold text-yellow-300 leading-tight">25 $</div>
                 </div>
             </div>
 
-            <div class="wood-panel rounded-2xl px-3.5 py-2 flex items-center gap-2 text-amber-100">
-                <span class="text-2xl">🍪</span>
+            <div class="wood-panel rounded-2xl px-3 py-1.5 flex items-center gap-2 text-amber-100">
+                <span class="text-xl sm:text-2xl">🍪</span>
                 <div>
-                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Prix / Biscuit</div>
-                    <div id="hudPrice" class="text-lg sm:text-xl font-bold text-emerald-300 leading-tight">5 $</div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Base / Biscuit</div>
+                    <div id="hudPrice" class="text-base sm:text-xl font-bold text-emerald-300 leading-tight">5 $</div>
                 </div>
             </div>
 
-            <div class="hidden sm:flex wood-panel rounded-2xl px-3.5 py-2 items-center gap-2 text-amber-100">
-                <span class="text-2xl">⭐</span>
+            <div class="hidden md:flex wood-panel rounded-2xl px-3 py-1.5 items-center gap-2 text-amber-100">
+                <span class="text-xl">⭐</span>
                 <div>
                     <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Vendus</div>
-                    <div id="hudSold" class="text-lg sm:text-xl font-bold text-amber-100 leading-tight">0</div>
+                    <div id="hudSold" class="text-lg font-bold text-amber-100 leading-tight">0</div>
                 </div>
+            </div>
+
+            <!-- Indicateur discret Sauvegarde LocalStorage -->
+            <div id="saveBadge" class="bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-xl opacity-0 transition-opacity duration-300">
+                Sauvegardé ✓
             </div>
         </div>
 
-        <!-- Boutons Boutique, Son & Reset -->
+        <!-- Boutons Boutique & Son -->
         <div class="flex items-center gap-2 pointer-events-auto">
-            <button id="btnOpenShop" class="btn-gold rounded-2xl px-4 py-2.5 font-bold text-amber-950 text-sm sm:text-base flex items-center gap-2 cursor-pointer">
-                <span class="text-xl">🛍️</span>
+            <button id="btnOpenShop" class="btn-gold rounded-2xl px-3.5 sm:px-4 py-2 font-bold text-amber-950 text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                <span class="text-lg sm:text-xl">🛍️</span>
                 <span>Boutique</span>
             </button>
-            <button id="btnSound" class="wood-panel rounded-2xl p-2.5 text-xl text-amber-100 hover:bg-amber-900 cursor-pointer" title="Son">
+            <button id="btnSound" class="wood-panel rounded-2xl p-2 text-lg sm:text-xl text-amber-100 hover:bg-amber-900 cursor-pointer" title="Son">
                 🔊
-            </button>
-            <button id="btnReset" class="wood-panel rounded-2xl p-2.5 text-xl text-amber-100 hover:bg-red-900 cursor-pointer" title="Réinitialiser">
-                🔄
             </button>
         </div>
     </div>
 
-    <!-- Recette Active en Bas à Droite -->
-    <div class="fixed bottom-3 right-3 wood-panel rounded-2xl px-3.5 py-2 text-amber-100 text-xs sm:text-sm pointer-events-none z-10 flex items-center gap-3">
-        <div>
-            <span class="text-amber-300 font-bold">Recette :</span>
-            <span id="hudRecipeText">Classique • Blanc Vanille</span>
+    <!-- Barre de Sélection Rapide des Glaçages + Commande Client en Bas -->
+    <div class="fixed bottom-2.5 left-2.5 right-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Sélecteur Rapide de Glaçage (Touches 1-9 ou Clic/Tap) -->
+        <div class="wood-panel rounded-2xl px-3 py-1.5 pointer-events-auto max-w-full sm:max-w-[64%] flex items-center gap-2">
+            <div class="text-[11px] font-bold text-amber-200 shrink-0 leading-tight">
+                🎨 Glaçage :<br><span class="text-[10px] text-amber-400 font-normal">Touches 1-9</span>
+            </div>
+            <div id="glazeQuickBar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-0.5"></div>
         </div>
-        <div class="bg-amber-950/80 px-2.5 py-1 rounded-xl border border-amber-700 font-bold text-yellow-300">
-            Main : <span id="hudHandCount">0/3</span>
+
+        <!-- Infos Main & Commande Client Active -->
+        <div class="wood-panel rounded-2xl px-3 py-1.5 text-amber-100 text-xs flex items-center gap-2.5 pointer-events-auto shrink-0">
+            <div id="customerOrderBox" class="flex items-center gap-1.5 bg-amber-950/80 px-2.5 py-1 rounded-xl border border-amber-700">
+                <span class="text-amber-300 font-bold">Client veut :</span>
+                <span id="hudOrderSwatch" class="inline-block w-3.5 h-3.5 rounded-full border border-white"></span>
+                <span id="hudOrderText" class="font-bold text-amber-100">Vanille Classique</span>
+            </div>
+            <div class="bg-amber-950/80 px-2.5 py-1 rounded-xl border border-amber-700 font-bold text-yellow-300">
+                Main : <span id="hudHandCount">0/3</span>
+            </div>
         </div>
     </div>
 
     <!-- Joystick Tactile (Mobile / Tablette) -->
-    <div id="joystickZone" class="fixed bottom-4 left-4 w-28 h-28 rounded-full bg-amber-950/40 border-2 border-amber-200/40 flex items-center justify-center z-20 md:hidden">
-        <div id="joystickKnob" class="w-12 h-12 rounded-full bg-amber-400 border-2 border-white shadow-md pointer-events-none"></div>
+    <div id="joystickZone" class="fixed bottom-24 left-4 w-24 h-24 rounded-full bg-amber-950/40 border-2 border-amber-200/40 flex items-center justify-center z-20 md:hidden">
+        <div id="joystickKnob" class="w-10 h-10 rounded-full bg-amber-400 border-2 border-white shadow-md pointer-events-none"></div>
     </div>
 
     <!-- Modale Boutique -->
-    <div id="shopModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-3 sm:p-6 z-30">
-        <div class="wood-panel rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
+    <div id="shopModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-2.5 sm:p-5 z-30">
+        <div class="wood-panel rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
             <!-- En-tête Boutique -->
-            <div class="flex items-center justify-between px-5 py-4 border-b-2 border-amber-800 bg-amber-950/60">
+            <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b-2 border-amber-800 bg-amber-950/60">
                 <div class="flex items-center gap-3">
-                    <span class="text-3xl">🎄</span>
+                    <span class="text-2xl sm:text-3xl">🎄</span>
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-amber-100">Boutique du Pâtissier</h2>
-                        <p class="text-xs text-amber-300">Solde : <span id="shopBalance" class="font-bold text-yellow-300">25 $</span></p>
+                        <h2 class="text-lg sm:text-2xl font-bold text-amber-100">Boutique du Pâtissier</h2>
+                        <p class="text-xs text-amber-300">Solde : <span id="shopBalance" class="font-bold text-yellow-300">25 $</span> • Sauvegarde auto active</p>
                     </div>
                 </div>
-                <button id="btnCloseShop" class="w-10 h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xl flex items-center justify-center border-2 border-red-900 cursor-pointer">
+                <button id="btnCloseShop" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-lg flex items-center justify-center border-2 border-red-900 cursor-pointer">
                     ✕
                 </button>
             </div>
 
             <!-- Onglets -->
-            <div class="flex gap-1.5 p-3 bg-amber-950/40 overflow-x-auto">
-                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâtes</button>
-                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="decor">🎨 Glaçages & Confettis</button>
-                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Équipement</button>
-                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Équipe & Déco</button>
+            <div class="flex gap-1.5 p-2.5 bg-amber-950/40 overflow-x-auto">
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâtes</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 Glaçages (12)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ Confettis</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Équipement</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Équipe & Déco</button>
             </div>
 
             <!-- Liste des articles -->
-            <div id="shopGrid" class="p-4 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1"></div>
+            <div id="shopGrid" class="p-3.5 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1"></div>
+
+            <!-- Pied de boutique avec bouton Réinitialiser la sauvegarde -->
+            <div class="px-4 py-2.5 bg-amber-950/70 border-t-2 border-amber-800 flex items-center justify-between text-xs text-amber-300">
+                <span>Astuce : +50% de bonus si le glaçage correspond à la demande du client !</span>
+                <button id="btnOpenReset" class="px-3 py-1.5 rounded-xl bg-red-900/80 hover:bg-red-700 text-red-100 font-bold border border-red-600 cursor-pointer whitespace-nowrap">
+                    🗑️ Réinitialiser la sauvegarde
+                </button>
+            </div>
         </div>
     </div>
 
@@ -176,11 +210,11 @@
     <div id="resetModal" class="fixed inset-0 bg-black/75 hidden items-center justify-center p-4 z-40">
         <div class="cream-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
             <div class="text-4xl mb-2">🍪</div>
-            <h3 class="text-xl font-bold mb-2">Recommencer la partie ?</h3>
-            <p class="text-sm text-amber-800 mb-5">Ta caisse, tes recettes et tes améliorations seront remises à zéro.</p>
+            <h3 class="text-xl font-bold mb-2">Réinitialiser la sauvegarde ?</h3>
+            <p class="text-sm text-amber-800 mb-5">Ta caisse, tes glaçages, tes améliorations et tes statistiques seront remis à zéro.</p>
             <div class="flex gap-3">
                 <button id="btnCancelReset" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
-                <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Recommencer</button>
+                <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Effacer tout</button>
             </div>
         </div>
     </div>
@@ -190,7 +224,7 @@
         "use strict";
 
         // ==========================================
-        // 1. CATALOGUE DU JEU (RECETTES & UPGRADES)
+        // 1. CATALOGUE COMPLET (PÂTES, 12 GLAÇAGES, CONFETTIS, UPGRADES)
         // ==========================================
         const CATALOG = {
             dough: [
@@ -202,44 +236,50 @@
                 { id: 'gold', name: 'Or Pur', desc: 'Éclat royal comestible (+48$ / biscuit, +70% vitesse).', cost: 1400, bonus: 48, speedMult: 1.70, color: '#f1c40f', stroke: '#9a7d0a' }
             ],
             icing: [
-                { id: 'white', name: 'Blanc Vanille', desc: 'Glaçage classique à la vanille.', cost: 0, bonus: 0, color: '#ffffff', rainbow: false },
-                { id: 'pink', name: 'Rose Bonbon', desc: 'Saveur fraise des neiges (+3$ / biscuit).', cost: 30, bonus: 3, color: '#ff6b81', rainbow: false },
-                { id: 'red', name: 'Rouge Noël', desc: 'Sucre d\'orge festif (+6$ / biscuit).', cost: 75, bonus: 6, color: '#e84118', rainbow: false },
-                { id: 'green', name: 'Vert Sapin', desc: 'Menthe douce givrée (+10$ / biscuit).', cost: 150, bonus: 10, color: '#2ecc71', rainbow: false },
-                { id: 'choco', name: 'Chocolat Fondant', desc: 'Nappage cacao intense (+16$ / biscuit).', cost: 280, bonus: 16, color: '#4b2611', rainbow: false },
-                { id: 'gold', name: 'Or Scintillant', desc: 'Glaçage doré lumineux (+28$ / biscuit).', cost: 580, bonus: 28, color: '#ffd32a', rainbow: false },
-                { id: 'rainbow', name: 'Arc-en-ciel', desc: 'Couleurs animées magiques (+45$ / biscuit).', cost: 1200, bonus: 45, color: '#ff9ff3', rainbow: true }
+                { id: 'vanilla', name: 'Vanille Classique', desc: 'Glaçage blanc onctueux à la vanille.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
+                { id: 'strawberry', name: 'Fraise Sucrée', desc: 'Rose tendre aux fruits rouges (+2$ / biscuit).', cost: 25, bonus: 2, color: '#ff6b81', mode: 'solid' },
+                { id: 'mint', name: 'Menthe Givrée', desc: 'Vert pastel rafraîchissant (+4$ / biscuit).', cost: 50, bonus: 4, color: '#7bed9f', mode: 'solid' },
+                { id: 'choco', name: 'Chocolat Fondant', desc: 'Marron riche au cacao (+6$ / biscuit).', cost: 85, bonus: 6, color: '#5c2c16', mode: 'solid' },
+                { id: 'caramel', name: 'Caramel Beurre Salé', desc: 'Ambre doré fondant (+9$ / biscuit).', cost: 130, bonus: 9, color: '#e67e22', mode: 'solid' },
+                { id: 'blueberry', name: 'Myrtille Royale', desc: 'Bleu violet velouté (+13$ / biscuit).', cost: 190, bonus: 13, color: '#5352ed', mode: 'solid' },
+                { id: 'lemon', name: 'Citron Pétillant', desc: 'Jaune vif acidulé (+18$ / biscuit).', cost: 270, bonus: 18, color: '#ffeaa7', mode: 'solid' },
+                { id: 'pistachio', name: 'Pistache Douce', desc: 'Vert pistache gourmand (+24$ / biscuit).', cost: 380, bonus: 24, color: '#a3cb38', mode: 'solid' },
+                { id: 'redvelvet', name: 'Velours Rouge', desc: 'Rouge rubis festif (+32$ / biscuit).', cost: 540, bonus: 32, color: '#d63031', mode: 'solid' },
+                { id: 'galaxy', name: 'Galaxie Cosmique', desc: 'Violet étoilé animé (+42$ / biscuit).', cost: 780, bonus: 42, color: '#8e44ad', mode: 'galaxy' },
+                { id: 'rainbow', name: 'Arc-en-ciel Magique', desc: 'Multicolore animé (+55$ / biscuit).', cost: 1150, bonus: 55, color: '#ff9ff3', mode: 'rainbow' },
+                { id: 'gold24k', name: 'Or Scintillant 24K', desc: 'Or brillant royal (+75$ / biscuit).', cost: 1750, bonus: 75, color: '#ffd700', mode: 'gold24k' }
             ],
             topping: [
-                { id: 'none', name: 'Sans Confettis', desc: 'Simple et authentique.', cost: 0, bonus: 0, style: 'none' },
-                { id: 'sprinkles', name: 'Vermicelles Colorés', desc: 'Petits confettis joyeux (+3$ / biscuit).', cost: 35, bonus: 3, style: 'sprinkles' },
-                { id: 'stars', name: 'Étoiles Dorées', desc: 'Étoiles brillantes (+8$ / biscuit).', cost: 100, bonus: 8, style: 'stars' },
-                { id: 'marshmallow', name: 'Mini Guimauves', desc: 'Nuages fondants (+15$ / biscuit).', cost: 240, bonus: 15, style: 'marshmallow' },
-                { id: 'chocochips', name: 'Pépites de Chocolat', desc: 'Éclats croquants (+25$ / biscuit).', cost: 520, bonus: 25, style: 'chocochips' },
-                { id: 'fairydust', name: 'Poussière de Fée', desc: 'Étincelles enchantées (+42$ / biscuit).', cost: 1100, bonus: 42, style: 'fairydust' }
+                { id: 'none', name: 'Aucun', desc: 'Simple et authentique.', cost: 0, bonus: 0, style: 'none' },
+                { id: 'sprinkles', name: 'Vermicelles Arc-en-ciel', desc: 'Petits confettis multicolores (+3$ / biscuit).', cost: 35, bonus: 3, style: 'sprinkles' },
+                { id: 'snow', name: 'Sucre Neige', desc: 'Flocons givrés croquants (+6$ / biscuit).', cost: 80, bonus: 6, style: 'snow' },
+                { id: 'marshmallow', name: 'Mini Guimauves', desc: 'Nuages fondants (+12$ / biscuit).', cost: 165, bonus: 12, style: 'marshmallow' },
+                { id: 'chocochips', name: 'Pépites de Chocolat', desc: 'Éclats de chocolat noir (+20$ / biscuit).', cost: 320, bonus: 20, style: 'chocochips' },
+                { id: 'stars', name: 'Étoiles Dorées', desc: 'Étoiles brillantes (+30$ / biscuit).', cost: 600, bonus: 30, style: 'stars' },
+                { id: 'fairydust', name: 'Poussière de Fée', desc: 'Étincelles enchantées (+45$ / biscuit).', cost: 1100, bonus: 45, style: 'fairydust' }
             ],
             upgrades: [
                 { id: 'speed', name: 'Bottes Turbo', desc: 'Augmente ta vitesse de déplacement.', baseCost: 35, mult: 1.75, max: 6, icon: '👢' },
                 { id: 'capacity', name: 'Gants de Chef', desc: 'Porte plus de biscuits en main (jusqu\'à 12).', baseCost: 40, mult: 1.85, max: 6, icon: '🧤' },
-                { id: 'roller', name: 'Rouleau Magique', desc: 'Aplatit la pâte beaucoup plus vite.', baseCost: 45, mult: 1.8, max: 6, icon: '🪄' },
-                { id: 'ovenSpeed', name: 'Four Turbo', desc: 'Réduit le temps de cuisson au four.', baseCost: 55, mult: 1.85, max: 5, icon: '🔥' },
-                { id: 'ovenCap', name: 'Four XL', desc: 'Augmente la capacité du four (4 à 8 places).', baseCost: 70, mult: 2.0, max: 5, icon: '♨️' },
-                { id: 'piping', name: 'Poche à Douille Auto', desc: 'Glace et décore les biscuits ultra vite.', baseCost: 65, mult: 1.85, max: 5, icon: '🧁' },
+                { id: 'roller', name: 'Rouleau Magique', desc: 'Accélère la pâte et fait évoluer la table (Marbre -> Cristal Doré).', baseCost: 45, mult: 1.85, max: 6, icon: '🪄' },
+                { id: 'ovenSpeed', name: 'Four Turbo', desc: 'Cuisson plus rapide et évolution du four (Acier/Cuivre -> Royal).', baseCost: 55, mult: 1.9, max: 5, icon: '🔥' },
+                { id: 'ovenCap', name: 'Four XL', desc: 'Augmente les places du four (4 à 8) et agrandit sa vitre.', baseCost: 70, mult: 2.0, max: 5, icon: '♨️' },
+                { id: 'piping', name: 'Poche à Douille Auto', desc: 'Glace plus vite et transforme la station en machine à bonbons.', baseCost: 65, mult: 1.9, max: 5, icon: '🧁' },
                 { id: 'magnet', name: 'Aimant à Pièces', desc: 'Attire automatiquement les pièces au sol.', baseCost: 85, mult: 2.1, max: 4, icon: '🧲' }
             ],
             staff: [
                 { id: 'bakerElf', name: 'Lutin Boulanger', desc: 'Roule la pâte et enfourne automatiquement !', cost: 150, icon: '🧝‍♂️', kind: 'staff' },
-                { id: 'decoratorElf', name: 'Lutin Décorateur', desc: 'Sort du four, glace et remplit le présentoir !', cost: 230, icon: '🧝‍♀️', kind: 'staff' },
-                { id: 'cashierElf', name: 'Caissier Express', desc: 'Ajoute +20% de pourboire à chaque vente !', cost: 310, icon: '🎩', kind: 'staff' },
+                { id: 'decoratorElf', name: 'Lutin Décorateur', desc: 'Sort du four, glace selon le client et remplit l\'étagère !', cost: 240, icon: '🧝‍♀️', kind: 'staff' },
+                { id: 'cashierElf', name: 'Caissier Express', desc: '+25% de pourboire et vitrine dorée de luxe !', cost: 320, icon: '🎩', kind: 'staff' },
                 { id: 'tree', name: 'Sapin Lumineux', desc: 'Apparaît en boutique (+3$ / vente et +clients).', cost: 175, icon: '🎄', kind: 'decor', bonus: 3 },
                 { id: 'garlands', name: 'Guirlandes Festives', desc: 'Illumine la salle (+4$ / vente).', cost: 340, icon: '✨', kind: 'decor', bonus: 4 },
-                { id: 'stockings', name: 'Chaussettes de Noël', desc: 'Ambiance chaleureuse (+6$ / vente).', cost: 580, icon: '🧦', kind: 'decor', bonus: 6 },
+                { id: 'stockings', name: 'Chaussettes Festives', desc: 'Ambiance chaleureuse (+6$ / vente).', cost: 580, icon: '🧦', kind: 'decor', bonus: 6 },
                 { id: 'snowman', name: 'Bonhomme de Neige', desc: 'Mascotte à l\'entrée (+10$ / vente).', cost: 980, icon: '⛄', kind: 'decor', bonus: 10 }
             ]
         };
 
         // ==========================================
-        // 2. SYNTHÉTISEUR AUDIO LÉGER (SANS FICHIERS)
+        // 2. SYNTHÉTISEUR AUDIO LÉGER (WEB AUDIO API)
         // ==========================================
         const sound = {
             ctx: null,
@@ -253,7 +293,7 @@
                     this.ctx.resume().catch(() => {});
                 }
             },
-            beep(freq, type, duration, vol = 0.08) {
+            beep(freq, type, duration, vol = 0.07) {
                 if (this.muted || !this.ctx) return;
                 try {
                     const osc = this.ctx.createOscillator();
@@ -268,29 +308,35 @@
                     osc.stop(this.ctx.currentTime + duration);
                 } catch (e) {}
             },
-            pop() { this.beep(520, 'sine', 0.09, 0.07); },
-            ding() { this.beep(880, 'triangle', 0.22, 0.09); },
+            pop() { this.beep(520, 'sine', 0.08, 0.06); },
+            ding() { this.beep(880, 'triangle', 0.2, 0.08); },
+            perfect() {
+                this.beep(660, 'triangle', 0.09, 0.09);
+                setTimeout(() => this.beep(880, 'triangle', 0.1, 0.09), 65);
+                setTimeout(() => this.beep(1175, 'triangle', 0.18, 0.09), 130);
+            },
             coin() {
-                this.beep(980, 'sine', 0.08, 0.08);
-                setTimeout(() => this.beep(1320, 'sine', 0.14, 0.08), 55);
+                this.beep(980, 'sine', 0.08, 0.07);
+                setTimeout(() => this.beep(1320, 'sine', 0.13, 0.07), 55);
             },
             upgrade() {
-                this.beep(440, 'triangle', 0.09, 0.09);
-                setTimeout(() => this.beep(660, 'triangle', 0.14, 0.09), 75);
+                this.beep(440, 'triangle', 0.09, 0.08);
+                setTimeout(() => this.beep(660, 'triangle', 0.14, 0.08), 75);
             }
         };
 
         // ==========================================
-        // 3. ÉTAT SAUVEGARDÉ & FORMULES
+        // 3. LOCALSTORAGE AUTO-SAVE & ÉTAT DU JEU
         // ==========================================
-        const SAVE_KEY = 'gingerbread_mart_clean_v1';
+        const SAVE_KEY = 'gingerbread_mart_save_v2';
         const DEFAULT_STATE = {
             money: 25,
             soldCount: 0,
+            perfectCount: 0,
             unlockedDough: ['classic'],
             selectedDough: 'classic',
-            unlockedIcing: ['white'],
-            selectedIcing: 'white',
+            unlockedIcing: ['vanilla'],
+            selectedIcing: 'vanilla',
             unlockedTopping: ['none'],
             selectedTopping: 'none',
             levels: {
@@ -314,6 +360,7 @@
         };
 
         let state = loadGame();
+        let saveBadgeTimer = null;
 
         function loadGame() {
             try {
@@ -334,6 +381,14 @@
         function saveGame() {
             try {
                 localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+                const badge = document.getElementById('saveBadge');
+                if (badge) {
+                    badge.style.opacity = '1';
+                    clearTimeout(saveBadgeTimer);
+                    saveBadgeTimer = setTimeout(() => {
+                        badge.style.opacity = '0';
+                    }, 1500);
+                }
             } catch (e) {}
         }
 
@@ -413,35 +468,35 @@
 
         const stations = {
             dough: {
-                x: 115, y: 205, w: 120, h: 125,
-                zoneX: 255, zoneY: 268, zoneR: 54,
+                x: 115, y: 195, w: 122, h: 122,
+                zoneX: 256, zoneY: 256, zoneR: 54,
                 progress: 0
             },
             oven: {
-                x: 345, y: 145, w: 135, h: 100,
-                zoneX: 412, zoneY: 272, zoneR: 56,
+                x: 345, y: 140, w: 138, h: 102,
+                zoneX: 414, zoneY: 268, zoneR: 56,
                 slots: [],
                 ready: []
             },
             icing: {
-                x: 115, y: 395, w: 120, h: 125,
-                zoneX: 255, zoneY: 458, zoneR: 54,
+                x: 115, y: 385, w: 122, h: 122,
+                zoneX: 256, zoneY: 446, zoneR: 54,
                 progress: 0
             },
             shelf: {
-                x: 560, y: 235, w: 76, h: 155,
-                zoneX: 525, zoneY: 312, zoneR: 56,
+                x: 560, y: 225, w: 78, h: 158,
+                zoneX: 525, zoneY: 304, zoneR: 56,
                 cookies: [],
                 maxCookies: 9
             },
             cashier: {
-                x: 695, y: 425, w: 92, h: 72
+                x: 695, y: 415, w: 94, h: 72
             }
         };
 
         const player = {
             x: 360,
-            y: 375,
+            y: 365,
             facing: 1,
             walkPhase: 0,
             holding: [],
@@ -453,29 +508,48 @@
         let moneyPiles = [];
         let particles = [];
         let floatingTexts = [];
-        let customerSpawnTimer = 1.2;
+        let customerSpawnTimer = 1.0;
 
         function syncHelpers() {
             if (state.staffAndDecor.bakerElf && !helpers.some(h => h.role === 'baker')) {
-                helpers.push({ role: 'baker', x: 270, y: 275, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+                helpers.push({ role: 'baker', x: 270, y: 265, holding: [], timer: 0, facing: 1, walkPhase: 0 });
             }
             if (state.staffAndDecor.decoratorElf && !helpers.some(h => h.role === 'decorator')) {
-                helpers.push({ role: 'decorator', x: 355, y: 385, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+                helpers.push({ role: 'decorator', x: 355, y: 375, holding: [], timer: 0, facing: 1, walkPhase: 0 });
             }
         }
         syncHelpers();
 
         // ==========================================
-        // 5. CONTRÔLES (CLAVIER, SOURIS, JOYSTICK)
+        // 5. CONTRÔLES (CLAVIER, SOURIS, JOYSTICK, TOUCHES 1-9)
         // ==========================================
         const keys = {};
         let pointerTarget = null;
         let isPointerDown = false;
         const joyVec = { x: 0, y: 0 };
 
+        function selectGlazeById(glazeId) {
+            if (!state.unlockedIcing.includes(glazeId)) return;
+            state.selectedIcing = glazeId;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderGlazeQuickBar();
+        }
+
         window.addEventListener('keydown', (e) => {
-            keys[e.key.toLowerCase()] = true;
-            pointerTarget = null;
+            const k = e.key.toLowerCase();
+            keys[k] = true;
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'q', 'z'].includes(k)) {
+                pointerTarget = null;
+            }
+            // Touches 1-9 pour sélectionner rapidement un glaçage débloqué
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key, 10) - 1;
+                if (idx < state.unlockedIcing.length) {
+                    selectGlazeById(state.unlockedIcing[idx]);
+                }
+            }
         });
         window.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
@@ -484,7 +558,7 @@
         function toWorld(clientX, clientY) {
             return {
                 x: Math.max(95, Math.min(805, (clientX - offsetX) / scale)),
-                y: Math.max(150, Math.min(535, (clientY - offsetY) / scale))
+                y: Math.max(145, Math.min(525, (clientY - offsetY) / scale))
             };
         }
 
@@ -519,7 +593,7 @@
             const rect = joyZone.getBoundingClientRect();
             const centerX = rect.left + rect.width * 0.5;
             const centerY = rect.top + rect.height * 0.5;
-            const maxR = rect.width * 0.5 - 16;
+            const maxR = rect.width * 0.5 - 14;
             let dx = cx - centerX;
             let dy = cy - centerY;
             const d = Math.hypot(dx, dy);
@@ -569,14 +643,14 @@
         // 6. EFFETS VISUELS LÉGERS
         // ==========================================
         function spawnParticles(x, y, color, count) {
-            if (particles.length > 55) return; // Plafond anti-lag
+            if (particles.length > 60) return;
             for (let i = 0; i < count; i++) {
                 const ang = Math.random() * Math.PI * 2;
-                const spd = 35 + Math.random() * 75;
+                const spd = 35 + Math.random() * 80;
                 particles.push({
                     x, y,
                     vx: Math.cos(ang) * spd,
-                    vy: Math.sin(ang) * spd - 20,
+                    vy: Math.sin(ang) * spd - 24,
                     life: 0.45 + Math.random() * 0.25,
                     maxLife: 0.7,
                     color,
@@ -586,14 +660,18 @@
         }
 
         function spawnText(x, y, text, color) {
-            if (floatingTexts.length > 15) floatingTexts.shift();
-            floatingTexts.push({ x, y, text, color, life: 0.9 });
+            if (floatingTexts.length > 16) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life: 1.0 });
         }
 
         // ==========================================
         // 7. LOGIQUE DE JEU (UPDATE)
         // ==========================================
-        function update(dt, nowMs) {
+        function getFrontCustomer() {
+            return customers.find(c => c.state === 'toShelf') || customers[0] || null;
+        }
+
+        function update(dt) {
             // 1. Déplacement joueur
             let mx = joyVec.x;
             let my = joyVec.y;
@@ -627,9 +705,8 @@
                 player.walkPhase = 0;
             }
 
-            // Limites de la cuisine
             player.x = Math.max(245, Math.min(655, player.x));
-            player.y = Math.max(210, Math.min(525, player.y));
+            player.y = Math.max(200, Math.min(515, player.y));
 
             // 2. Cuisson au four
             const bakeTime = getBakeTime();
@@ -645,7 +722,7 @@
                         topping: slot.topping
                     });
                     sound.ding();
-                    spawnParticles(stations.oven.x + 68, stations.oven.y + 45, '#f6e58d', 6);
+                    spawnParticles(stations.oven.x + 69, stations.oven.y + 45, '#f6e58d', 6);
                 }
             }
 
@@ -653,7 +730,7 @@
             player.activeStation = null;
             const maxHand = getMaxHand();
 
-            // Station A : Table à rouleau
+            // Station 1 : Table à rouleau
             if (Math.hypot(player.x - stations.dough.zoneX, player.y - stations.dough.zoneY) <= stations.dough.zoneR) {
                 player.activeStation = 'dough';
                 if (player.holding.length < maxHand) {
@@ -677,7 +754,7 @@
                 stations.dough.progress = Math.max(0, stations.dough.progress - dt * 1.5);
             }
 
-            // Station B : Four (Déposer pâte crue & Prendre biscuits cuits)
+            // Station 2 : Four
             if (Math.hypot(player.x - stations.oven.zoneX, player.y - stations.oven.zoneY) <= stations.oven.zoneR) {
                 player.activeStation = 'oven';
                 const ovenCap = getOvenCapacity();
@@ -700,7 +777,7 @@
                 }
             }
 
-            // Station C : Glaçage & Confettis
+            // Station 3 : Glaçage & Confettis (applique le glaçage sélectionné !)
             if (Math.hypot(player.x - stations.icing.zoneX, player.y - stations.icing.zoneY) <= stations.icing.zoneR) {
                 player.activeStation = 'icing';
                 const bakedIdx = player.holding.findIndex(c => c.type === 'baked');
@@ -708,11 +785,12 @@
                     stations.icing.progress += dt / getDecorateTime();
                     if (stations.icing.progress >= 1) {
                         stations.icing.progress = 0;
+                        const chosenIcing = getIcing();
                         player.holding[bakedIdx].type = 'decorated';
-                        player.holding[bakedIdx].icing = getIcing();
+                        player.holding[bakedIdx].icing = chosenIcing;
                         player.holding[bakedIdx].topping = getTopping();
                         sound.pop();
-                        spawnParticles(stations.icing.x + 60, stations.icing.y + 55, getIcing().color, 6);
+                        spawnParticles(stations.icing.x + 60, stations.icing.y + 55, chosenIcing.color, 6);
                         updateHUD();
                     }
                 } else {
@@ -722,7 +800,7 @@
                 stations.icing.progress = Math.max(0, stations.icing.progress - dt * 1.5);
             }
 
-            // Station D : Présentoir
+            // Station 4 : Présentoir
             if (Math.hypot(player.x - stations.shelf.zoneX, player.y - stations.shelf.zoneY) <= stations.shelf.zoneR) {
                 player.activeStation = 'shelf';
                 while (stations.shelf.cookies.length < stations.shelf.maxCookies) {
@@ -734,7 +812,7 @@
                 }
             }
 
-            // 4. Mise à jour Lutins, Clients, Pièces et Particules
+            // 4. Lutins, Clients, Pièces et Particules
             updateHelpers(dt);
             updateCustomers(dt);
             updateMoneyPiles(dt);
@@ -742,7 +820,7 @@
         }
 
         function updateHelpers(dt) {
-            const hSpeed = 175;
+            const hSpeed = 178;
             const ovenCap = getOvenCapacity();
 
             helpers.forEach(h => {
@@ -785,8 +863,11 @@
                             if (h.timer >= getDecorateTime() * 1.15) {
                                 h.timer = 0;
                                 const idx = h.holding.findIndex(c => c.type === 'baked');
+                                // Le Lutin Décorateur prépare intelligemment le glaçage demandé par le client !
+                                const frontCust = getFrontCustomer();
+                                const targetGlaze = frontCust ? frontCust.desiredIcing : getIcing();
                                 h.holding[idx].type = 'decorated';
-                                h.holding[idx].icing = getIcing();
+                                h.holding[idx].icing = targetGlaze;
                                 h.holding[idx].topping = getTopping();
                             }
                         }
@@ -823,6 +904,12 @@
             { skin: '#ffdbac', hat: '#6c5ce7', scarf: '#ff7675' }
         ];
 
+        function pickRandomUnlockedGlaze() {
+            const list = state.unlockedIcing;
+            const id = list[Math.floor(Math.random() * list.length)];
+            return CATALOG.icing.find(i => i.id === id) || CATALOG.icing[0];
+        }
+
         function updateCustomers(dt) {
             customerSpawnTimer -= dt;
             const maxCust = state.staffAndDecor.tree ? 5 : 4;
@@ -830,14 +917,16 @@
                 const st = CUST_STYLES[Math.floor(Math.random() * CUST_STYLES.length)];
                 customers.push({
                     x: 845,
-                    y: 135,
+                    y: 130,
                     state: 'toShelf',
                     want: 1 + Math.floor(Math.random() * 2),
+                    desiredIcing: pickRandomUnlockedGlaze(),
                     bag: [],
                     style: st,
                     walkPhase: 0
                 });
-                customerSpawnTimer = Math.max(2.1, 4.8 - (state.staffAndDecor.tree ? 0.7 : 0));
+                customerSpawnTimer = Math.max(2.2, 4.8 - (state.staffAndDecor.tree ? 0.7 : 0));
+                updateHUD();
             }
 
             const cSpeed = state.staffAndDecor.garlands ? 160 : 140;
@@ -848,8 +937,8 @@
                 let ty = c.y;
 
                 if (c.state === 'toShelf') {
-                    tx = 672;
-                    ty = 255 + (i % 3) * 46;
+                    tx = 674;
+                    ty = 250 + (i % 3) * 48;
                     const d = Math.hypot(tx - c.x, ty - c.y);
                     if (d > 8) {
                         c.x += ((tx - c.x) / d) * cSpeed * dt;
@@ -858,14 +947,20 @@
                     } else {
                         c.walkPhase = 0;
                         if (stations.shelf.cookies.length > 0 && c.bag.length < c.want) {
-                            c.bag.push(stations.shelf.cookies.pop());
+                            // Cherche en priorité un biscuit qui a exactement le glaçage demandé !
+                            let matchIdx = stations.shelf.cookies.findIndex(ck => ck.icing && ck.icing.id === c.desiredIcing.id);
+                            if (matchIdx === -1) matchIdx = stations.shelf.cookies.length - 1;
+                            c.bag.push(stations.shelf.cookies.splice(matchIdx, 1)[0]);
                             sound.pop();
-                            if (c.bag.length >= c.want) c.state = 'toCashier';
+                            if (c.bag.length >= c.want) {
+                                c.state = 'toCashier';
+                                updateHUD();
+                            }
                         }
                     }
                 } else if (c.state === 'toCashier') {
                     tx = 750;
-                    ty = 392;
+                    ty = 385;
                     const d = Math.hypot(tx - c.x, ty - c.y);
                     if (d > 8) {
                         c.x += ((tx - c.x) / d) * cSpeed * dt;
@@ -873,28 +968,45 @@
                         c.walkPhase += dt * 10;
                     } else {
                         let earned = 0;
+                        let matchedCount = 0;
                         const decorExtra = getDecorBonus();
+
                         c.bag.forEach(ck => {
-                            earned += 5 + (ck.dough?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.topping?.bonus || 0) + decorExtra;
+                            let val = 5 + (ck.dough?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.topping?.bonus || 0) + decorExtra;
+                            if (ck.icing && ck.icing.id === c.desiredIcing.id) {
+                                val = Math.ceil(val * 1.5); // +50% Bonus Commande Parfaite !
+                                matchedCount++;
+                            }
+                            earned += val;
                         });
-                        if (state.staffAndDecor.cashierElf) earned = Math.ceil(earned * 1.2);
+
+                        if (state.staffAndDecor.cashierElf) earned = Math.ceil(earned * 1.25);
                         state.soldCount += c.bag.length;
+                        if (matchedCount > 0) state.perfectCount += matchedCount;
                         updateHUD();
                         saveGame();
 
                         moneyPiles.push({
                             x: 642 + (Math.random() - 0.5) * 28,
-                            y: 465 + (Math.random() - 0.5) * 28,
+                            y: 455 + (Math.random() - 0.5) * 28,
                             amount: earned,
+                            perfect: matchedCount > 0,
                             bob: Math.random() * 6
                         });
-                        sound.ding();
-                        spawnParticles(750, 415, '#ffd700', 6);
+
+                        if (matchedCount > 0) {
+                            sound.perfect();
+                            spawnParticles(750, 390, '#ff6b81', 10);
+                            spawnText(750, 355, '★ Commande Parfaite +50% !', '#ffd166');
+                        } else {
+                            sound.ding();
+                            spawnParticles(750, 405, '#ffd700', 6);
+                        }
                         c.state = 'leaving';
                     }
                 } else if (c.state === 'leaving') {
                     tx = 855;
-                    ty = 550;
+                    ty = 540;
                     const d = Math.hypot(tx - c.x, ty - c.y);
                     if (d > 10) {
                         c.x += ((tx - c.x) / d) * (cSpeed * 1.15) * dt;
@@ -902,6 +1014,7 @@
                         c.walkPhase += dt * 10;
                     } else {
                         customers.splice(i, 1);
+                        updateHUD();
                     }
                 }
             }
@@ -914,7 +1027,7 @@
                 p.bob += dt * 4;
                 const d = Math.hypot(player.x - p.x, player.y - p.y);
                 if (state.levels.magnet > 0 && d < magR && d > 8) {
-                    const pull = 250 + state.levels.magnet * 75;
+                    const pull = 260 + state.levels.magnet * 75;
                     p.x += ((player.x - p.x) / d) * pull * dt;
                     p.y += ((player.y - p.y) / d) * pull * dt;
                 }
@@ -922,7 +1035,7 @@
                     state.money += p.amount;
                     sound.coin();
                     spawnParticles(p.x, p.y, '#ffeaa7', 7);
-                    spawnText(p.x, p.y - 16, `+${p.amount} $`, '#55efc4');
+                    spawnText(p.x, p.y - 16, `+${p.amount} $`, p.perfect ? '#ffd166' : '#55efc4');
                     moneyPiles.splice(i, 1);
                     updateHUD();
                     saveGame();
@@ -948,8 +1061,22 @@
         }
 
         // ==========================================
-        // 8. RENDU CANVAS 60 FPS ULTRA-FLUIDE
+        // 8. RENDU CANVAS 60 FPS + ÉVOLUTIONS VISUELLES
         // ==========================================
+        function getIcingRenderColor(ic, nowMs) {
+            if (!ic) return '#ffffff';
+            if (ic.mode === 'rainbow') {
+                return `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 62%)`;
+            }
+            if (ic.mode === 'galaxy') {
+                return `hsl(${265 + Math.sin(nowMs * 0.005) * 28}, 82%, 58%)`;
+            }
+            if (ic.mode === 'gold24k') {
+                return `hsl(46, 98%, ${54 + Math.sin(nowMs * 0.008) * 12}%)`;
+            }
+            return ic.color;
+        }
+
         function drawCookieShape(x, y, s, cookie, nowMs) {
             ctx.save();
             ctx.translate(x, y);
@@ -961,33 +1088,29 @@
             ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
             ctx.lineWidth = 2;
 
-            // Silhouette bonhomme pain d'épices
             ctx.beginPath();
-            ctx.arc(0, -10, 7, 0, Math.PI * 2); // Tête
-            ctx.roundRect(-9, -3, 18, 5, 2.5);   // Bras
-            ctx.roundRect(-5, -3, 10, 11, 3);    // Torse
-            ctx.roundRect(-5, 6, 4, 7, 2);       // Jambe G
-            ctx.roundRect(1, 6, 4, 7, 2);        // Jambe D
+            ctx.arc(0, -10, 7, 0, Math.PI * 2);
+            ctx.roundRect(-9, -3, 18, 5, 2.5);
+            ctx.roundRect(-5, -3, 10, 11, 3);
+            ctx.roundRect(-5, 6, 4, 7, 2);
+            ctx.roundRect(1, 6, 4, 7, 2);
             ctx.fill();
             ctx.stroke();
 
-            // Glaçage & Confettis
             if (cookie.type === 'decorated') {
                 const ic = cookie.icing || CATALOG.icing[0];
-                let icColor = ic.color;
-                if (ic.rainbow) {
-                    icColor = `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 65%)`;
-                }
+                const icColor = getIcingRenderColor(ic, nowMs);
+
                 ctx.fillStyle = icColor;
                 ctx.beginPath();
                 ctx.arc(-2.5, -11, 1.3, 0, Math.PI * 2);
                 ctx.arc(2.5, -11, 1.3, 0, Math.PI * 2);
-                ctx.arc(0, 0, 1.6, 0, Math.PI * 2);
-                ctx.arc(0, 4.5, 1.6, 0, Math.PI * 2);
+                ctx.arc(0, 0, 1.7, 0, Math.PI * 2);
+                ctx.arc(0, 4.5, 1.7, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.strokeStyle = icColor;
-                ctx.lineWidth = 1.6;
+                ctx.lineWidth = 1.7;
                 ctx.beginPath();
                 ctx.arc(0, -9, 3, 0.2, Math.PI - 0.2);
                 ctx.stroke();
@@ -997,8 +1120,9 @@
                     const dots = [[-3, -2], [3, -1.5], [-2, 3], [2.5, 3.5]];
                     dots.forEach((p, idx) => {
                         if (top.style === 'sprinkles') ctx.fillStyle = idx % 2 === 0 ? '#ff4757' : '#1e90ff';
+                        else if (top.style === 'snow') ctx.fillStyle = '#ffffff';
                         else if (top.style === 'stars') ctx.fillStyle = '#ffd700';
-                        else if (top.style === 'marshmallow') ctx.fillStyle = '#fff5f7';
+                        else if (top.style === 'marshmallow') ctx.fillStyle = '#fff0f3';
                         else if (top.style === 'chocochips') ctx.fillStyle = '#3d1c04';
                         else ctx.fillStyle = `hsl(${(nowMs * 0.3 + idx * 60) % 360}, 100%, 75%)`;
 
@@ -1012,15 +1136,13 @@
             ctx.restore();
         }
 
-        function drawBakeryFloor(nowMs) {
-            // Fond extérieur neigeux
+        function drawBakeryFloor() {
             ctx.fillStyle = '#1f0d05';
             ctx.fillRect(0, 0, WORLD_W, WORLD_H);
 
-            // Sol carrelé damier chaud (cuisine + boutique)
             const tile = 45;
             for (let gx = 60; gx < 840; gx += tile) {
-                for (let gy = 115; gy < 555; gy += tile) {
+                for (let gy = 110; gy < 545; gy += tile) {
                     const isEven = ((gx + gy) / tile) % 2 === 0;
                     if (gx < 605) {
                         ctx.fillStyle = isEven ? '#f5e6cc' : '#e6ccb2';
@@ -1031,18 +1153,15 @@
                 }
             }
 
-            // Séparation cuisine / espace client
             ctx.fillStyle = '#b08968';
-            ctx.fillRect(602, 115, 6, 440);
+            ctx.fillRect(602, 110, 6, 435);
 
-            // Murs extérieurs bois
             ctx.strokeStyle = '#6d3619';
             ctx.lineWidth = 12;
-            ctx.strokeRect(54, 109, 792, 452);
+            ctx.strokeRect(54, 104, 792, 446);
 
-            // Bandeau mural haut & Guirlande lumineuse
             ctx.fillStyle = '#582911';
-            ctx.fillRect(54, 78, 792, 34);
+            ctx.fillRect(54, 74, 792, 34);
             const bulbs = state.staffAndDecor.garlands
                 ? ['#ff4757', '#2ed573', '#ffa502', '#1e90ff', '#ff9ff3', '#ffeaa7']
                 : ['#ff4757', '#2ed573', '#ffa502', '#1e90ff'];
@@ -1050,23 +1169,21 @@
             for (let bx = 80; bx < 825; bx += step) {
                 ctx.fillStyle = bulbs[Math.floor(bx / step) % bulbs.length];
                 ctx.beginPath();
-                ctx.arc(bx, 112, state.staffAndDecor.garlands ? 6 : 4.5, 0, Math.PI * 2);
+                ctx.arc(bx, 108, state.staffAndDecor.garlands ? 6 : 4.5, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // Porte d'entrée clients
             ctx.fillStyle = '#2d3436';
-            ctx.fillRect(785, 86, 54, 16);
+            ctx.fillRect(785, 82, 54, 16);
             ctx.fillStyle = '#55efc4';
             ctx.font = 'bold 11px Fredoka, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('ENTRÉE', 812, 98);
+            ctx.fillText('ENTRÉE', 812, 94);
         }
 
         function drawDecorations() {
-            // Sapin lumineux
             if (state.staffAndDecor.tree) {
-                const tx = 565, ty = 158;
+                const tx = 565, ty = 152;
                 ctx.fillStyle = '#6d3619';
                 ctx.fillRect(tx - 6, ty + 16, 12, 12);
                 ctx.fillStyle = '#1e8449';
@@ -1084,22 +1201,20 @@
                 ctx.fill();
             }
 
-            // Chaussettes de cheminée
             if (state.staffAndDecor.stockings) {
                 [275, 305, 335].forEach((sx, i) => {
                     ctx.fillStyle = i % 2 === 0 ? '#e74c3c' : '#2ecc71';
                     ctx.beginPath();
-                    ctx.roundRect(sx, 90, 11, 16, 4);
-                    ctx.roundRect(sx, 100, 16, 7, 3);
+                    ctx.roundRect(sx, 86, 11, 16, 4);
+                    ctx.roundRect(sx, 96, 16, 7, 3);
                     ctx.fill();
                     ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(sx - 1, 88, 13, 4);
+                    ctx.fillRect(sx - 1, 84, 13, 4);
                 });
             }
 
-            // Bonhomme de neige à l'entrée
             if (state.staffAndDecor.snowman) {
-                const sx = 805, sy = 175;
+                const sx = 805, sy = 170;
                 ctx.fillStyle = '#ffffff';
                 ctx.strokeStyle = '#95a5a6';
                 ctx.lineWidth = 2;
@@ -1119,9 +1234,8 @@
                 ctx.fill();
             }
 
-            // Caissier Express
             if (state.staffAndDecor.cashierElf) {
-                drawCharacter({ x: 762, y: 518, facing: -1, walkPhase: 0, holding: [] }, 'cashier', 0);
+                drawCharacter({ x: 762, y: 508, facing: -1, walkPhase: 0, holding: [] }, 'cashier', 0);
             }
         }
 
@@ -1163,39 +1277,89 @@
         }
 
         function drawStations(nowMs) {
-            // Zones au sol
             drawZoneCircle(stations.dough.zoneX, stations.dough.zoneY, stations.dough.zoneR, player.activeStation === 'dough');
             drawZoneCircle(stations.oven.zoneX, stations.oven.zoneY, stations.oven.zoneR, player.activeStation === 'oven');
             drawZoneCircle(stations.icing.zoneX, stations.icing.zoneY, stations.icing.zoneR, player.activeStation === 'icing');
             drawZoneCircle(stations.shelf.zoneX, stations.shelf.zoneY, stations.shelf.zoneR, player.activeStation === 'shelf');
 
-            // 1. Table à rouleau
+            // ==========================================================
+            // 1. TABLE À ROULEAU (Évolution : Bois -> Marbre/Laiton -> Cristal Doré)
+            // ==========================================================
             const dtb = stations.dough;
-            ctx.fillStyle = '#9c5a2b';
-            ctx.strokeStyle = '#4a2511';
-            ctx.lineWidth = 3;
+            const rollerTier = state.levels.roller >= 5 ? 2 : (state.levels.roller >= 3 ? 1 : 0);
+
+            if (rollerTier === 0) {
+                ctx.fillStyle = '#9c5a2b';
+                ctx.strokeStyle = '#4a2511';
+            } else if (rollerTier === 1) {
+                ctx.fillStyle = '#f1f2f6'; // Marbre blanc
+                ctx.strokeStyle = '#d4af37'; // Bordure laiton
+            } else {
+                ctx.fillStyle = '#70a1ff'; // Cristal enchanté
+                ctx.strokeStyle = '#ffd700'; // Bordure or royal
+            }
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.roundRect(dtb.x, dtb.y, dtb.w, dtb.h, 14);
             ctx.fill();
             ctx.stroke();
 
-            // Pâte aplatie & rouleau
+            // Runes ou veines de marbre selon le niveau
+            if (rollerTier === 1) {
+                ctx.strokeStyle = '#dfe4ea';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(dtb.x + 15, dtb.y + 20);
+                ctx.lineTo(dtb.x + 95, dtb.y + 95);
+                ctx.stroke();
+            } else if (rollerTier === 2) {
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(dtb.x + 61, dtb.y + 61, 44, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Pâte aplatie & rouleau évolutif
             ctx.fillStyle = getDough().color;
             ctx.beginPath();
-            ctx.ellipse(dtb.x + 60, dtb.y + 62, 34, 24, 0, 0, Math.PI * 2);
+            ctx.ellipse(dtb.x + 61, dtb.y + 62, 34, 24, 0, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#deb887';
-            ctx.beginPath();
-            ctx.roundRect(dtb.x + 32, dtb.y + 56 + Math.sin(dtb.progress * Math.PI * 4) * 10, 56, 10, 4);
-            ctx.fill();
-            drawProgressBar(dtb.x + 60, dtb.y - 24, 84, dtb.progress, '#2ed573');
-            drawLabel(dtb.x + 60, dtb.y - 8, '1. Rouler Pâte');
 
-            // 2. Four doré
+            const rollOffset = rollerTier === 2 ? Math.sin(nowMs * 0.008) * 8 : Math.sin(dtb.progress * Math.PI * 4) * 10;
+            ctx.fillStyle = rollerTier === 0 ? '#deb887' : (rollerTier === 1 ? '#f1c40f' : '#ff9ff3');
+            ctx.beginPath();
+            ctx.roundRect(dtb.x + 31, dtb.y + 56 + rollOffset, 60, 11, 5);
+            ctx.fill();
+            drawProgressBar(dtb.x + 61, dtb.y - 24, 84, dtb.progress, '#2ed573');
+            drawLabel(dtb.x + 61, dtb.y - 8, rollerTier === 2 ? '1. Table Cristal ✨' : (rollerTier === 1 ? '1. Table Marbre' : '1. Rouler Pâte'));
+
+            // ==========================================================
+            // 2. FOUR (Évolution : Briques -> Acier/Cuivre -> Foyer Royal Magma)
+            // ==========================================================
             const ov = stations.oven;
-            ctx.fillStyle = '#57606f';
-            ctx.strokeStyle = '#2f3542';
-            ctx.lineWidth = 3;
+            const ovenScore = state.levels.ovenSpeed + state.levels.ovenCap;
+            const ovenTier = ovenScore >= 8 ? 2 : (ovenScore >= 5 ? 1 : 0);
+
+            // Cheminées sur le toit du four aux niveaux supérieurs
+            if (ovenTier >= 1) {
+                ctx.fillStyle = ovenTier === 2 ? '#ffd700' : '#b87333';
+                ctx.fillRect(ov.x + 24, ov.y - 14, 16, 16);
+                if (ovenTier === 2) ctx.fillRect(ov.x + 98, ov.y - 14, 16, 16);
+            }
+
+            if (ovenTier === 0) {
+                ctx.fillStyle = '#a55eea';
+                ctx.fillStyle = '#8e443d'; // Brique chaude
+                ctx.strokeStyle = '#4a1c17';
+            } else if (ovenTier === 1) {
+                ctx.fillStyle = '#747d8c'; // Acier brossé
+                ctx.strokeStyle = '#e67e22'; // Cadre cuivre
+            } else {
+                ctx.fillStyle = '#2f3542'; // Obsidienne & Or
+                ctx.strokeStyle = '#ffd700';
+            }
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.roundRect(ov.x, ov.y, ov.w, ov.h, 14);
             ctx.fill();
@@ -1203,59 +1367,83 @@
 
             // Vitre du four
             const isBaking = ov.slots.length > 0;
-            ctx.fillStyle = isBaking ? '#ff7f50' : '#2f3542';
+            ctx.fillStyle = isBaking ? (ovenTier === 2 ? '#ff4757' : '#ff7f50') : '#1e272e';
             ctx.beginPath();
-            ctx.roundRect(ov.x + 14, ov.y + 22, ov.w - 28, 54, 8);
+            ctx.roundRect(ov.x + 14, ov.y + 22, ov.w - 28, 56, 8);
             ctx.fill();
 
-            // Biscuits en cours ou prêts
             ov.slots.forEach((s, idx) => {
-                drawCookieShape(ov.x + 30 + (idx % 4) * 24, ov.y + 42 + Math.floor(idx / 4) * 20, 0.65, { type: 'raw', dough: s.dough }, nowMs);
+                drawCookieShape(ov.x + 30 + (idx % 4) * 25, ov.y + 42 + Math.floor(idx / 4) * 20, 0.65, { type: 'raw', dough: s.dough }, nowMs);
             });
             ov.ready.forEach((c, idx) => {
-                drawCookieShape(ov.x + 30 + (idx % 4) * 24, ov.y + 55 + Math.floor(idx / 4) * 18, 0.72, c, nowMs);
+                drawCookieShape(ov.x + 30 + (idx % 4) * 25, ov.y + 55 + Math.floor(idx / 4) * 18, 0.72, c, nowMs);
             });
             if (isBaking) {
-                drawProgressBar(ov.x + ov.w * 0.5, ov.y - 24, 90, ov.slots[0].timer / getBakeTime(), '#ffa502');
+                drawProgressBar(ov.x + ov.w * 0.5, ov.y - 24, 92, ov.slots[0].timer / getBakeTime(), '#ffa502');
             }
             drawLabel(ov.x + ov.w * 0.5, ov.y - 8, `2. Four (${ov.slots.length + ov.ready.length}/${getOvenCapacity()})`);
 
-            // 3. Station Glaçage & Confettis
+            // ==========================================================
+            // 3. STATION GLAÇAGE (Évolution : Bois -> Bar Inox -> Usine Auto)
+            // ==========================================================
             const ic = stations.icing;
-            ctx.fillStyle = '#9c5a2b';
-            ctx.strokeStyle = '#4a2511';
-            ctx.lineWidth = 3;
+            const pipeTier = state.levels.piping >= 4 ? 2 : (state.levels.piping >= 2 ? 1 : 0);
+
+            if (pipeTier === 0) {
+                ctx.fillStyle = '#9c5a2b';
+                ctx.strokeStyle = '#4a2511';
+            } else if (pipeTier === 1) {
+                ctx.fillStyle = '#ced6e0';
+                ctx.strokeStyle = '#57606f';
+            } else {
+                ctx.fillStyle = '#ff9ff3';
+                ctx.strokeStyle = '#f368e0';
+            }
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.roundRect(ic.x, ic.y, ic.w, ic.h, 14);
             ctx.fill();
             ctx.stroke();
 
-            // Bol de glaçage + pot confettis
-            ctx.fillStyle = getIcing().rainbow ? `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 65%)` : getIcing().color;
+            // Bol du glaçage actuellement sélectionné (avec couleur dynamique)
+            const activeIcingColor = getIcingRenderColor(getIcing(), nowMs);
+            ctx.fillStyle = activeIcingColor;
             ctx.beginPath();
-            ctx.arc(ic.x + 42, ic.y + 58, 20, 0, Math.PI * 2);
+            ctx.arc(ic.x + 42, ic.y + 58, 22, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#dfe4ea';
+            ctx.strokeStyle = '#2f3542';
+            ctx.lineWidth = 2;
             ctx.stroke();
 
+            // Pot de confettis & buses automatiques au niveau 2
             ctx.fillStyle = '#ff6b81';
             ctx.beginPath();
-            ctx.arc(ic.x + 84, ic.y + 62, 15, 0, Math.PI * 2);
+            ctx.arc(ic.x + 86, ic.y + 62, 16, 0, Math.PI * 2);
             ctx.fill();
-            drawProgressBar(ic.x + 60, ic.y - 24, 84, ic.progress, '#ff6b81');
-            drawLabel(ic.x + 60, ic.y - 8, '3. Glaçage & Déco');
+            ctx.stroke();
 
-            // 4. Présentoir
+            if (pipeTier >= 1) {
+                ctx.fillStyle = pipeTier === 2 ? '#ffd700' : '#ffffff';
+                ctx.beginPath();
+                ctx.arc(ic.x + 61, ic.y + 24, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawProgressBar(ic.x + 61, ic.y - 24, 84, ic.progress, '#ff6b81');
+            drawLabel(ic.x + 61, ic.y - 8, `3. Glaçage: ${getIcing().name.split(' ')[0]}`);
+
+            // ==========================================================
+            // 4. PRÉSENTOIR & CAISSE (Évolution Dorée si Caissier Express)
+            // ==========================================================
             const sh = stations.shelf;
-            ctx.fillStyle = '#d4a373';
-            ctx.strokeStyle = '#6d3619';
-            ctx.lineWidth = 3;
+            ctx.fillStyle = state.staffAndDecor.cashierElf ? '#f6e58d' : '#d4a373';
+            ctx.strokeStyle = state.staffAndDecor.cashierElf ? '#e1b12c' : '#6d3619';
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 12);
             ctx.fill();
             ctx.stroke();
 
-            // Étagères intérieures
             ctx.fillStyle = '#8d5524';
             ctx.fillRect(sh.x + 6, sh.y + 50, sh.w - 12, 4);
             ctx.fillRect(sh.x + 6, sh.y + 102, sh.w - 12, 4);
@@ -1263,15 +1451,15 @@
             sh.cookies.forEach((ck, idx) => {
                 const col = idx % 3;
                 const row = Math.floor(idx / 3);
-                drawCookieShape(sh.x + 19 + col * 19, sh.y + 28 + row * 50, 0.65, ck, nowMs);
+                drawCookieShape(sh.x + 20 + col * 19, sh.y + 28 + row * 50, 0.65, ck, nowMs);
             });
             drawLabel(sh.x + sh.w * 0.5, sh.y - 10, `4. Présentoir (${sh.cookies.length}/${sh.maxCookies})`);
 
-            // 5. Caisse Enregistreuse
+            // Caisse Enregistreuse
             const ca = stations.cashier;
-            ctx.fillStyle = '#7f4f24';
-            ctx.strokeStyle = '#3d1c04';
-            ctx.lineWidth = 3;
+            ctx.fillStyle = state.staffAndDecor.cashierElf ? '#f9ca24' : '#7f4f24';
+            ctx.strokeStyle = state.staffAndDecor.cashierElf ? '#b7840b' : '#3d1c04';
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.roundRect(ca.x, ca.y, ca.w, ca.h, 12);
             ctx.fill();
@@ -1279,12 +1467,12 @@
 
             ctx.fillStyle = '#2f3542';
             ctx.beginPath();
-            ctx.roundRect(ca.x + 22, ca.y + 16, 48, 36, 6);
+            ctx.roundRect(ca.x + 23, ca.y + 16, 48, 36, 6);
             ctx.fill();
             ctx.fillStyle = '#2ed573';
             ctx.font = 'bold 13px Fredoka, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('$$$', ca.x + 46, ca.y + 39);
+            ctx.fillText('$$$', ca.x + 47, ca.y + 39);
             drawLabel(ca.x + ca.w * 0.5, ca.y - 10, 'Caisse');
         }
 
@@ -1293,13 +1481,11 @@
             const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
             ctx.translate(ent.x, ent.y - bob);
 
-            // Ombre simple au sol
             ctx.fillStyle = 'rgba(0,0,0,0.22)';
             ctx.beginPath();
             ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Corps
             if (role === 'baker') ctx.fillStyle = '#2ed573';
             else if (role === 'decorator') ctx.fillStyle = '#a55eea';
             else if (role === 'cashier') ctx.fillStyle = '#ffa502';
@@ -1312,13 +1498,11 @@
             ctx.fill();
             ctx.stroke();
 
-            // Tête
             ctx.beginPath();
             ctx.arc(0, -14, 13, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // Toque de chef ou bonnet de lutin
             if (role === 'player') {
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
@@ -1335,7 +1519,6 @@
                 ctx.fill();
             }
 
-            // Yeux & sourire
             const look = ent.facing * 3;
             ctx.fillStyle = '#2f3542';
             ctx.beginPath();
@@ -1343,7 +1526,6 @@
             ctx.arc(4 + look, -15, 2, 0, Math.PI * 2);
             ctx.fill();
 
-            // Pile de biscuits portés
             if (ent.holding && ent.holding.length > 0) {
                 ent.holding.forEach((ck, idx) => {
                     drawCookieShape(ent.facing * 14, -4 - idx * 8, 0.72, ck, nowMs);
@@ -1364,7 +1546,6 @@
                 ctx.ellipse(0, 17 + bob, 14, 5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Manteau & écharpe
                 ctx.fillStyle = c.style.hat;
                 ctx.strokeStyle = '#2d3436';
                 ctx.lineWidth = 2;
@@ -1376,7 +1557,6 @@
                 ctx.fillStyle = c.style.scarf;
                 ctx.fillRect(-11, -4, 22, 5);
 
-                // Tête & bonnet
                 ctx.fillStyle = c.style.skin;
                 ctx.beginPath();
                 ctx.arc(0, -14, 11, 0, Math.PI * 2);
@@ -1388,17 +1568,30 @@
                 ctx.arc(0, -18, 11, Math.PI, 0);
                 ctx.fill();
 
-                // Bulle de commande
+                // Bulle de commande avec couleur exacte du glaçage souhaité !
                 if (c.state === 'toShelf') {
                     const rem = c.want - c.bag.length;
                     ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#2d3436';
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.roundRect(-18, -46, 36, 20, 8);
+                    ctx.roundRect(-28, -52, 56, 24, 9);
                     ctx.fill();
+                    ctx.stroke();
+
+                    // Pastille couleur du glaçage demandé
+                    ctx.fillStyle = getIcingRenderColor(c.desiredIcing, nowMs);
+                    ctx.beginPath();
+                    ctx.arc(-14, -40, 6.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#2d3436';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
                     ctx.fillStyle = '#2d3436';
                     ctx.font = 'bold 11px Fredoka, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(`🍪x${rem}`, 0, -32);
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`x${rem}`, -3, -36);
                 } else {
                     c.bag.forEach((ck, idx) => {
                         drawCookieShape(-14, -4 - idx * 7, 0.65, ck, nowMs);
@@ -1410,24 +1603,22 @@
         }
 
         function drawMoneyAndEffects() {
-            // Piles d'argent au sol
             moneyPiles.forEach(p => {
                 const py = p.y + Math.sin(p.bob) * 3;
-                ctx.fillStyle = '#2ecc71';
-                ctx.strokeStyle = '#1e8449';
+                ctx.fillStyle = p.perfect ? '#f1c40f' : '#2ecc71';
+                ctx.strokeStyle = p.perfect ? '#b7840b' : '#1e8449';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.roundRect(p.x - 14, py - 9, 28, 18, 5);
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.fillStyle = '#f1c40f';
+                ctx.fillStyle = p.perfect ? '#ffffff' : '#f1c40f';
                 ctx.beginPath();
                 ctx.arc(p.x, py, 5, 0, Math.PI * 2);
                 ctx.fill();
             });
 
-            // Particules
             particles.forEach(pt => {
                 ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
                 ctx.fillStyle = pt.color;
@@ -1437,7 +1628,6 @@
             });
             ctx.globalAlpha = 1;
 
-            // Textes flottants (+$ )
             floatingTexts.forEach(ft => {
                 ctx.globalAlpha = Math.max(0, Math.min(1, ft.life * 1.4));
                 ctx.font = 'bold 16px Fredoka, sans-serif';
@@ -1451,23 +1641,61 @@
         }
 
         // ==========================================
-        // 9. INTERFACE HUD & BOUTIQUE
+        // 9. INTERFACE HUD, BARRE RAPIDE GLAÇAGES & BOUTIQUE
         // ==========================================
         const elMoney = document.getElementById('hudMoney');
         const elPrice = document.getElementById('hudPrice');
         const elSold = document.getElementById('hudSold');
-        const elRecipe = document.getElementById('hudRecipeText');
         const elHand = document.getElementById('hudHandCount');
         const elShopBal = document.getElementById('shopBalance');
+        const elOrderText = document.getElementById('hudOrderText');
+        const elOrderSwatch = document.getElementById('hudOrderSwatch');
+        const glazeQuickBar = document.getElementById('glazeQuickBar');
+
+        function getSwatchBackground(item) {
+            if (item.mode === 'rainbow') return 'linear-gradient(90deg,#ff6b81,#feca57,#1dd1a1,#54a0ff)';
+            if (item.mode === 'galaxy') return 'linear-gradient(135deg,#2c003e,#8e44ad,#3498db)';
+            if (item.mode === 'gold24k') return 'linear-gradient(135deg,#fff200,#f39c12,#ffd700)';
+            return item.color;
+        }
+
+        function renderGlazeQuickBar() {
+            glazeQuickBar.innerHTML = '';
+            state.unlockedIcing.forEach((id, idx) => {
+                const ic = CATALOG.icing.find(i => i.id === id);
+                if (!ic) return;
+                const isSelected = state.selectedIcing === ic.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.title = `${idx + 1}. ${ic.name} (+${ic.bonus}$)`;
+                btn.className = `glaze-pill ${isSelected ? 'active' : ''} shrink-0 px-2.5 py-1 rounded-xl border-2 border-amber-950 font-bold text-[11px] flex items-center gap-1.5 cursor-pointer bg-amber-100 text-amber-950`;
+                btn.innerHTML = `
+                    <span class="w-3.5 h-3.5 rounded-full border border-amber-950 shrink-0" style="background:${getSwatchBackground(ic)}"></span>
+                    <span>${idx < 9 ? (idx + 1) + '.' : ''} ${ic.name.split(' ')[0]}</span>
+                `;
+                btn.addEventListener('click', () => {
+                    sound.init();
+                    selectGlazeById(ic.id);
+                });
+                glazeQuickBar.appendChild(btn);
+            });
+        }
 
         function updateHUD() {
             elMoney.textContent = `${state.money} $`;
             elShopBal.textContent = `${state.money} $`;
             elPrice.textContent = `${getCookieValue()} $`;
             elSold.textContent = state.soldCount;
-            const topName = getTopping().id === 'none' ? '' : ` • ${getTopping().name}`;
-            elRecipe.textContent = `${getDough().name} • ${getIcing().name}${topName}`;
             elHand.textContent = `${player.holding.length}/${getMaxHand()}`;
+
+            const frontCust = getFrontCustomer();
+            if (frontCust && frontCust.desiredIcing) {
+                elOrderText.textContent = `${frontCust.desiredIcing.name} (x${frontCust.want - frontCust.bag.length})`;
+                elOrderSwatch.style.background = getSwatchBackground(frontCust.desiredIcing);
+            } else {
+                elOrderText.textContent = getIcing().name;
+                elOrderSwatch.style.background = getSwatchBackground(getIcing());
+            }
         }
 
         let currentTab = 'dough';
@@ -1502,6 +1730,7 @@
         function renderShop() {
             shopGrid.innerHTML = '';
             updateHUD();
+            renderGlazeQuickBar();
 
             if (currentTab === 'dough') {
                 CATALOG.dough.forEach(item => {
@@ -1521,8 +1750,7 @@
                         renderShop();
                     });
                 });
-            } else if (currentTab === 'decor') {
-                // Glaçages
+            } else if (currentTab === 'icing') {
                 CATALOG.icing.forEach(item => {
                     const unlocked = state.unlockedIcing.includes(item.id);
                     const equipped = state.selectedIcing === item.id;
@@ -1540,7 +1768,7 @@
                         renderShop();
                     });
                 });
-                // Confettis
+            } else if (currentTab === 'confetti') {
                 CATALOG.topping.forEach(item => {
                     const unlocked = state.unlockedTopping.includes(item.id);
                     const equipped = state.selectedTopping === item.id;
@@ -1636,8 +1864,7 @@
 
             let swatch = '';
             if (item.color) {
-                const bg = item.rainbow ? 'linear-gradient(90deg,#ff6b81,#feca57,#1dd1a1,#54a0ff)' : item.color;
-                swatch = `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${bg}"></span>`;
+                swatch = `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>`;
             }
 
             let btnLabel = equipped ? '✓ Équipé' : (unlocked ? 'Équiper' : `Débloquer • ${item.cost} $`);
@@ -1664,16 +1891,14 @@
             shopGrid.appendChild(card);
         }
 
-        // Bouton Son
         const btnSound = document.getElementById('btnSound');
         btnSound.addEventListener('click', () => {
             sound.muted = !sound.muted;
             btnSound.textContent = sound.muted ? '🔇' : '🔊';
         });
 
-        // Bouton Réinitialisation
         const resetModal = document.getElementById('resetModal');
-        document.getElementById('btnReset').addEventListener('click', () => {
+        document.getElementById('btnOpenReset').addEventListener('click', () => {
             resetModal.classList.remove('hidden');
             resetModal.classList.add('flex');
         });
@@ -1692,21 +1917,24 @@
             stations.oven.ready = [];
             stations.shelf.cookies = [];
             updateHUD();
+            renderGlazeQuickBar();
+            renderShop();
             resetModal.classList.add('hidden');
             resetModal.classList.remove('flex');
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
         });
 
         // ==========================================
-        // 10. BOUCLE PRINCIPALE 60 FPS (DELTA-TIME)
+        // 10. BOUCLE PRINCIPALE 60 FPS
         // ==========================================
         let lastTime = 0;
         function gameLoop(nowMs) {
             if (!lastTime) lastTime = nowMs;
-            // Plafonnement de dt à 0.05s pour éviter les sauts en cas de changement d'onglet
             const dt = Math.min(0.05, (nowMs - lastTime) / 1000);
             lastTime = nowMs;
 
-            update(dt, nowMs);
+            update(dt);
 
             ctx.save();
             ctx.fillStyle = '#1f0d05';
@@ -1714,7 +1942,7 @@
             ctx.translate(offsetX, offsetY);
             ctx.scale(scale, scale);
 
-            drawBakeryFloor(nowMs);
+            drawBakeryFloor();
             drawDecorations();
             drawStations(nowMs);
             drawMoneyAndEffects();
@@ -1727,6 +1955,7 @@
         }
 
         updateHUD();
+        renderGlazeQuickBar();
         window.onload = function() {
             requestAnimationFrame(gameLoop);
         };
