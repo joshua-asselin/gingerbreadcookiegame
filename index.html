@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gingerbread Mart — Tycoon de Pain d'Épices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #2c1408;
+            font-family: 'Fredoka', sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .wood-panel {
+            background: linear-gradient(180deg, #5d2e14 0%, #3e1d0b 100%);
+            border: 3px solid #9c5a2b;
+            box-shadow: 0 6px 0 #261005;
+        }
+        .cream-card {
+            background: #fff8eb;
+            border: 3px solid #d4a373;
+            box-shadow: 0 4px 0 #b07d4f;
+        }
+        .btn-gold {
+            background: linear-gradient(180deg, #ffd166 0%, #f4a261 100%);
+            border: 2px solid #9c5a2b;
+            box-shadow: 0 4px 0 #7f441b;
+            transition: transform 0.08s;
+        }
+        .btn-gold:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #7f441b;
+        }
+        .btn-mint {
+            background: linear-gradient(180deg, #52b788 0%, #2d6a4f 100%);
+            border: 2px solid #1b4332;
+            box-shadow: 0 4px 0 #143326;
+            transition: transform 0.08s;
+        }
+        .btn-mint:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #143326;
+        }
+        .btn-mint:disabled {
+            background: #9ca3af;
+            border-color: #6b7280;
+            box-shadow: 0 4px 0 #4b5563;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        /* Scrollbar fine pour la boutique */
+        .shop-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .shop-scroll::-webkit-scrollbar-track {
+            background: #2c1408;
+            border-radius: 8px;
+        }
+        .shop-scroll::-webkit-scrollbar-thumb {
+            background: #9c5a2b;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Principal -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Supérieur -->
+    <div class="fixed top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Compteurs Argent & Biscuits -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <div class="wood-panel rounded-2xl px-3.5 py-2 flex items-center gap-2 text-amber-100">
+                <span class="text-2xl">🪙</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Caisse</div>
+                    <div id="hudMoney" class="text-lg sm:text-xl font-bold text-yellow-300 leading-tight">25 $</div>
+                </div>
+            </div>
+
+            <div class="wood-panel rounded-2xl px-3.5 py-2 flex items-center gap-2 text-amber-100">
+                <span class="text-2xl">🍪</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Prix / Biscuit</div>
+                    <div id="hudPrice" class="text-lg sm:text-xl font-bold text-emerald-300 leading-tight">5 $</div>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex wood-panel rounded-2xl px-3.5 py-2 items-center gap-2 text-amber-100">
+                <span class="text-2xl">⭐</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Vendus</div>
+                    <div id="hudSold" class="text-lg sm:text-xl font-bold text-amber-100 leading-tight">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons Boutique, Son & Reset -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <button id="btnOpenShop" class="btn-gold rounded-2xl px-4 py-2.5 font-bold text-amber-950 text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                <span class="text-xl">🛍️</span>
+                <span>Boutique</span>
+            </button>
+            <button id="btnSound" class="wood-panel rounded-2xl p-2.5 text-xl text-amber-100 hover:bg-amber-900 cursor-pointer" title="Son">
+                🔊
+            </button>
+            <button id="btnReset" class="wood-panel rounded-2xl p-2.5 text-xl text-amber-100 hover:bg-red-900 cursor-pointer" title="Réinitialiser">
+                🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- Recette Active en Bas à Droite -->
+    <div class="fixed bottom-3 right-3 wood-panel rounded-2xl px-3.5 py-2 text-amber-100 text-xs sm:text-sm pointer-events-none z-10 flex items-center gap-3">
+        <div>
+            <span class="text-amber-300 font-bold">Recette :</span>
+            <span id="hudRecipeText">Classique • Blanc Vanille</span>
+        </div>
+        <div class="bg-amber-950/80 px-2.5 py-1 rounded-xl border border-amber-700 font-bold text-yellow-300">
+            Main : <span id="hudHandCount">0/3</span>
+        </div>
+    </div>
+
+    <!-- Joystick Tactile (Mobile / Tablette) -->
+    <div id="joystickZone" class="fixed bottom-4 left-4 w-28 h-28 rounded-full bg-amber-950/40 border-2 border-amber-200/40 flex items-center justify-center z-20 md:hidden">
+        <div id="joystickKnob" class="w-12 h-12 rounded-full bg-amber-400 border-2 border-white shadow-md pointer-events-none"></div>
+    </div>
+
+    <!-- Modale Boutique -->
+    <div id="shopModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-3 sm:p-6 z-30">
+        <div class="wood-panel rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
+            <!-- En-tête Boutique -->
+            <div class="flex items-center justify-between px-5 py-4 border-b-2 border-amber-800 bg-amber-950/60">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🎄</span>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-amber-100">Boutique du Pâtissier</h2>
+                        <p class="text-xs text-amber-300">Solde : <span id="shopBalance" class="font-bold text-yellow-300">25 $</span></p>
+                    </div>
+                </div>
+                <button id="btnCloseShop" class="w-10 h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xl flex items-center justify-center border-2 border-red-900 cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Onglets -->
+            <div class="flex gap-1.5 p-3 bg-amber-950/40 overflow-x-auto">
+                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâtes</button>
+                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="decor">🎨 Glaçages & Confettis</button>
+                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Équipement</button>
+                <button class="shop-tab px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Équipe & Déco</button>
+            </div>
+
+            <!-- Liste des articles -->
+            <div id="shopGrid" class="p-4 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Modale Confirmation Réinitialisation -->
+    <div id="resetModal" class="fixed inset-0 bg-black/75 hidden items-center justify-center p-4 z-40">
+        <div class="cream-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
+            <div class="text-4xl mb-2">🍪</div>
+            <h3 class="text-xl font-bold mb-2">Recommencer la partie ?</h3>
+            <p class="text-sm text-amber-800 mb-5">Ta caisse, tes recettes et tes améliorations seront remises à zéro.</p>
+            <div class="flex gap-3">
+                <button id="btnCancelReset" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
+                <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        "use strict";
+
+        // ==========================================
+        // 1. CATALOGUE DU JEU (RECETTES & UPGRADES)
+        // ==========================================
+        const CATALOG = {
+            dough: [
+                { id: 'classic', name: 'Pâte Classique', desc: 'Recette traditionnelle au gingembre.', cost: 0, bonus: 0, speedMult: 1.0, color: '#c67d3b', stroke: '#7c4314' },
+                { id: 'honey', name: 'Miel Doré', desc: 'Plus souple et parfumée (+4$ / biscuit, +15% vitesse).', cost: 40, bonus: 4, speedMult: 1.15, color: '#e09f3e', stroke: '#9e6716' },
+                { id: 'royal', name: 'Épicée Royale', desc: 'Cannelle fine & muscade (+9$ / biscuit, +25% vitesse).', cost: 130, bonus: 9, speedMult: 1.25, color: '#a85327', stroke: '#5c2409' },
+                { id: 'choco', name: 'Choco-Noisette', desc: 'Fondante au cacao pur (+16$ / biscuit, +35% vitesse).', cost: 300, bonus: 16, speedMult: 1.35, color: '#5c3317', stroke: '#291204' },
+                { id: 'starry', name: 'Féerique Étoilée', desc: 'Reflets rosés magiques (+28$ / biscuit, +50% vitesse).', cost: 650, bonus: 28, speedMult: 1.50, color: '#d9778b', stroke: '#873044' },
+                { id: 'gold', name: 'Or Pur', desc: 'Éclat royal comestible (+48$ / biscuit, +70% vitesse).', cost: 1400, bonus: 48, speedMult: 1.70, color: '#f1c40f', stroke: '#9a7d0a' }
+            ],
+            icing: [
+                { id: 'white', name: 'Blanc Vanille', desc: 'Glaçage classique à la vanille.', cost: 0, bonus: 0, color: '#ffffff', rainbow: false },
+                { id: 'pink', name: 'Rose Bonbon', desc: 'Saveur fraise des neiges (+3$ / biscuit).', cost: 30, bonus: 3, color: '#ff6b81', rainbow: false },
+                { id: 'red', name: 'Rouge Noël', desc: 'Sucre d\'orge festif (+6$ / biscuit).', cost: 75, bonus: 6, color: '#e84118', rainbow: false },
+                { id: 'green', name: 'Vert Sapin', desc: 'Menthe douce givrée (+10$ / biscuit).', cost: 150, bonus: 10, color: '#2ecc71', rainbow: false },
+                { id: 'choco', name: 'Chocolat Fondant', desc: 'Nappage cacao intense (+16$ / biscuit).', cost: 280, bonus: 16, color: '#4b2611', rainbow: false },
+                { id: 'gold', name: 'Or Scintillant', desc: 'Glaçage doré lumineux (+28$ / biscuit).', cost: 580, bonus: 28, color: '#ffd32a', rainbow: false },
+                { id: 'rainbow', name: 'Arc-en-ciel', desc: 'Couleurs animées magiques (+45$ / biscuit).', cost: 1200, bonus: 45, color: '#ff9ff3', rainbow: true }
+            ],
+            topping: [
+                { id: 'none', name: 'Sans Confettis', desc: 'Simple et authentique.', cost: 0, bonus: 0, style: 'none' },
+                { id: 'sprinkles', name: 'Vermicelles Colorés', desc: 'Petits confettis joyeux (+3$ / biscuit).', cost: 35, bonus: 3, style: 'sprinkles' },
+                { id: 'stars', name: 'Étoiles Dorées', desc: 'Étoiles brillantes (+8$ / biscuit).', cost: 100, bonus: 8, style: 'stars' },
+                { id: 'marshmallow', name: 'Mini Guimauves', desc: 'Nuages fondants (+15$ / biscuit).', cost: 240, bonus: 15, style: 'marshmallow' },
+                { id: 'chocochips', name: 'Pépites de Chocolat', desc: 'Éclats croquants (+25$ / biscuit).', cost: 520, bonus: 25, style: 'chocochips' },
+                { id: 'fairydust', name: 'Poussière de Fée', desc: 'Étincelles enchantées (+42$ / biscuit).', cost: 1100, bonus: 42, style: 'fairydust' }
+            ],
+            upgrades: [
+                { id: 'speed', name: 'Bottes Turbo', desc: 'Augmente ta vitesse de déplacement.', baseCost: 35, mult: 1.75, max: 6, icon: '👢' },
+                { id: 'capacity', name: 'Gants de Chef', desc: 'Porte plus de biscuits en main (jusqu\'à 12).', baseCost: 40, mult: 1.85, max: 6, icon: '🧤' },
+                { id: 'roller', name: 'Rouleau Magique', desc: 'Aplatit la pâte beaucoup plus vite.', baseCost: 45, mult: 1.8, max: 6, icon: '🪄' },
+                { id: 'ovenSpeed', name: 'Four Turbo', desc: 'Réduit le temps de cuisson au four.', baseCost: 55, mult: 1.85, max: 5, icon: '🔥' },
+                { id: 'ovenCap', name: 'Four XL', desc: 'Augmente la capacité du four (4 à 8 places).', baseCost: 70, mult: 2.0, max: 5, icon: '♨️' },
+                { id: 'piping', name: 'Poche à Douille Auto', desc: 'Glace et décore les biscuits ultra vite.', baseCost: 65, mult: 1.85, max: 5, icon: '🧁' },
+                { id: 'magnet', name: 'Aimant à Pièces', desc: 'Attire automatiquement les pièces au sol.', baseCost: 85, mult: 2.1, max: 4, icon: '🧲' }
+            ],
+            staff: [
+                { id: 'bakerElf', name: 'Lutin Boulanger', desc: 'Roule la pâte et enfourne automatiquement !', cost: 150, icon: '🧝‍♂️', kind: 'staff' },
+                { id: 'decoratorElf', name: 'Lutin Décorateur', desc: 'Sort du four, glace et remplit le présentoir !', cost: 230, icon: '🧝‍♀️', kind: 'staff' },
+                { id: 'cashierElf', name: 'Caissier Express', desc: 'Ajoute +20% de pourboire à chaque vente !', cost: 310, icon: '🎩', kind: 'staff' },
+                { id: 'tree', name: 'Sapin Lumineux', desc: 'Apparaît en boutique (+3$ / vente et +clients).', cost: 175, icon: '🎄', kind: 'decor', bonus: 3 },
+                { id: 'garlands', name: 'Guirlandes Festives', desc: 'Illumine la salle (+4$ / vente).', cost: 340, icon: '✨', kind: 'decor', bonus: 4 },
+                { id: 'stockings', name: 'Chaussettes de Noël', desc: 'Ambiance chaleureuse (+6$ / vente).', cost: 580, icon: '🧦', kind: 'decor', bonus: 6 },
+                { id: 'snowman', name: 'Bonhomme de Neige', desc: 'Mascotte à l\'entrée (+10$ / vente).', cost: 980, icon: '⛄', kind: 'decor', bonus: 10 }
+            ]
+        };
+
+        // ==========================================
+        // 2. SYNTHÉTISEUR AUDIO LÉGER (SANS FICHIERS)
+        // ==========================================
+        const sound = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            },
+            beep(freq, type, duration, vol = 0.08) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            },
+            pop() { this.beep(520, 'sine', 0.09, 0.07); },
+            ding() { this.beep(880, 'triangle', 0.22, 0.09); },
+            coin() {
+                this.beep(980, 'sine', 0.08, 0.08);
+                setTimeout(() => this.beep(1320, 'sine', 0.14, 0.08), 55);
+            },
+            upgrade() {
+                this.beep(440, 'triangle', 0.09, 0.09);
+                setTimeout(() => this.beep(660, 'triangle', 0.14, 0.09), 75);
+            }
+        };
+
+        // ==========================================
+        // 3. ÉTAT SAUVEGARDÉ & FORMULES
+        // ==========================================
+        const SAVE_KEY = 'gingerbread_mart_clean_v1';
+        const DEFAULT_STATE = {
+            money: 25,
+            soldCount: 0,
+            unlockedDough: ['classic'],
+            selectedDough: 'classic',
+            unlockedIcing: ['white'],
+            selectedIcing: 'white',
+            unlockedTopping: ['none'],
+            selectedTopping: 'none',
+            levels: {
+                speed: 1,
+                capacity: 1,
+                roller: 1,
+                ovenSpeed: 1,
+                ovenCap: 1,
+                piping: 1,
+                magnet: 0
+            },
+            staffAndDecor: {
+                bakerElf: false,
+                decoratorElf: false,
+                cashierElf: false,
+                tree: false,
+                garlands: false,
+                stockings: false,
+                snowman: false
+            }
+        };
+
+        let state = loadGame();
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        ...DEFAULT_STATE,
+                        ...parsed,
+                        levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) },
+                        staffAndDecor: { ...DEFAULT_STATE.staffAndDecor, ...(parsed.staffAndDecor || {}) }
+                    };
+                }
+            } catch (e) {}
+            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
+        function getIcing() { return CATALOG.icing.find(i => i.id === state.selectedIcing) || CATALOG.icing[0]; }
+        function getTopping() { return CATALOG.topping.find(t => t.id === state.selectedTopping) || CATALOG.topping[0]; }
+
+        function getDecorBonus() {
+            let b = 0;
+            CATALOG.staff.forEach(item => {
+                if (item.kind === 'decor' && state.staffAndDecor[item.id]) b += item.bonus;
+            });
+            return b;
+        }
+
+        function getCookieValue() {
+            return 5 + getDough().bonus + getIcing().bonus + getTopping().bonus + getDecorBonus();
+        }
+
+        function getMaxHand() {
+            const table = [3, 5, 7, 9, 11, 12];
+            return table[Math.min(table.length - 1, state.levels.capacity - 1)];
+        }
+
+        function getOvenCapacity() {
+            return Math.min(8, 3 + state.levels.ovenCap);
+        }
+
+        function getPlayerSpeed() {
+            return 230 + (state.levels.speed - 1) * 42;
+        }
+
+        function getRollTime() {
+            const mult = 1 + (state.levels.roller - 1) * 0.45;
+            return Math.max(0.22, 1.25 / (getDough().speedMult * mult));
+        }
+
+        function getBakeTime() {
+            return Math.max(0.75, 3.0 - (state.levels.ovenSpeed - 1) * 0.5);
+        }
+
+        function getDecorateTime() {
+            const mult = 1 + (state.levels.piping - 1) * 0.65;
+            return Math.max(0.15, 1.1 / mult);
+        }
+
+        function getMagnetRadius() {
+            return state.levels.magnet > 0 ? 115 + state.levels.magnet * 95 : 48;
+        }
+
+        // ==========================================
+        // 4. MONDE 2D & ENTITÉS (900x600 LOGIQUE)
+        // ==========================================
+        const WORLD_W = 900;
+        const WORLD_H = 600;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            scale = Math.min(w / WORLD_W, h / WORLD_H);
+            offsetX = (w - WORLD_W * scale) * 0.5;
+            offsetY = (h - WORLD_H * scale) * 0.5;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const stations = {
+            dough: {
+                x: 115, y: 205, w: 120, h: 125,
+                zoneX: 255, zoneY: 268, zoneR: 54,
+                progress: 0
+            },
+            oven: {
+                x: 345, y: 145, w: 135, h: 100,
+                zoneX: 412, zoneY: 272, zoneR: 56,
+                slots: [],
+                ready: []
+            },
+            icing: {
+                x: 115, y: 395, w: 120, h: 125,
+                zoneX: 255, zoneY: 458, zoneR: 54,
+                progress: 0
+            },
+            shelf: {
+                x: 560, y: 235, w: 76, h: 155,
+                zoneX: 525, zoneY: 312, zoneR: 56,
+                cookies: [],
+                maxCookies: 9
+            },
+            cashier: {
+                x: 695, y: 425, w: 92, h: 72
+            }
+        };
+
+        const player = {
+            x: 360,
+            y: 375,
+            facing: 1,
+            walkPhase: 0,
+            holding: [],
+            activeStation: null
+        };
+
+        let helpers = [];
+        let customers = [];
+        let moneyPiles = [];
+        let particles = [];
+        let floatingTexts = [];
+        let customerSpawnTimer = 1.2;
+
+        function syncHelpers() {
+            if (state.staffAndDecor.bakerElf && !helpers.some(h => h.role === 'baker')) {
+                helpers.push({ role: 'baker', x: 270, y: 275, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+            }
+            if (state.staffAndDecor.decoratorElf && !helpers.some(h => h.role === 'decorator')) {
+                helpers.push({ role: 'decorator', x: 355, y: 385, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+            }
+        }
+        syncHelpers();
+
+        // ==========================================
+        // 5. CONTRÔLES (CLAVIER, SOURIS, JOYSTICK)
+        // ==========================================
+        const keys = {};
+        let pointerTarget = null;
+        let isPointerDown = false;
+        const joyVec = { x: 0, y: 0 };
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            pointerTarget = null;
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        function toWorld(clientX, clientY) {
+            return {
+                x: Math.max(95, Math.min(805, (clientX - offsetX) / scale)),
+                y: Math.max(150, Math.min(535, (clientY - offsetY) / scale))
+            };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            sound.init();
+            isPointerDown = true;
+            pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPointerDown) pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', () => { isPointerDown = false; });
+
+        canvas.addEventListener('touchstart', (e) => {
+            sound.init();
+            if (e.touches.length > 0) {
+                pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        // Joystick mobile
+        const joyZone = document.getElementById('joystickZone');
+        const joyKnob = document.getElementById('joystickKnob');
+        let joyId = null;
+
+        function handleJoyMove(cx, cy) {
+            const rect = joyZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width * 0.5;
+            const centerY = rect.top + rect.height * 0.5;
+            const maxR = rect.width * 0.5 - 16;
+            let dx = cx - centerX;
+            let dy = cy - centerY;
+            const d = Math.hypot(dx, dy);
+            if (d > maxR) {
+                dx = (dx / d) * maxR;
+                dy = (dy / d) * maxR;
+            }
+            joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+            joyVec.x = dx / maxR;
+            joyVec.y = dy / maxR;
+            pointerTarget = null;
+        }
+
+        joyZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sound.init();
+            const t = e.changedTouches[0];
+            joyId = t.identifier;
+            handleJoyMove(t.clientX, t.clientY);
+        }, { passive: false });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) {
+                    handleJoyMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                }
+            }
+        }, { passive: false });
+
+        function endJoy(e) {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) {
+                    joyId = null;
+                    joyVec.x = 0;
+                    joyVec.y = 0;
+                    joyKnob.style.transform = 'translate(0px, 0px)';
+                }
+            }
+        }
+        joyZone.addEventListener('touchend', endJoy);
+        joyZone.addEventListener('touchcancel', endJoy);
+
+        // ==========================================
+        // 6. EFFETS VISUELS LÉGERS
+        // ==========================================
+        function spawnParticles(x, y, color, count) {
+            if (particles.length > 55) return; // Plafond anti-lag
+            for (let i = 0; i < count; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 35 + Math.random() * 75;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(ang) * spd,
+                    vy: Math.sin(ang) * spd - 20,
+                    life: 0.45 + Math.random() * 0.25,
+                    maxLife: 0.7,
+                    color,
+                    r: 3 + Math.random() * 2.5
+                });
+            }
+        }
+
+        function spawnText(x, y, text, color) {
+            if (floatingTexts.length > 15) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life: 0.9 });
+        }
+
+        // ==========================================
+        // 7. LOGIQUE DE JEU (UPDATE)
+        // ==========================================
+        function update(dt, nowMs) {
+            // 1. Déplacement joueur
+            let mx = joyVec.x;
+            let my = joyVec.y;
+            if (keys['arrowleft'] || keys['a'] || keys['q']) mx -= 1;
+            if (keys['arrowright'] || keys['d']) mx += 1;
+            if (keys['arrowup'] || keys['w'] || keys['z']) my -= 1;
+            if (keys['arrowdown'] || keys['s']) my += 1;
+
+            const spd = getPlayerSpeed();
+            if (mx !== 0 || my !== 0) {
+                const len = Math.hypot(mx, my);
+                if (len > 1) { mx /= len; my /= len; }
+                player.x += mx * spd * dt;
+                player.y += my * spd * dt;
+                if (mx !== 0) player.facing = mx > 0 ? 1 : -1;
+                player.walkPhase += dt * 12;
+            } else if (pointerTarget) {
+                const dx = pointerTarget.x - player.x;
+                const dy = pointerTarget.y - player.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    player.x += (dx / dist) * spd * dt;
+                    player.y += (dy / dist) * spd * dt;
+                    if (Math.abs(dx) > 2) player.facing = dx > 0 ? 1 : -1;
+                    player.walkPhase += dt * 12;
+                } else {
+                    pointerTarget = null;
+                    player.walkPhase = 0;
+                }
+            } else {
+                player.walkPhase = 0;
+            }
+
+            // Limites de la cuisine
+            player.x = Math.max(245, Math.min(655, player.x));
+            player.y = Math.max(210, Math.min(525, player.y));
+
+            // 2. Cuisson au four
+            const bakeTime = getBakeTime();
+            for (let i = stations.oven.slots.length - 1; i >= 0; i--) {
+                const slot = stations.oven.slots[i];
+                slot.timer += dt;
+                if (slot.timer >= bakeTime) {
+                    stations.oven.slots.splice(i, 1);
+                    stations.oven.ready.push({
+                        type: 'baked',
+                        dough: slot.dough,
+                        icing: slot.icing,
+                        topping: slot.topping
+                    });
+                    sound.ding();
+                    spawnParticles(stations.oven.x + 68, stations.oven.y + 45, '#f6e58d', 6);
+                }
+            }
+
+            // 3. Interactions du joueur avec les stations
+            player.activeStation = null;
+            const maxHand = getMaxHand();
+
+            // Station A : Table à rouleau
+            if (Math.hypot(player.x - stations.dough.zoneX, player.y - stations.dough.zoneY) <= stations.dough.zoneR) {
+                player.activeStation = 'dough';
+                if (player.holding.length < maxHand) {
+                    stations.dough.progress += dt / getRollTime();
+                    if (stations.dough.progress >= 1) {
+                        stations.dough.progress = 0;
+                        player.holding.push({
+                            type: 'raw',
+                            dough: getDough(),
+                            icing: getIcing(),
+                            topping: getTopping()
+                        });
+                        sound.pop();
+                        spawnParticles(stations.dough.x + 60, stations.dough.y + 55, '#fff3cd', 5);
+                        updateHUD();
+                    }
+                } else {
+                    stations.dough.progress = 0;
+                }
+            } else {
+                stations.dough.progress = Math.max(0, stations.dough.progress - dt * 1.5);
+            }
+
+            // Station B : Four (Déposer pâte crue & Prendre biscuits cuits)
+            if (Math.hypot(player.x - stations.oven.zoneX, player.y - stations.oven.zoneY) <= stations.oven.zoneR) {
+                player.activeStation = 'oven';
+                const ovenCap = getOvenCapacity();
+                const rawIdx = player.holding.findIndex(c => c.type === 'raw');
+                if (rawIdx !== -1 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                    const item = player.holding.splice(rawIdx, 1)[0];
+                    stations.oven.slots.push({
+                        timer: 0,
+                        dough: item.dough,
+                        icing: item.icing,
+                        topping: item.topping
+                    });
+                    sound.pop();
+                    updateHUD();
+                }
+                while (stations.oven.ready.length > 0 && player.holding.length < maxHand) {
+                    player.holding.push(stations.oven.ready.shift());
+                    sound.pop();
+                    updateHUD();
+                }
+            }
+
+            // Station C : Glaçage & Confettis
+            if (Math.hypot(player.x - stations.icing.zoneX, player.y - stations.icing.zoneY) <= stations.icing.zoneR) {
+                player.activeStation = 'icing';
+                const bakedIdx = player.holding.findIndex(c => c.type === 'baked');
+                if (bakedIdx !== -1) {
+                    stations.icing.progress += dt / getDecorateTime();
+                    if (stations.icing.progress >= 1) {
+                        stations.icing.progress = 0;
+                        player.holding[bakedIdx].type = 'decorated';
+                        player.holding[bakedIdx].icing = getIcing();
+                        player.holding[bakedIdx].topping = getTopping();
+                        sound.pop();
+                        spawnParticles(stations.icing.x + 60, stations.icing.y + 55, getIcing().color, 6);
+                        updateHUD();
+                    }
+                } else {
+                    stations.icing.progress = 0;
+                }
+            } else {
+                stations.icing.progress = Math.max(0, stations.icing.progress - dt * 1.5);
+            }
+
+            // Station D : Présentoir
+            if (Math.hypot(player.x - stations.shelf.zoneX, player.y - stations.shelf.zoneY) <= stations.shelf.zoneR) {
+                player.activeStation = 'shelf';
+                while (stations.shelf.cookies.length < stations.shelf.maxCookies) {
+                    const decIdx = player.holding.findIndex(c => c.type === 'decorated');
+                    if (decIdx === -1) break;
+                    stations.shelf.cookies.push(player.holding.splice(decIdx, 1)[0]);
+                    sound.pop();
+                    updateHUD();
+                }
+            }
+
+            // 4. Mise à jour Lutins, Clients, Pièces et Particules
+            updateHelpers(dt);
+            updateCustomers(dt);
+            updateMoneyPiles(dt);
+            updateEffects(dt);
+        }
+
+        function updateHelpers(dt) {
+            const hSpeed = 175;
+            const ovenCap = getOvenCapacity();
+
+            helpers.forEach(h => {
+                let tx = h.x;
+                let ty = h.y;
+
+                if (h.role === 'baker') {
+                    if (h.holding.some(c => c.type === 'raw')) {
+                        tx = stations.oven.zoneX - 24;
+                        ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                            const idx = h.holding.findIndex(c => c.type === 'raw');
+                            const item = h.holding.splice(idx, 1)[0];
+                            stations.oven.slots.push({ timer: 0, dough: item.dough, icing: item.icing, topping: item.topping });
+                        }
+                    } else {
+                        tx = stations.dough.zoneX - 18;
+                        ty = stations.dough.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * 1.15) {
+                                h.timer = 0;
+                                h.holding.push({ type: 'raw', dough: getDough(), icing: getIcing(), topping: getTopping() });
+                            }
+                        }
+                    }
+                } else if (h.role === 'decorator') {
+                    if (h.holding.some(c => c.type === 'decorated')) {
+                        tx = stations.shelf.zoneX;
+                        ty = stations.shelf.zoneY + 24;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && stations.shelf.cookies.length < stations.shelf.maxCookies) {
+                            const idx = h.holding.findIndex(c => c.type === 'decorated');
+                            stations.shelf.cookies.push(h.holding.splice(idx, 1)[0]);
+                        }
+                    } else if (h.holding.some(c => c.type === 'baked')) {
+                        tx = stations.icing.zoneX + 18;
+                        ty = stations.icing.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getDecorateTime() * 1.15) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(c => c.type === 'baked');
+                                h.holding[idx].type = 'decorated';
+                                h.holding[idx].icing = getIcing();
+                                h.holding[idx].topping = getTopping();
+                            }
+                        }
+                    } else if (stations.oven.ready.length > 0 && h.holding.length < 3) {
+                        tx = stations.oven.zoneX + 24;
+                        ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.holding.push(stations.oven.ready.shift());
+                        }
+                    } else {
+                        tx = stations.oven.zoneX + 24;
+                        ty = stations.oven.zoneY + 28;
+                    }
+                }
+
+                const dx = tx - h.x;
+                const dy = ty - h.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    h.x += (dx / dist) * hSpeed * dt;
+                    h.y += (dy / dist) * hSpeed * dt;
+                    if (Math.abs(dx) > 1) h.facing = dx > 0 ? 1 : -1;
+                    h.walkPhase += dt * 10;
+                } else {
+                    h.walkPhase = 0;
+                }
+            });
+        }
+
+        const CUST_STYLES = [
+            { skin: '#ffdbac', hat: '#e17055', scarf: '#00b894' },
+            { skin: '#f1c27d', hat: '#0984e3', scarf: '#fdcb6e' },
+            { skin: '#8d5524', hat: '#d63031', scarf: '#ffffff' },
+            { skin: '#ffdbac', hat: '#6c5ce7', scarf: '#ff7675' }
+        ];
+
+        function updateCustomers(dt) {
+            customerSpawnTimer -= dt;
+            const maxCust = state.staffAndDecor.tree ? 5 : 4;
+            if (customerSpawnTimer <= 0 && customers.length < maxCust) {
+                const st = CUST_STYLES[Math.floor(Math.random() * CUST_STYLES.length)];
+                customers.push({
+                    x: 845,
+                    y: 135,
+                    state: 'toShelf',
+                    want: 1 + Math.floor(Math.random() * 2),
+                    bag: [],
+                    style: st,
+                    walkPhase: 0
+                });
+                customerSpawnTimer = Math.max(2.1, 4.8 - (state.staffAndDecor.tree ? 0.7 : 0));
+            }
+
+            const cSpeed = state.staffAndDecor.garlands ? 160 : 140;
+
+            for (let i = customers.length - 1; i >= 0; i--) {
+                const c = customers[i];
+                let tx = c.x;
+                let ty = c.y;
+
+                if (c.state === 'toShelf') {
+                    tx = 672;
+                    ty = 255 + (i % 3) * 46;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 8) {
+                        c.x += ((tx - c.x) / d) * cSpeed * dt;
+                        c.y += ((ty - c.y) / d) * cSpeed * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        c.walkPhase = 0;
+                        if (stations.shelf.cookies.length > 0 && c.bag.length < c.want) {
+                            c.bag.push(stations.shelf.cookies.pop());
+                            sound.pop();
+                            if (c.bag.length >= c.want) c.state = 'toCashier';
+                        }
+                    }
+                } else if (c.state === 'toCashier') {
+                    tx = 750;
+                    ty = 392;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 8) {
+                        c.x += ((tx - c.x) / d) * cSpeed * dt;
+                        c.y += ((ty - c.y) / d) * cSpeed * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        let earned = 0;
+                        const decorExtra = getDecorBonus();
+                        c.bag.forEach(ck => {
+                            earned += 5 + (ck.dough?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.topping?.bonus || 0) + decorExtra;
+                        });
+                        if (state.staffAndDecor.cashierElf) earned = Math.ceil(earned * 1.2);
+                        state.soldCount += c.bag.length;
+                        updateHUD();
+                        saveGame();
+
+                        moneyPiles.push({
+                            x: 642 + (Math.random() - 0.5) * 28,
+                            y: 465 + (Math.random() - 0.5) * 28,
+                            amount: earned,
+                            bob: Math.random() * 6
+                        });
+                        sound.ding();
+                        spawnParticles(750, 415, '#ffd700', 6);
+                        c.state = 'leaving';
+                    }
+                } else if (c.state === 'leaving') {
+                    tx = 855;
+                    ty = 550;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 10) {
+                        c.x += ((tx - c.x) / d) * (cSpeed * 1.15) * dt;
+                        c.y += ((ty - c.y) / d) * (cSpeed * 1.15) * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        customers.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function updateMoneyPiles(dt) {
+            const magR = getMagnetRadius();
+            for (let i = moneyPiles.length - 1; i >= 0; i--) {
+                const p = moneyPiles[i];
+                p.bob += dt * 4;
+                const d = Math.hypot(player.x - p.x, player.y - p.y);
+                if (state.levels.magnet > 0 && d < magR && d > 8) {
+                    const pull = 250 + state.levels.magnet * 75;
+                    p.x += ((player.x - p.x) / d) * pull * dt;
+                    p.y += ((player.y - p.y) / d) * pull * dt;
+                }
+                if (d < 46) {
+                    state.money += p.amount;
+                    sound.coin();
+                    spawnParticles(p.x, p.y, '#ffeaa7', 7);
+                    spawnText(p.x, p.y - 16, `+${p.amount} $`, '#55efc4');
+                    moneyPiles.splice(i, 1);
+                    updateHUD();
+                    saveGame();
+                }
+            }
+        }
+
+        function updateEffects(dt) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.vy += 120 * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) particles.splice(i, 1);
+            }
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 34 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        // ==========================================
+        // 8. RENDU CANVAS 60 FPS ULTRA-FLUIDE
+        // ==========================================
+        function drawCookieShape(x, y, s, cookie, nowMs) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(s, s);
+
+            const isRaw = cookie.type === 'raw';
+            const dough = cookie.dough || CATALOG.dough[0];
+            ctx.fillStyle = isRaw ? '#f3d5a5' : dough.color;
+            ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
+            ctx.lineWidth = 2;
+
+            // Silhouette bonhomme pain d'épices
+            ctx.beginPath();
+            ctx.arc(0, -10, 7, 0, Math.PI * 2); // Tête
+            ctx.roundRect(-9, -3, 18, 5, 2.5);   // Bras
+            ctx.roundRect(-5, -3, 10, 11, 3);    // Torse
+            ctx.roundRect(-5, 6, 4, 7, 2);       // Jambe G
+            ctx.roundRect(1, 6, 4, 7, 2);        // Jambe D
+            ctx.fill();
+            ctx.stroke();
+
+            // Glaçage & Confettis
+            if (cookie.type === 'decorated') {
+                const ic = cookie.icing || CATALOG.icing[0];
+                let icColor = ic.color;
+                if (ic.rainbow) {
+                    icColor = `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 65%)`;
+                }
+                ctx.fillStyle = icColor;
+                ctx.beginPath();
+                ctx.arc(-2.5, -11, 1.3, 0, Math.PI * 2);
+                ctx.arc(2.5, -11, 1.3, 0, Math.PI * 2);
+                ctx.arc(0, 0, 1.6, 0, Math.PI * 2);
+                ctx.arc(0, 4.5, 1.6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = icColor;
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.arc(0, -9, 3, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+
+                const top = cookie.topping || CATALOG.topping[0];
+                if (top.style !== 'none') {
+                    const dots = [[-3, -2], [3, -1.5], [-2, 3], [2.5, 3.5]];
+                    dots.forEach((p, idx) => {
+                        if (top.style === 'sprinkles') ctx.fillStyle = idx % 2 === 0 ? '#ff4757' : '#1e90ff';
+                        else if (top.style === 'stars') ctx.fillStyle = '#ffd700';
+                        else if (top.style === 'marshmallow') ctx.fillStyle = '#fff5f7';
+                        else if (top.style === 'chocochips') ctx.fillStyle = '#3d1c04';
+                        else ctx.fillStyle = `hsl(${(nowMs * 0.3 + idx * 60) % 360}, 100%, 75%)`;
+
+                        ctx.beginPath();
+                        ctx.arc(p[0], p[1], 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function drawBakeryFloor(nowMs) {
+            // Fond extérieur neigeux
+            ctx.fillStyle = '#1f0d05';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+            // Sol carrelé damier chaud (cuisine + boutique)
+            const tile = 45;
+            for (let gx = 60; gx < 840; gx += tile) {
+                for (let gy = 115; gy < 555; gy += tile) {
+                    const isEven = ((gx + gy) / tile) % 2 === 0;
+                    if (gx < 605) {
+                        ctx.fillStyle = isEven ? '#f5e6cc' : '#e6ccb2';
+                    } else {
+                        ctx.fillStyle = isEven ? '#ede0d4' : '#ddb892';
+                    }
+                    ctx.fillRect(gx, gy, tile, tile);
+                }
+            }
+
+            // Séparation cuisine / espace client
+            ctx.fillStyle = '#b08968';
+            ctx.fillRect(602, 115, 6, 440);
+
+            // Murs extérieurs bois
+            ctx.strokeStyle = '#6d3619';
+            ctx.lineWidth = 12;
+            ctx.strokeRect(54, 109, 792, 452);
+
+            // Bandeau mural haut & Guirlande lumineuse
+            ctx.fillStyle = '#582911';
+            ctx.fillRect(54, 78, 792, 34);
+            const bulbs = state.staffAndDecor.garlands
+                ? ['#ff4757', '#2ed573', '#ffa502', '#1e90ff', '#ff9ff3', '#ffeaa7']
+                : ['#ff4757', '#2ed573', '#ffa502', '#1e90ff'];
+            const step = state.staffAndDecor.garlands ? 30 : 48;
+            for (let bx = 80; bx < 825; bx += step) {
+                ctx.fillStyle = bulbs[Math.floor(bx / step) % bulbs.length];
+                ctx.beginPath();
+                ctx.arc(bx, 112, state.staffAndDecor.garlands ? 6 : 4.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Porte d'entrée clients
+            ctx.fillStyle = '#2d3436';
+            ctx.fillRect(785, 86, 54, 16);
+            ctx.fillStyle = '#55efc4';
+            ctx.font = 'bold 11px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('ENTRÉE', 812, 98);
+        }
+
+        function drawDecorations() {
+            // Sapin lumineux
+            if (state.staffAndDecor.tree) {
+                const tx = 565, ty = 158;
+                ctx.fillStyle = '#6d3619';
+                ctx.fillRect(tx - 6, ty + 16, 12, 12);
+                ctx.fillStyle = '#1e8449';
+                [0, -13, -25].forEach((off, idx) => {
+                    ctx.beginPath();
+                    ctx.moveTo(tx - (22 - idx * 4), ty + 16 + off);
+                    ctx.lineTo(tx + (22 - idx * 4), ty + 16 + off);
+                    ctx.lineTo(tx, ty - 6 + off);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+                ctx.fillStyle = '#f1c40f';
+                ctx.beginPath();
+                ctx.arc(tx, ty - 33, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Chaussettes de cheminée
+            if (state.staffAndDecor.stockings) {
+                [275, 305, 335].forEach((sx, i) => {
+                    ctx.fillStyle = i % 2 === 0 ? '#e74c3c' : '#2ecc71';
+                    ctx.beginPath();
+                    ctx.roundRect(sx, 90, 11, 16, 4);
+                    ctx.roundRect(sx, 100, 16, 7, 3);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(sx - 1, 88, 13, 4);
+                });
+            }
+
+            // Bonhomme de neige à l'entrée
+            if (state.staffAndDecor.snowman) {
+                const sx = 805, sy = 175;
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#95a5a6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(sx, sy + 10, 13, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(sx, sy - 7, 9, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(sx - 8, sy, 16, 4);
+                ctx.fillStyle = '#e67e22';
+                ctx.beginPath();
+                ctx.arc(sx - 3, sy - 7, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Caissier Express
+            if (state.staffAndDecor.cashierElf) {
+                drawCharacter({ x: 762, y: 518, facing: -1, walkPhase: 0, holding: [] }, 'cashier', 0);
+            }
+        }
+
+        function drawZoneCircle(x, y, r, active) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = active ? 'rgba(46, 213, 115, 0.25)' : 'rgba(255, 255, 255, 0.22)';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.strokeStyle = active ? '#2ed573' : '#d4a373';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawProgressBar(x, y, w, ratio, color) {
+            if (ratio <= 0) return;
+            ctx.fillStyle = '#2d1606';
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5, y, w, 10, 5);
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5 + 2, y + 2, Math.max(0, (w - 4) * Math.min(1, ratio)), 6, 3);
+            ctx.fill();
+        }
+
+        function drawLabel(x, y, text) {
+            ctx.font = 'bold 12px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            const tw = ctx.measureText(text).width + 14;
+            ctx.fillStyle = 'rgba(44, 20, 8, 0.85)';
+            ctx.beginPath();
+            ctx.roundRect(x - tw * 0.5, y - 11, tw, 18, 7);
+            ctx.fill();
+            ctx.fillStyle = '#fff8eb';
+            ctx.fillText(text, x, y + 2);
+        }
+
+        function drawStations(nowMs) {
+            // Zones au sol
+            drawZoneCircle(stations.dough.zoneX, stations.dough.zoneY, stations.dough.zoneR, player.activeStation === 'dough');
+            drawZoneCircle(stations.oven.zoneX, stations.oven.zoneY, stations.oven.zoneR, player.activeStation === 'oven');
+            drawZoneCircle(stations.icing.zoneX, stations.icing.zoneY, stations.icing.zoneR, player.activeStation === 'icing');
+            drawZoneCircle(stations.shelf.zoneX, stations.shelf.zoneY, stations.shelf.zoneR, player.activeStation === 'shelf');
+
+            // 1. Table à rouleau
+            const dtb = stations.dough;
+            ctx.fillStyle = '#9c5a2b';
+            ctx.strokeStyle = '#4a2511';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(dtb.x, dtb.y, dtb.w, dtb.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            // Pâte aplatie & rouleau
+            ctx.fillStyle = getDough().color;
+            ctx.beginPath();
+            ctx.ellipse(dtb.x + 60, dtb.y + 62, 34, 24, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#deb887';
+            ctx.beginPath();
+            ctx.roundRect(dtb.x + 32, dtb.y + 56 + Math.sin(dtb.progress * Math.PI * 4) * 10, 56, 10, 4);
+            ctx.fill();
+            drawProgressBar(dtb.x + 60, dtb.y - 24, 84, dtb.progress, '#2ed573');
+            drawLabel(dtb.x + 60, dtb.y - 8, '1. Rouler Pâte');
+
+            // 2. Four doré
+            const ov = stations.oven;
+            ctx.fillStyle = '#57606f';
+            ctx.strokeStyle = '#2f3542';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(ov.x, ov.y, ov.w, ov.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            // Vitre du four
+            const isBaking = ov.slots.length > 0;
+            ctx.fillStyle = isBaking ? '#ff7f50' : '#2f3542';
+            ctx.beginPath();
+            ctx.roundRect(ov.x + 14, ov.y + 22, ov.w - 28, 54, 8);
+            ctx.fill();
+
+            // Biscuits en cours ou prêts
+            ov.slots.forEach((s, idx) => {
+                drawCookieShape(ov.x + 30 + (idx % 4) * 24, ov.y + 42 + Math.floor(idx / 4) * 20, 0.65, { type: 'raw', dough: s.dough }, nowMs);
+            });
+            ov.ready.forEach((c, idx) => {
+                drawCookieShape(ov.x + 30 + (idx % 4) * 24, ov.y + 55 + Math.floor(idx / 4) * 18, 0.72, c, nowMs);
+            });
+            if (isBaking) {
+                drawProgressBar(ov.x + ov.w * 0.5, ov.y - 24, 90, ov.slots[0].timer / getBakeTime(), '#ffa502');
+            }
+            drawLabel(ov.x + ov.w * 0.5, ov.y - 8, `2. Four (${ov.slots.length + ov.ready.length}/${getOvenCapacity()})`);
+
+            // 3. Station Glaçage & Confettis
+            const ic = stations.icing;
+            ctx.fillStyle = '#9c5a2b';
+            ctx.strokeStyle = '#4a2511';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(ic.x, ic.y, ic.w, ic.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            // Bol de glaçage + pot confettis
+            ctx.fillStyle = getIcing().rainbow ? `hsl(${Math.floor((nowMs * 0.25) % 360)}, 90%, 65%)` : getIcing().color;
+            ctx.beginPath();
+            ctx.arc(ic.x + 42, ic.y + 58, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#dfe4ea';
+            ctx.stroke();
+
+            ctx.fillStyle = '#ff6b81';
+            ctx.beginPath();
+            ctx.arc(ic.x + 84, ic.y + 62, 15, 0, Math.PI * 2);
+            ctx.fill();
+            drawProgressBar(ic.x + 60, ic.y - 24, 84, ic.progress, '#ff6b81');
+            drawLabel(ic.x + 60, ic.y - 8, '3. Glaçage & Déco');
+
+            // 4. Présentoir
+            const sh = stations.shelf;
+            ctx.fillStyle = '#d4a373';
+            ctx.strokeStyle = '#6d3619';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            // Étagères intérieures
+            ctx.fillStyle = '#8d5524';
+            ctx.fillRect(sh.x + 6, sh.y + 50, sh.w - 12, 4);
+            ctx.fillRect(sh.x + 6, sh.y + 102, sh.w - 12, 4);
+
+            sh.cookies.forEach((ck, idx) => {
+                const col = idx % 3;
+                const row = Math.floor(idx / 3);
+                drawCookieShape(sh.x + 19 + col * 19, sh.y + 28 + row * 50, 0.65, ck, nowMs);
+            });
+            drawLabel(sh.x + sh.w * 0.5, sh.y - 10, `4. Présentoir (${sh.cookies.length}/${sh.maxCookies})`);
+
+            // 5. Caisse Enregistreuse
+            const ca = stations.cashier;
+            ctx.fillStyle = '#7f4f24';
+            ctx.strokeStyle = '#3d1c04';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(ca.x, ca.y, ca.w, ca.h, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#2f3542';
+            ctx.beginPath();
+            ctx.roundRect(ca.x + 22, ca.y + 16, 48, 36, 6);
+            ctx.fill();
+            ctx.fillStyle = '#2ed573';
+            ctx.font = 'bold 13px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('$$$', ca.x + 46, ca.y + 39);
+            drawLabel(ca.x + ca.w * 0.5, ca.y - 10, 'Caisse');
+        }
+
+        function drawCharacter(ent, role, nowMs) {
+            ctx.save();
+            const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
+            ctx.translate(ent.x, ent.y - bob);
+
+            // Ombre simple au sol
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.beginPath();
+            ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Corps
+            if (role === 'baker') ctx.fillStyle = '#2ed573';
+            else if (role === 'decorator') ctx.fillStyle = '#a55eea';
+            else if (role === 'cashier') ctx.fillStyle = '#ffa502';
+            else ctx.fillStyle = '#c67d3b';
+
+            ctx.strokeStyle = '#4a2511';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(-13, -6, 26, 24, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Tête
+            ctx.beginPath();
+            ctx.arc(0, -14, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Toque de chef ou bonnet de lutin
+            if (role === 'player') {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, -29, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillRect(-9, -27, 18, 6);
+            } else {
+                ctx.fillStyle = '#ff4757';
+                ctx.beginPath();
+                ctx.moveTo(-11, -22);
+                ctx.lineTo(11, -22);
+                ctx.lineTo(0, -38);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Yeux & sourire
+            const look = ent.facing * 3;
+            ctx.fillStyle = '#2f3542';
+            ctx.beginPath();
+            ctx.arc(-4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.arc(4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pile de biscuits portés
+            if (ent.holding && ent.holding.length > 0) {
+                ent.holding.forEach((ck, idx) => {
+                    drawCookieShape(ent.facing * 14, -4 - idx * 8, 0.72, ck, nowMs);
+                });
+            }
+
+            ctx.restore();
+        }
+
+        function drawCustomers(nowMs) {
+            customers.forEach(c => {
+                ctx.save();
+                const bob = Math.abs(Math.sin(c.walkPhase)) * 3.5;
+                ctx.translate(c.x, c.y - bob);
+
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath();
+                ctx.ellipse(0, 17 + bob, 14, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Manteau & écharpe
+                ctx.fillStyle = c.style.hat;
+                ctx.strokeStyle = '#2d3436';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-12, -5, 24, 22, 9);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.scarf;
+                ctx.fillRect(-11, -4, 22, 5);
+
+                // Tête & bonnet
+                ctx.fillStyle = c.style.skin;
+                ctx.beginPath();
+                ctx.arc(0, -14, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.hat;
+                ctx.beginPath();
+                ctx.arc(0, -18, 11, Math.PI, 0);
+                ctx.fill();
+
+                // Bulle de commande
+                if (c.state === 'toShelf') {
+                    const rem = c.want - c.bag.length;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.roundRect(-18, -46, 36, 20, 8);
+                    ctx.fill();
+                    ctx.fillStyle = '#2d3436';
+                    ctx.font = 'bold 11px Fredoka, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`🍪x${rem}`, 0, -32);
+                } else {
+                    c.bag.forEach((ck, idx) => {
+                        drawCookieShape(-14, -4 - idx * 7, 0.65, ck, nowMs);
+                    });
+                }
+
+                ctx.restore();
+            });
+        }
+
+        function drawMoneyAndEffects() {
+            // Piles d'argent au sol
+            moneyPiles.forEach(p => {
+                const py = p.y + Math.sin(p.bob) * 3;
+                ctx.fillStyle = '#2ecc71';
+                ctx.strokeStyle = '#1e8449';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(p.x - 14, py - 9, 28, 18, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#f1c40f';
+                ctx.beginPath();
+                ctx.arc(p.x, py, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Particules
+            particles.forEach(pt => {
+                ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // Textes flottants (+$ )
+            floatingTexts.forEach(ft => {
+                ctx.globalAlpha = Math.max(0, Math.min(1, ft.life * 1.4));
+                ctx.font = 'bold 16px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#1e272e';
+                ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // ==========================================
+        // 9. INTERFACE HUD & BOUTIQUE
+        // ==========================================
+        const elMoney = document.getElementById('hudMoney');
+        const elPrice = document.getElementById('hudPrice');
+        const elSold = document.getElementById('hudSold');
+        const elRecipe = document.getElementById('hudRecipeText');
+        const elHand = document.getElementById('hudHandCount');
+        const elShopBal = document.getElementById('shopBalance');
+
+        function updateHUD() {
+            elMoney.textContent = `${state.money} $`;
+            elShopBal.textContent = `${state.money} $`;
+            elPrice.textContent = `${getCookieValue()} $`;
+            elSold.textContent = state.soldCount;
+            const topName = getTopping().id === 'none' ? '' : ` • ${getTopping().name}`;
+            elRecipe.textContent = `${getDough().name} • ${getIcing().name}${topName}`;
+            elHand.textContent = `${player.holding.length}/${getMaxHand()}`;
+        }
+
+        let currentTab = 'dough';
+        const shopModal = document.getElementById('shopModal');
+        const shopGrid = document.getElementById('shopGrid');
+
+        document.getElementById('btnOpenShop').addEventListener('click', () => {
+            sound.init();
+            shopModal.classList.remove('hidden');
+            shopModal.classList.add('flex');
+            renderShop();
+        });
+
+        document.getElementById('btnCloseShop').addEventListener('click', () => {
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        document.querySelectorAll('.shop-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.shop-tab').forEach(b => {
+                    b.classList.remove('bg-amber-400', 'text-amber-950');
+                    b.classList.add('bg-amber-900/70', 'text-amber-100');
+                });
+                btn.classList.remove('bg-amber-900/70', 'text-amber-100');
+                btn.classList.add('bg-amber-400', 'text-amber-950');
+                currentTab = btn.dataset.tab;
+                renderShop();
+            });
+        });
+
+        function renderShop() {
+            shopGrid.innerHTML = '';
+            updateHUD();
+
+            if (currentTab === 'dough') {
+                CATALOG.dough.forEach(item => {
+                    const unlocked = state.unlockedDough.includes(item.id);
+                    const equipped = state.selectedDough === item.id;
+                    addRecipeCard(item, unlocked, equipped, '🥣', () => {
+                        if (!unlocked && state.money >= item.cost) {
+                            state.money -= item.cost;
+                            state.unlockedDough.push(item.id);
+                            state.selectedDough = item.id;
+                            sound.upgrade();
+                        } else if (unlocked) {
+                            state.selectedDough = item.id;
+                            sound.pop();
+                        }
+                        saveGame();
+                        renderShop();
+                    });
+                });
+            } else if (currentTab === 'decor') {
+                // Glaçages
+                CATALOG.icing.forEach(item => {
+                    const unlocked = state.unlockedIcing.includes(item.id);
+                    const equipped = state.selectedIcing === item.id;
+                    addRecipeCard(item, unlocked, equipped, '🎨', () => {
+                        if (!unlocked && state.money >= item.cost) {
+                            state.money -= item.cost;
+                            state.unlockedIcing.push(item.id);
+                            state.selectedIcing = item.id;
+                            sound.upgrade();
+                        } else if (unlocked) {
+                            state.selectedIcing = item.id;
+                            sound.pop();
+                        }
+                        saveGame();
+                        renderShop();
+                    });
+                });
+                // Confettis
+                CATALOG.topping.forEach(item => {
+                    const unlocked = state.unlockedTopping.includes(item.id);
+                    const equipped = state.selectedTopping === item.id;
+                    addRecipeCard(item, unlocked, equipped, '✨', () => {
+                        if (!unlocked && state.money >= item.cost) {
+                            state.money -= item.cost;
+                            state.unlockedTopping.push(item.id);
+                            state.selectedTopping = item.id;
+                            sound.upgrade();
+                        } else if (unlocked) {
+                            state.selectedTopping = item.id;
+                            sound.pop();
+                        }
+                        saveGame();
+                        renderShop();
+                    });
+                });
+            } else if (currentTab === 'upgrades') {
+                CATALOG.upgrades.forEach(up => {
+                    const lvl = state.levels[up.id] || 0;
+                    const isMax = lvl >= up.max;
+                    const cost = Math.round(up.baseCost * Math.pow(up.mult, up.id === 'magnet' ? lvl : lvl - 1));
+                    const canBuy = !isMax && state.money >= cost;
+
+                    const card = document.createElement('div');
+                    card.className = 'cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5';
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">${up.icon}</span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-base">${up.name}</span>
+                                    <span class="text-xs font-bold bg-amber-200 px-2 py-0.5 rounded-lg">Niv. ${lvl}/${up.max}</span>
+                                </div>
+                                <p class="text-xs text-amber-800 mt-1">${up.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || isMax) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
+                            ${isMax ? '✓ Niveau Maximum' : `Améliorer • ${cost} $`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= cost;
+                            state.levels[up.id] = lvl + 1;
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            } else if (currentTab === 'staff') {
+                CATALOG.staff.forEach(st => {
+                    const owned = !!state.staffAndDecor[st.id];
+                    const canBuy = !owned && state.money >= st.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${owned ? 'ring-4 ring-emerald-500' : ''}`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">${st.icon}</span>
+                            <div>
+                                <div class="font-bold text-base">${st.name}</div>
+                                <p class="text-xs text-amber-800 mt-1">${st.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
+                            ${owned ? '✓ Actif en boutique' : `Acheter • ${st.cost} $`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= st.cost;
+                            state.staffAndDecor[st.id] = true;
+                            syncHelpers();
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            }
+        }
+
+        function addRecipeCard(item, unlocked, equipped, icon, onAction) {
+            const canBuy = !unlocked && state.money >= item.cost;
+            const card = document.createElement('div');
+            card.className = `cream-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${equipped ? 'ring-4 ring-amber-500' : ''}`;
+
+            let swatch = '';
+            if (item.color) {
+                const bg = item.rainbow ? 'linear-gradient(90deg,#ff6b81,#feca57,#1dd1a1,#54a0ff)' : item.color;
+                swatch = `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${bg}"></span>`;
+            }
+
+            let btnLabel = equipped ? '✓ Équipé' : (unlocked ? 'Équiper' : `Débloquer • ${item.cost} $`);
+            let btnClass = equipped ? 'bg-amber-500 text-amber-950' : (unlocked ? 'bg-amber-200 hover:bg-amber-300 text-amber-950' : 'btn-mint text-white');
+            let disabledAttr = (!unlocked && !canBuy) ? 'disabled' : '';
+
+            card.innerHTML = `
+                <div class="flex items-start gap-2.5">
+                    <span class="text-2xl">${icon}</span>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-base">${item.name}</span>
+                            ${swatch}
+                        </div>
+                        <p class="text-xs text-amber-800 mt-1">${item.desc}</p>
+                    </div>
+                </div>
+                <button ${disabledAttr} class="${btnClass} w-full py-2 rounded-xl font-bold text-sm cursor-pointer">
+                    ${btnLabel}
+                </button>
+            `;
+            const btn = card.querySelector('button');
+            if (!disabledAttr) btn.addEventListener('click', onAction);
+            shopGrid.appendChild(card);
+        }
+
+        // Bouton Son
+        const btnSound = document.getElementById('btnSound');
+        btnSound.addEventListener('click', () => {
+            sound.muted = !sound.muted;
+            btnSound.textContent = sound.muted ? '🔇' : '🔊';
+        });
+
+        // Bouton Réinitialisation
+        const resetModal = document.getElementById('resetModal');
+        document.getElementById('btnReset').addEventListener('click', () => {
+            resetModal.classList.remove('hidden');
+            resetModal.classList.add('flex');
+        });
+        document.getElementById('btnCancelReset').addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+        });
+        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+            localStorage.removeItem(SAVE_KEY);
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            helpers = [];
+            customers = [];
+            moneyPiles = [];
+            player.holding = [];
+            stations.oven.slots = [];
+            stations.oven.ready = [];
+            stations.shelf.cookies = [];
+            updateHUD();
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+        });
+
+        // ==========================================
+        // 10. BOUCLE PRINCIPALE 60 FPS (DELTA-TIME)
+        // ==========================================
+        let lastTime = 0;
+        function gameLoop(nowMs) {
+            if (!lastTime) lastTime = nowMs;
+            // Plafonnement de dt à 0.05s pour éviter les sauts en cas de changement d'onglet
+            const dt = Math.min(0.05, (nowMs - lastTime) / 1000);
+            lastTime = nowMs;
+
+            update(dt, nowMs);
+
+            ctx.save();
+            ctx.fillStyle = '#1f0d05';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+
+            drawBakeryFloor(nowMs);
+            drawDecorations();
+            drawStations(nowMs);
+            drawMoneyAndEffects();
+            helpers.forEach(h => drawCharacter(h, h.role, nowMs));
+            drawCustomers(nowMs);
+            drawCharacter(player, 'player', nowMs);
+
+            ctx.restore();
+            requestAnimationFrame(gameLoop);
+        }
+
+        updateHUD();
+        window.onload = function() {
+            requestAnimationFrame(gameLoop);
+        };
+    })();
+    </script>
+</body>
+</html>
