@@ -81,6 +81,16 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
+        .btn-next-page {
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            border: 2px solid #bae6fd;
+            box-shadow: 0 4px 0 #075985;
+            transition: transform 0.08s;
+        }
+        .btn-next-page:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #075985;
+        }
         .glaze-pill {
             transition: transform 0.1s, box-shadow 0.1s;
         }
@@ -153,8 +163,14 @@
             </div>
         </div>
 
-        <!-- Boutons Boutique & Son -->
+        <!-- Boutons Suite (Rebirth 2), Boutique & Son -->
         <div class="flex items-center gap-2 pointer-events-auto">
+            <!-- BOUTON DÉBLOQUÉ AU REBIRTH 2 -->
+            <button id="btnNextPage" class="hidden btn-next-page rounded-2xl px-3.5 sm:px-4 py-2 font-bold text-white text-sm sm:text-base items-center gap-2 cursor-pointer animate-bounce">
+                <span class="text-lg sm:text-xl">🚀</span>
+                <span>Suite du jeu</span>
+            </button>
+
             <button id="btnOpenShop" class="btn-gold rounded-2xl px-3.5 sm:px-4 py-2 font-bold text-amber-950 text-sm sm:text-base flex items-center gap-2 cursor-pointer">
                 <span class="text-lg sm:text-xl">🛍️</span>
                 <span>Boutique</span>
@@ -222,7 +238,7 @@
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="hats">🎩 Chapeaux</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Équipement</button>
                 <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/70 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Équipe & Déco</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-purple-900/80 text-purple-100 border border-purple-400/50 cursor-pointer whitespace-nowrap" data-tab="rebirth">🔮 Rebirth (15k)</button>
+                <button id="tabRebirthBtn" class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-purple-900/80 text-purple-100 border border-purple-400/50 cursor-pointer whitespace-nowrap" data-tab="rebirth">🔮 Rebirth</button>
             </div>
 
             <!-- Liste des articles -->
@@ -255,11 +271,11 @@
     <div id="rebirthModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-40">
         <div class="cream-card rounded-3xl p-6 max-w-md w-full text-center text-amber-950 border-purple-500">
             <div class="text-5xl mb-2">🔮✨</div>
-            <h3 class="text-2xl font-bold text-purple-900 mb-2">Faire un Rebirth ?</h3>
+            <h3 id="rebirthModalTitle" class="text-2xl font-bold text-purple-900 mb-2">Faire un Rebirth ?</h3>
             <p class="text-sm text-amber-900 mb-3">
                 Tu vas recommencer ta boulangerie avec <strong>25 $</strong>, mais tu gagnes des bonus permanents incroyables :
             </p>
-            <ul class="text-left text-xs sm:text-sm bg-purple-100/90 border-2 border-purple-300 rounded-2xl p-3.5 mb-4 space-y-1.5 text-purple-950 font-semibold">
+            <ul id="rebirthModalList" class="text-left text-xs sm:text-sm bg-purple-100/90 border-2 border-purple-300 rounded-2xl p-3.5 mb-4 space-y-1.5 text-purple-950 font-semibold">
                 <li>📦 <strong>Présentoir plus gros :</strong> +3 places permanentes sur le présentoir !</li>
                 <li>💰 <strong>Multiplicateur de gains :</strong> +50% de valeur sur TOUS les biscuits !</li>
                 <li>🔓 <strong>Contenu exclusif débloqué :</strong> Nouveaux niveaux d'équipement, formes royales & chapeaux légendaires !</li>
@@ -272,9 +288,27 @@
         </div>
     </div>
 
+    <!-- Modale Info Lien Suite du Jeu (si le lien n'a pas encore été remplacé) -->
+    <div id="nextPageInfoModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-40">
+        <div class="cream-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950 border-sky-500">
+            <div class="text-5xl mb-2">🚀</div>
+            <h3 class="text-xl font-bold text-sky-900 mb-2">Suite du jeu débloquée !</h3>
+            <p class="text-sm text-amber-900 mb-4">
+                Bravo pour ton <strong>Rebirth 2</strong> ! Pour activer la redirection vers la suite, remplace <code class="bg-amber-200 px-1.5 py-0.5 rounded font-bold">"mettre le lien ici"</code> dans la variable <code class="bg-amber-200 px-1.5 py-0.5 rounded font-bold">LIEN_SUITE_JEU</code> du code.
+            </p>
+            <button id="btnCloseNextPageInfo" class="w-full py-2.5 rounded-xl btn-next-page font-bold text-white cursor-pointer">Compris !</button>
+        </div>
+    </div>
+
     <script>
     (function() {
         "use strict";
+
+        // =========================================================================
+        // 🔗 METS LE LIEN DE TA PROCHAINE PAGE ICI (DÉBLOQUÉ AU REBIRTH 2) :
+        // =========================================================================
+        const LIEN_SUITE_JEU = "mettre le lien ici";
+
 
         // ==========================================
         // 1. CATALOGUE COMPLET (PÂTES, FORMES, 12 GLAÇAGES, CONFETTIS, CHAPEAUX, UPGRADES)
@@ -488,7 +522,25 @@
 
         function getRebirthCost() {
             if (state.rebirths === 0) return 15000;
-            return Math.round(15000 * Math.pow(2.4, state.rebirths));
+            if (state.rebirths === 1) return 50000;
+            return Math.round(50000 * Math.pow(2.4, state.rebirths - 1));
+        }
+
+        function getUpgradeMaxLevel(up) {
+            return up.max + (state.rebirths > 0 ? (up.rebirthExtraMax || 0) * Math.min(3, state.rebirths) : 0);
+        }
+
+        // Vérifie si TOUT a été acheté dans la boutique et l'équipement
+        function isShopFullyPurchased() {
+            const allDough = CATALOG.dough.every(item => state.unlockedDough.includes(item.id));
+            const allShapes = CATALOG.shapes.every(item => state.unlockedShapes.includes(item.id));
+            const allIcing = CATALOG.icing.every(item => state.unlockedIcing.includes(item.id));
+            const allTopping = CATALOG.topping.every(item => state.unlockedTopping.includes(item.id));
+            const allHats = CATALOG.hats.every(item => state.unlockedHats.includes(item.id));
+            const allUpgrades = CATALOG.upgrades.every(up => (state.levels[up.id] || 0) >= getUpgradeMaxLevel(up));
+            const allStaff = CATALOG.staff.every(st => !!state.staffAndDecor[st.id]);
+
+            return allDough && allShapes && allIcing && allTopping && allHats && allUpgrades && allStaff;
         }
 
         function getRebirthMultiplier() {
@@ -498,10 +550,6 @@
         function getShelfMaxCookies() {
             // Présentoir plus gros à chaque Rebirth : 9 de base, +3 par Rebirth jusqu'à 21 !
             return Math.min(21, 9 + state.rebirths * 3);
-        }
-
-        function getUpgradeMaxLevel(up) {
-            return up.max + (state.rebirths > 0 ? (up.rebirthExtraMax || 0) * Math.min(3, state.rebirths) : 0);
         }
 
         function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
@@ -617,7 +665,6 @@
         };
 
         function updateShelfGeometry() {
-            // Agrandit visuellement le présentoir en fonction des Rebirths !
             const extra = Math.min(3, state.rebirths);
             stations.shelf.w = 82 + extra * 14;
             stations.shelf.h = 162 + extra * 14;
@@ -1236,7 +1283,6 @@
             ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
             ctx.lineWidth = 2;
 
-            // 1. Silhouette de la pâte selon la forme choisie
             ctx.beginPath();
             if (shapeId === 'star') {
                 for (let i = 0; i < 10; i++) {
@@ -1283,7 +1329,6 @@
                 ctx.lineTo(11, 9);
                 ctx.closePath();
             } else {
-                // Bonhomme Classique
                 ctx.arc(0, -10, 7, 0, Math.PI * 2);
                 ctx.roundRect(-9, -3, 18, 5, 2.5);
                 ctx.roundRect(-5, -3, 10, 11, 3);
@@ -1293,7 +1338,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // 2. Glaçage & Confettis
             if (cookie.type === 'decorated') {
                 const ic = cookie.icing || CATALOG.icing[0];
                 const icColor = getIcingRenderColor(ic, nowMs);
@@ -1327,7 +1371,6 @@
                     ctx.arc(5, 4, 1.6, 0, Math.PI * 2);
                     ctx.fill();
                 } else {
-                    // Cœur / Étoile / Flocon : centre glacé brillant
                     ctx.beginPath();
                     ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
                     ctx.fill();
@@ -1374,7 +1417,7 @@
             ctx.fillStyle = '#b08968';
             ctx.fillRect(602, 110, 6, 435);
 
-            ctx.strokeStyle = state.rebirths > 0 ? '#a855f7' : '#6d3619';
+            ctx.strokeStyle = state.rebirths >= 2 ? '#38bdf8' : (state.rebirths > 0 ? '#a855f7' : '#6d3619');
             ctx.lineWidth = 12;
             ctx.strokeRect(54, 104, 792, 446);
 
@@ -1637,7 +1680,7 @@
             drawProgressBar(ic.x + 61, ic.y - 24, 84, ic.progress, '#ff6b81');
             drawLabel(ic.x + 61, ic.y - 8, `3. Glaçage: ${getIcing().name.split(' ')[0]}`);
 
-            // 4. PRÉSENTOIR ÉVOLUTIF (Plus gros à chaque Rebirth !)
+            // 4. PRÉSENTOIR ÉVOLUTIF
             const sh = stations.shelf;
             const shelfMax = getShelfMaxCookies();
             const cols = state.rebirths >= 1 ? 4 : 3;
@@ -1697,7 +1740,6 @@
 
         function drawPlayerHat(hatId, nowMs) {
             if (hatId === 'santa') {
-                // Bonnet de Noël
                 ctx.fillStyle = '#e74c3c';
                 ctx.beginPath();
                 ctx.moveTo(-12, -23);
@@ -1711,14 +1753,12 @@
                 ctx.arc(5, -42, 4, 0, Math.PI * 2);
                 ctx.fill();
             } else if (hatId === 'tophat') {
-                // Haut-de-forme chic
                 ctx.fillStyle = '#2d3436';
                 ctx.fillRect(-14, -26, 28, 4);
                 ctx.fillRect(-9, -42, 18, 16);
                 ctx.fillStyle = '#e17055';
                 ctx.fillRect(-9, -30, 18, 3);
             } else if (hatId === 'wizard') {
-                // Chapeau de sorcier étoilé
                 ctx.fillStyle = '#6c5ce7';
                 ctx.beginPath();
                 ctx.ellipse(0, -24, 16, 4, 0, 0, Math.PI * 2);
@@ -1734,7 +1774,6 @@
                 ctx.arc(0, -33, 2.5, 0, Math.PI * 2);
                 ctx.fill();
             } else if (hatId === 'crown') {
-                // Couronne d'or
                 ctx.fillStyle = '#ffd700';
                 ctx.strokeStyle = '#b7840b';
                 ctx.lineWidth = 1.5;
@@ -1750,7 +1789,6 @@
                 ctx.fill();
                 ctx.stroke();
             } else if (hatId === 'rebirthHalo') {
-                // Couronne Cosmique Rebirth animée
                 const hue = Math.floor((nowMs * 0.2) % 360);
                 ctx.strokeStyle = `hsl(${hue}, 95%, 65%)`;
                 ctx.lineWidth = 3;
@@ -1768,7 +1806,6 @@
                 ctx.closePath();
                 ctx.fill();
             } else {
-                // Toque de chef classique
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(0, -29, 10, 0, Math.PI * 2);
@@ -1949,10 +1986,17 @@
         const elOrderSwatch = document.getElementById('hudOrderSwatch');
         const elRebirthBadge = document.getElementById('hudRebirthBadge');
         const elRebirthText = document.getElementById('hudRebirthText');
+        const elTabRebirthBtn = document.getElementById('tabRebirthBtn');
+        const elBtnNextPage = document.getElementById('btnNextPage');
         const glazeQuickBar = document.getElementById('glazeQuickBar');
 
         function formatMoney(n) {
             return n.toLocaleString('fr-FR') + ' $';
+        }
+
+        function formatShortMoney(n) {
+            if (n >= 1000) return (n / 1000) + 'k';
+            return n + '$';
         }
 
         function getSwatchBackground(item) {
@@ -1991,6 +2035,16 @@
             elPrice.textContent = formatMoney(getCookieValue());
             elSold.textContent = state.soldCount;
             elHand.textContent = `${player.holding.length}/${getMaxHand()}`;
+            elTabRebirthBtn.textContent = `🔮 Rebirth (${formatShortMoney(getRebirthCost())})`;
+
+            // Affichage du bouton "Suite du jeu" dès que Rebirth >= 2 !
+            if (state.rebirths >= 2) {
+                elBtnNextPage.classList.remove('hidden');
+                elBtnNextPage.classList.add('flex');
+            } else {
+                elBtnNextPage.classList.add('hidden');
+                elBtnNextPage.classList.remove('flex');
+            }
 
             if (state.rebirths > 0 || state.money >= 10000) {
                 elRebirthBadge.classList.remove('hidden');
@@ -2010,6 +2064,24 @@
                 elOrderSwatch.style.background = getSwatchBackground(getIcing());
             }
         }
+
+        // Action du bouton débloqué au Rebirth 2
+        const nextPageInfoModal = document.getElementById('nextPageInfoModal');
+        elBtnNextPage.addEventListener('click', () => {
+            sound.init();
+            sound.pop();
+            if (LIEN_SUITE_JEU && LIEN_SUITE_JEU !== "mettre le lien ici" && LIEN_SUITE_JEU.trim() !== "") {
+                window.location.href = LIEN_SUITE_JEU;
+            } else {
+                nextPageInfoModal.classList.remove('hidden');
+                nextPageInfoModal.classList.add('flex');
+            }
+        });
+
+        document.getElementById('btnCloseNextPageInfo').addEventListener('click', () => {
+            nextPageInfoModal.classList.add('hidden');
+            nextPageInfoModal.classList.remove('flex');
+        });
 
         let currentTab = 'dough';
         const shopModal = document.getElementById('shopModal');
@@ -2215,9 +2287,29 @@
                 });
             } else if (currentTab === 'rebirth') {
                 const rCost = getRebirthCost();
-                const canRebirth = state.money >= rCost;
+                const isNextRebirth2 = (state.rebirths === 1);
+                const hasRebirth1 = (state.rebirths >= 1);
+                const shopCompleted = isShopFullyPurchased();
+                const hasEnoughMoney = (state.money >= rCost);
+
+                // Au Rebirth 2 (rebirths === 1 -> 2), il faut : 50 000 $, Rebirth 1 déjà acquis, et TOUT acheté en boutique !
+                const canRebirth = isNextRebirth2
+                    ? (hasEnoughMoney && hasRebirth1 && shopCompleted)
+                    : hasEnoughMoney;
+
                 const nextShelf = Math.min(21, 9 + (state.rebirths + 1) * 3);
                 const nextMult = (1 + (state.rebirths + 1) * 0.5).toFixed(1);
+
+                let btnText = '';
+                if (canRebirth) {
+                    btnText = isNextRebirth2
+                        ? `🚀 Faire le Rebirth 2 & Débloquer la Suite (${formatMoney(rCost)})`
+                        : `✨ Faire un Rebirth maintenant (${formatMoney(rCost)})`;
+                } else if (isNextRebirth2 && !shopCompleted) {
+                    btnText = `🔒 Achète d'abord TOUT dans la boutique & équipement !`;
+                } else {
+                    btnText = `🔒 Il te faut ${formatMoney(rCost)} (Tu as ${formatMoney(state.money)})`;
+                }
 
                 const banner = document.createElement('div');
                 banner.className = 'sm:col-span-2 cream-card rounded-3xl p-4 sm:p-5 text-amber-950 border-purple-500 flex flex-col gap-3';
@@ -2226,22 +2318,31 @@
                         <div class="flex items-center gap-3">
                             <span class="text-4xl">🔮</span>
                             <div>
-                                <h3 class="text-xl font-bold text-purple-950">Renaissance Pâtissière (Rebirth ${state.rebirths})</h3>
+                                <h3 class="text-xl font-bold text-purple-950">Renaissance Pâtissière (Rebirth ${state.rebirths} → ${state.rebirths + 1})</h3>
                                 <p class="text-xs text-amber-800">Multiplicateur actuel : <strong class="text-purple-800">x${getRebirthMultiplier().toFixed(1)}</strong> • Présentoir actuel : <strong class="text-purple-800">${getShelfMaxCookies()} places</strong></p>
                             </div>
                         </div>
                         <span class="px-3 py-1 rounded-xl bg-purple-200 text-purple-950 font-bold text-xs">Objectif : ${formatMoney(rCost)}</span>
                     </div>
 
+                    ${isNextRebirth2 ? `
+                    <div class="bg-sky-100/90 border-2 border-sky-400 rounded-2xl p-3 text-xs text-sky-950 space-y-1">
+                        <div class="font-bold text-sm text-sky-900 mb-1">📋 Conditions pour le Rebirth 2 (Débloque la Suite du jeu 🚀) :</div>
+                        <div>${hasRebirth1 ? '✅' : '❌'} Avoir le <strong>Rebirth 1</strong></div>
+                        <div>${shopCompleted ? '✅' : '❌'} Avoir <strong>TOUT acheté</strong> dans la boutique et l'équipement (Niv. Max partout)</div>
+                        <div>${hasEnoughMoney ? '✅' : '❌'} Avoir <strong>${formatMoney(rCost)}</strong> en caisse (${formatMoney(state.money)} / ${formatMoney(rCost)})</div>
+                    </div>
+                    ` : ''}
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs bg-amber-100/80 p-3 rounded-2xl border border-amber-300">
                         <div>📦 <strong>Présentoir plus gros :</strong> Passe à <strong>${nextShelf} places</strong> et s'agrandit en salle !</div>
                         <div>💰 <strong>Valeur des biscuits :</strong> Passe à <strong>x${nextMult}</strong> en permanence !</div>
                         <div>⚡ <strong>Nouveaux niveaux max :</strong> Équipement & Lutins débloqués !</div>
-                        <div>👑 <strong>Exclusivités :</strong> Pâte Céleste, Forme Couronne & Couronne Cosmique !</div>
+                        <div>${isNextRebirth2 ? '🚀 <strong>Exclusivité Rebirth 2 :</strong> Débloque le bouton vers la <strong>Suite du jeu</strong> !' : '👑 <strong>Exclusivités :</strong> Pâte Céleste, Forme Couronne & Couronne Cosmique !'}</div>
                     </div>
 
                     <button ${!canRebirth ? 'disabled' : ''} id="btnTriggerRebirth" class="btn-rebirth w-full py-3 rounded-2xl text-white font-bold text-base cursor-pointer">
-                        ${canRebirth ? `✨ Faire un Rebirth maintenant (${formatMoney(rCost)})` : `🔒 Il te faut ${formatMoney(rCost)} (Tu as ${formatMoney(state.money)})`}
+                        ${btnText}
                     </button>
                 `;
                 shopGrid.appendChild(banner);
@@ -2249,6 +2350,25 @@
                 const btnTrig = banner.querySelector('#btnTriggerRebirth');
                 if (canRebirth) {
                     btnTrig.addEventListener('click', () => {
+                        const titleEl = document.getElementById('rebirthModalTitle');
+                        const listEl = document.getElementById('rebirthModalList');
+                        if (isNextRebirth2) {
+                            titleEl.textContent = 'Passer au Rebirth 2 ? 🚀';
+                            listEl.innerHTML = `
+                                <li>🚀 <strong>Bouton Suite Débloqué :</strong> Accède directement à la suite du jeu !</li>
+                                <li>📦 <strong>Présentoir plus gros :</strong> +3 places permanentes sur le présentoir !</li>
+                                <li>💰 <strong>Multiplicateur de gains :</strong> Passe à <strong>x${nextMult}</strong> sur TOUS les biscuits !</li>
+                                <li>🎩 <strong>Tes chapeaux & formes Rebirth</strong> restent conservés !</li>
+                            `;
+                        } else {
+                            titleEl.textContent = 'Faire un Rebirth ?';
+                            listEl.innerHTML = `
+                                <li>📦 <strong>Présentoir plus gros :</strong> +3 places permanentes sur le présentoir !</li>
+                                <li>💰 <strong>Multiplicateur de gains :</strong> +50% de valeur sur TOUS les biscuits !</li>
+                                <li>🔓 <strong>Contenu exclusif débloqué :</strong> Nouveaux niveaux d'équipement, formes royales & chapeaux légendaires !</li>
+                                <li>🎩 <strong>Tes chapeaux & formes Rebirth</strong> restent conservés !</li>
+                            `;
+                        }
                         rebirthModal.classList.remove('hidden');
                         rebirthModal.classList.add('flex');
                     });
@@ -2309,6 +2429,7 @@
         document.getElementById('btnConfirmRebirth').addEventListener('click', () => {
             const rCost = getRebirthCost();
             if (state.money < rCost) return;
+            if (state.rebirths === 1 && !isShopFullyPurchased()) return;
 
             const keptRebirths = state.rebirths + 1;
             const keptSold = state.soldCount;
@@ -2337,8 +2458,13 @@
 
             updateShelfGeometry();
             sound.rebirth();
-            spawnParticles(player.x, player.y, '#c084fc', 25);
-            spawnText(player.x, player.y - 30, `✨ REBIRTH ${state.rebirths} ! (x${getRebirthMultiplier().toFixed(1)})`, '#e9d5ff');
+            spawnParticles(player.x, player.y, keptRebirths >= 2 ? '#38bdf8' : '#c084fc', 30);
+            spawnText(
+                player.x,
+                player.y - 30,
+                keptRebirths === 2 ? `🚀 REBIRTH 2 ! BOUTON SUITE DÉBLOQUÉ !` : `✨ REBIRTH ${state.rebirths} ! (x${getRebirthMultiplier().toFixed(1)})`,
+                keptRebirths === 2 ? '#7dd3fc' : '#e9d5ff'
+            );
 
             saveGame();
             updateHUD();
