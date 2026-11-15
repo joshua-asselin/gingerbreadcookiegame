@@ -1,1 +1,2557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gingerbread Mart 3 — L'Atelier du Village du Père Noël</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #071426;
+            font-family: 'Fredoka', sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* UI Village du Père Noël : Rouge Royal, Or & Neige */
+        .santa-panel {
+            background: linear-gradient(180deg, #9b1c31 0%, #5c0918 100%);
+            border: 3px solid #fef3c7;
+            box-shadow: 0 5px 0 #2b030a, inset 0 2px 0 rgba(255, 255, 255, 0.28);
+        }
+        .snow-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            border: 3px solid #d97706;
+            box-shadow: 0 4px 0 #78350f;
+        }
+        .btn-gold {
+            background: linear-gradient(180deg, #fde047 0%, #d97706 100%);
+            border: 2px solid #fffbeb;
+            box-shadow: 0 4px 0 #78350f;
+            transition: transform 0.08s;
+        }
+        .btn-gold:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #78350f;
+        }
+        .btn-pine {
+            background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+            border: 2px solid #dcfce7;
+            box-shadow: 0 4px 0 #052e16;
+            transition: transform 0.08s;
+        }
+        .btn-pine:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #052e16;
+        }
+        .btn-pine:disabled {
+            background: #9ca3af;
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 0 #4b5563;
+            opacity: 0.72;
+            cursor: not-allowed;
+        }
+        .quick-pill {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .quick-pill.active {
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 0 0 3px #fde047, 0 3px 0 #2b030a;
+        }
+        .shop-scroll::-webkit-scrollbar,
+        .no-scrollbar::-webkit-scrollbar {
+            width: 7px;
+            height: 5px;
+        }
+        .shop-scroll::-webkit-scrollbar-track {
+            background: #3b0711;
+            border-radius: 8px;
+        }
+        .shop-scroll::-webkit-scrollbar-thumb {
+            background: #fbbf24;
+            border-radius: 8px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Principal 60 FPS -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Supérieur Village du Père Noël -->
+    <div class="fixed top-2 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Compteurs Financiers & Stats -->
+        <div class="flex items-center gap-2 pointer-events-auto flex-wrap">
+            <div class="santa-panel rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-amber-50">
+                <span class="text-xl sm:text-2xl">🪙</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-200 font-bold leading-none">Trésor du Pôle</div>
+                    <div id="hudMoney" class="text-base sm:text-xl font-bold text-yellow-300 leading-tight">80 $</div>
+                </div>
+            </div>
+
+            <div class="santa-panel rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-amber-50">
+                <span class="text-xl sm:text-2xl">🍪</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-200 font-bold leading-none">Valeur / Biscuit</div>
+                    <div id="hudPrice" class="text-base sm:text-xl font-bold text-emerald-300 leading-tight">20 $</div>
+                </div>
+            </div>
+
+            <div class="hidden md:flex santa-panel rounded-2xl px-3 py-1.5 items-center gap-2 text-amber-50">
+                <span class="text-xl">⭐</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-200 font-bold leading-none">Cmd Parfaites</div>
+                    <div id="hudPerfects" class="text-base font-bold text-yellow-200 leading-tight">0</div>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex santa-panel rounded-2xl px-3 py-1.5 items-center gap-1.5 text-amber-50">
+                <span class="text-lg">🎅</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-sky-200 font-bold leading-none">Rang Atelier</div>
+                    <div id="hudPrestige" class="text-sm sm:text-base font-bold text-sky-300 leading-tight">Niv. 1</div>
+                </div>
+            </div>
+
+            <div id="saveBadge" class="bg-emerald-950/90 border-2 border-emerald-400 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-xl opacity-0 transition-opacity duration-300">
+                Sauvegardé ✓
+            </div>
+        </div>
+
+        <!-- Boutons Navigation Monde 2, Boutique & Audio -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <a href="gingerbread_mart_2_la_maison_en_pain_d_pices_4.html" class="santa-panel rounded-2xl px-3 py-2 font-bold text-amber-100 text-xs sm:text-sm flex items-center gap-1.5 hover:brightness-110 cursor-pointer">
+                <span>⬅️</span>
+                <span class="hidden sm:inline">Monde 2</span>
+            </a>
+            <button id="btnOpenShop" class="btn-gold rounded-2xl px-4 py-2 font-bold text-amber-950 text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                <span class="text-lg sm:text-xl">🎄</span>
+                <span>Boutique du Père Noël</span>
+            </button>
+            <button id="btnSound" class="santa-panel rounded-2xl p-2 text-lg sm:text-xl text-white hover:brightness-110 cursor-pointer" title="Activer/Couper le son">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <!-- Barre Inférieure : Sélecteurs Rapides (Glaçage + Confettis + Emballage) & État Convoyeur / Commandes -->
+    <div class="fixed bottom-2 left-2.5 right-2.5 flex flex-col xl:flex-row items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Sélecteurs Rapides -->
+        <div class="santa-panel rounded-2xl px-3 py-1.5 pointer-events-auto max-w-full xl:max-w-[58%] flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-amber-200">🎨 Glaçage:</span>
+                <div id="glazeQuickBar" class="flex items-center gap-1"></div>
+            </div>
+            <div class="h-5 w-0.5 bg-amber-200/30 shrink-0"></div>
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-sky-200">✨ Confettis:</span>
+                <div id="confettiQuickBar" class="flex items-center gap-1"></div>
+            </div>
+            <div class="h-5 w-0.5 bg-amber-200/30 shrink-0"></div>
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-emerald-200">🎁 Emballage:</span>
+                <div id="packQuickBar" class="flex items-center gap-1"></div>
+            </div>
+        </div>
+
+        <!-- Résumé Tapis Convoyeur, Commandes & Main -->
+        <div class="santa-panel rounded-2xl px-3 py-1.5 text-amber-50 text-xs flex items-center gap-2 pointer-events-auto shrink-0 flex-wrap justify-center">
+            <div class="bg-red-950/85 px-2.5 py-1 rounded-xl border border-amber-400/50 font-bold text-amber-200">
+                🔄 Convoyeur : <span id="hudConveyorCount" class="text-yellow-300">0/20</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-red-950/85 px-2.5 py-1 rounded-xl border border-amber-400/50">
+                <span class="text-amber-300 font-bold">Client :</span>
+                <span id="hudOrderSwatch" class="inline-block w-3 h-3 rounded-full border border-white"></span>
+                <span id="hudOrdersList" class="font-bold text-white">En attente...</span>
+            </div>
+            <div class="bg-red-950/85 px-2.5 py-1 rounded-xl border border-amber-400/50 font-bold text-yellow-300">
+                Main : <span id="hudHandSummary">Vide (0/4)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Joystick Tactile Mobile -->
+    <div id="joystickZone" class="fixed bottom-28 left-4 w-24 h-24 rounded-full bg-red-950/60 border-2 border-amber-200/60 flex items-center justify-center z-20 md:hidden">
+        <div id="joystickKnob" class="w-10 h-10 rounded-full bg-amber-400 border-2 border-white shadow-md pointer-events-none"></div>
+    </div>
+
+    <!-- Modale Boutique Complète du Village du Père Noël -->
+    <div id="shopModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-2 sm:p-4 z-30">
+        <div class="santa-panel rounded-3xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden">
+            <!-- En-tête Boutique -->
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b-2 border-amber-200/30 bg-red-950/85">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl sm:text-3xl">🎅</span>
+                    <div>
+                        <h2 class="text-lg sm:text-2xl font-bold text-white">Grand Catalogue du Village du Père Noël (Monde 3)</h2>
+                        <p class="text-xs text-amber-200 flex flex-wrap gap-2">
+                            <span>Trésor : <strong id="shopBalance" class="text-yellow-300">80 $</strong></span> •
+                            <span>Convoyeur : <strong id="shopConveyorCap" class="text-sky-300">20 places</strong></span> •
+                            <span>Lutin Trieur (Étape 9) : <strong id="shopSorterInfo" class="text-emerald-300">1 biscuit/trajet</strong></span>
+                        </p>
+                    </div>
+                </div>
+                <button id="btnCloseShop" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-lg flex items-center justify-center border-2 border-white cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Navigation par Catégories (10 Onglets) -->
+            <div class="flex gap-1.5 p-2.5 bg-red-950/60 overflow-x-auto no-scrollbar">
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-red-950 cursor-pointer whitespace-nowrap" data-tab="flour">🌾 1. Farines (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 2. Pâtes (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="shapes">🎄 3. Formes (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 6. Glaçages (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ 7. Confettis (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="packaging">🎁 Emballages (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="hats">👑 Chapeaux (16)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="conveyor">🔄 Convoyeur & Lutin 9</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Machines & Atelier</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-red-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Lutins & Décos Village</button>
+            </div>
+
+            <!-- Grille d'articles -->
+            <div id="shopGrid" class="p-3.5 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 flex-1"></div>
+
+            <!-- Pied de boutique -->
+            <div class="px-4 py-2 bg-red-950/90 border-t-2 border-amber-200/20 flex items-center justify-between gap-2 text-xs text-amber-200">
+                <span>Chaîne : 1.Farine → 2.Mélanger → 3.Rouler → 4.Former → 5.Cuire → 6.Glaçage → 7.Confettis → 8.Convoyeur (en bas) → 9.Lutin Trieur !</span>
+                <button id="btnOpenReset" class="px-3 py-1 rounded-xl bg-red-900 hover:bg-red-700 text-red-100 font-bold border border-red-400 cursor-pointer whitespace-nowrap">
+                    🗑️ Réinitialiser Monde 3
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Confirmation Réinitialisation -->
+    <div id="resetModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-40">
+        <div class="snow-card rounded-3xl p-6 max-w-sm w-full text-center text-slate-900">
+            <div class="text-4xl mb-2">🎅</div>
+            <h3 class="text-xl font-bold mb-2">Réinitialiser le Village du Père Noël ?</h3>
+            <p class="text-sm text-slate-700 mb-5">Toutes tes recettes, chapeaux, emballages, améliorations du Convoyeur et du Lutin Trieur seront remis à zéro.</p>
+            <div class="flex gap-3">
+                <button id="btnCancelReset" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
+                <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Effacer tout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        "use strict";
+
+        // ============================================================
+        // 1. CATALOGUES COMPLETS (16 ARTICLES PAR CATÉGORIE - 30+ MIN)
+        // ============================================================
+        const CATALOG = {
+            flour: [
+                { id: 'f1', name: 'Farine de Blé Polaire', desc: 'Cultivée dans la serre chauffée du Père Noël.', cost: 0, bonus: 0, growMult: 1.0, color: '#f8fafc', stalkColor: '#fde047' },
+                { id: 'f2', name: 'Farine d\'Orge des Neiges', desc: 'Grain doux des vallées blanches (+8$, +10% pousse).', cost: 140, bonus: 8, growMult: 1.10, color: '#fef3c7', stalkColor: '#facc15' },
+                { id: 'f3', name: 'Farine d\'Épeautre Boréal', desc: 'Arôme rustique du Grand Nord (+18$, +20% pousse).', cost: 360, bonus: 18, growMult: 1.20, color: '#fed7aa', stalkColor: '#fb923c' },
+                { id: 'f4', name: 'Farine de Seigle Alpin', desc: 'Texture authentique de chalet (+34$, +30% pousse).', cost: 820, bonus: 34, growMult: 1.30, color: '#e7e5e4', stalkColor: '#d97706' },
+                { id: 'f5', name: 'Farine d\'Avoine Givré', desc: 'Céréale tendre et veloutée (+60$, +40% pousse).', cost: 1750, bonus: 60, growMult: 1.40, color: '#fef9c3', stalkColor: '#eab308' },
+                { id: 'f6', name: 'Farine de Châtaigne Grillée', desc: 'Saveur chaleureuse de fête (+105$, +50% pousse).', cost: 3600, bonus: 105, growMult: 1.50, color: '#d6ccc2', stalkColor: '#b45309' },
+                { id: 'f7', name: 'Farine d\'Amande Blanche', desc: 'Poudre fine de pâtisserie royale (+175$, +60% pousse).', cost: 7200, bonus: 175, growMult: 1.60, color: '#fffbeb', stalkColor: '#f59e0b' },
+                { id: 'f8', name: 'Farine de Noisette du Pôle', desc: 'Notes pralinées intenses (+280$, +72% pousse).', cost: 14000, bonus: 280, growMult: 1.72, color: '#d4a373', stalkColor: '#92400e' },
+                { id: 'f9', name: 'Farine de Pistache Émeraude', desc: 'Éclat vert festif (+430$, +85% pousse).', cost: 26000, bonus: 430, growMult: 1.85, color: '#dcfce7', stalkColor: '#22c55e' },
+                { id: 'f10', name: 'Farine de Noix de Pécan', desc: 'Richesse caramélisée (+650$, +98% pousse).', cost: 46000, bonus: 650, growMult: 1.98, color: '#e6ccb2', stalkColor: '#78350f' },
+                { id: 'f11', name: 'Farine de Macadamia Royale', desc: 'Douceur exotique rare (+960$, +112% pousse).', cost: 78000, bonus: 960, growMult: 2.12, color: '#fef08a', stalkColor: '#eab308' },
+                { id: 'f12', name: 'Farine de Vanille Bourbon', desc: 'Parfum envoûtant des îles (+1 400$, +126% pousse).', cost: 125000, bonus: 1400, growMult: 2.26, color: '#fff1f2', stalkColor: '#f43f5e' },
+                { id: 'f13', name: 'Farine de Cristal de Glace', desc: 'Blé translucide des glaciers (+2 050$, +142% pousse).', cost: 195000, bonus: 2050, growMult: 2.42, color: '#e0f2fe', stalkColor: '#38bdf8' },
+                { id: 'f14', name: 'Farine d\'Aurore Polaire', desc: 'Grains iridescents magiques (+2 950$, +160% pousse).', cost: 295000, bonus: 2950, growMult: 2.60, color: '#fae8ff', stalkColor: '#d946ef' },
+                { id: 'f15', name: 'Farine Poussière de Lune', desc: 'Récoltée sous l\'éclipse hivernale (+4 200$, +180% pousse).', cost: 430000, bonus: 4200, growMult: 2.80, color: '#e0e7ff', stalkColor: '#6366f1' },
+                { id: 'f16', name: 'Farine d\'Étoile Céleste', desc: 'La farine suprême du Père Noël (+6 000$, +200% pousse).', cost: 620000, bonus: 6000, growMult: 3.00, color: '#fef08a', stalkColor: '#facc15' }
+            ],
+            dough: [
+                { id: 'd1', name: 'Pâte Épicée du Pôle', desc: 'Recette traditionnelle au gingembre et cannelle.', cost: 0, bonus: 0, speedMult: 1.0, color: '#b5651d', stroke: '#5c2c06' },
+                { id: 'd2', name: 'Pâte Miel de Sapin', desc: 'Dorée au miel des forêts enneigées (+10$, +10% vitesse).', cost: 170, bonus: 10, speedMult: 1.10, color: '#d97706', stroke: '#78350f' },
+                { id: 'd3', name: 'Pâte Sirop d\'Érable Pur', desc: 'Coulée sucrée canadienne (+24$, +20% vitesse).', cost: 440, bonus: 24, speedMult: 1.20, color: '#b45309', stroke: '#451a03' },
+                { id: 'd4', name: 'Pâte Cassonade & Beurre', desc: 'Sablée et fondante (+48$, +30% vitesse).', cost: 980, bonus: 48, speedMult: 1.30, color: '#eab308', stroke: '#713f12' },
+                { id: 'd5', name: 'Pâte Cacao Chaud', desc: 'Chocolat au lait réconfortant (+85$, +40% vitesse).', cost: 2100, bonus: 85, speedMult: 1.40, color: '#6f4e37', stroke: '#2c1e16' },
+                { id: 'd6', name: 'Pâte Speculoos Impérial', desc: 'Mélange secret de 7 épices (+145$, +50% vitesse).', cost: 4300, bonus: 145, speedMult: 1.50, color: '#9a3412', stroke: '#431407' },
+                { id: 'd7', name: 'Pâte Velours Rouge Noël', desc: 'Rouge somptueux du manteau du Père Noël (+240$, +62% vitesse).', cost: 8600, bonus: 240, speedMult: 1.62, color: '#be123c', stroke: '#4c0519' },
+                { id: 'd8', name: 'Pâte Pistache & Fleur d\'Oranger', desc: 'Raffinée et parfumée (+380$, +74% vitesse).', cost: 16800, bonus: 380, speedMult: 1.74, color: '#16a34a', stroke: '#052e16' },
+                { id: 'd9', name: 'Pâte Truffe Noire Intense', desc: 'Cacao noir 85% grand cru (+590$, +86% vitesse).', cost: 31000, bonus: 590, speedMult: 1.86, color: '#292524', stroke: '#0c0a09' },
+                { id: 'd10', name: 'Pâte Caramel Beurre Salé', desc: 'Onctuosité bretonne (+890$, +98% vitesse).', cost: 55000, bonus: 890, speedMult: 1.98, color: '#ca8a04', stroke: '#422006' },
+                { id: 'd11', name: 'Pâte Framboise Givré', desc: 'Acidulée et fruitée (+1 320$, +112% vitesse).', cost: 94000, bonus: 1320, speedMult: 2.12, color: '#e11d48', stroke: '#881337' },
+                { id: 'd12', name: 'Pâte Myrtille Polaire', desc: 'Bleu profond des nuits arctiques (+1 950$, +126% vitesse).', cost: 155000, bonus: 1950, speedMult: 2.26, color: '#1d4ed8', stroke: '#1e3a8a' },
+                { id: 'd13', name: 'Pâte Sucre d\'Orge Marbrée', desc: 'Tourbillon menthe et fraise (+2 850$, +142% vitesse).', cost: 245000, bonus: 2850, speedMult: 2.42, color: '#f43f5e', stroke: '#9f1239' },
+                { id: 'd14', name: 'Pâte Cristal de Neige', desc: 'Légère comme un flocon (+4 100$, +160% vitesse).', cost: 375000, bonus: 4100, speedMult: 2.60, color: '#38bdf8', stroke: '#0369a1' },
+                { id: 'd15', name: 'Pâte Nébuleuse Violette', desc: 'Infusée à la magie des lutins (+5 800$, +180% vitesse).', cost: 560000, bonus: 5800, speedMult: 2.80, color: '#9333ea', stroke: '#3b0764' },
+                { id: 'd16', name: 'Pâte Or Liquide du Père Noël', desc: 'Pâte légendaire dorée à l\'or pur (+8 200$, +200% vitesse).', cost: 820000, bonus: 8200, speedMult: 3.00, color: '#facc15', stroke: '#854d0e' }
+            ],
+            shapes: [
+                { id: 's_gingerman', name: 'Bonhomme Pain d\'Épices', desc: 'Le classique souriant de l\'atelier.', cost: 0, bonus: 0, icon: '🧑' },
+                { id: 's_tree', name: 'Sapin de Noël', desc: 'Beau sapin vert des forêts du Pôle (+12$ / biscuit).', cost: 190, bonus: 12, icon: '🎄' },
+                { id: 's_star', name: 'Étoile Polaire', desc: 'Guide le traîneau dans la nuit (+28$ / biscuit).', cost: 480, bonus: 28, icon: '⭐' },
+                { id: 's_bell', name: 'Cloche Tintante', desc: 'Annonce l\'arrivée des cadeaux (+55$ / biscuit).', cost: 1100, bonus: 55, icon: '🔔' },
+                { id: 's_candycane', name: 'Canne Sucre d\'Orge', desc: 'Courbée et croquante (+95$ / biscuit).', cost: 2400, bonus: 95, icon: '🦯' },
+                { id: 's_stocking', name: 'Chaussette de Noël', desc: 'Prête à être remplie près de la cheminée (+165$ / biscuit).', cost: 5000, bonus: 165, icon: '🧦' },
+                { id: 's_gift', name: 'Paquet Cadeau', desc: 'Avec un joli nœud sur le dessus (+275$ / biscuit).', cost: 10200, bonus: 275, icon: '🎁' },
+                { id: 's_snowman', name: 'Bonhomme de Neige', desc: 'Tout rond avec son chapeau (+440$ / biscuit).', cost: 20000, bonus: 440, icon: '⛄' },
+                { id: 's_house', name: 'Chalet en Pain d\'Épices', desc: 'Maisonnette enneigée du village (+690$ / biscuit).', cost: 37000, bonus: 690, icon: '🏠' },
+                { id: 's_reindeer', name: 'Renne Rodolphe', desc: 'Le fidèle renne au nez lumineux (+1 050$ / biscuit).', cost: 66000, bonus: 1050, icon: '🦌' },
+                { id: 's_snowflake', name: 'Flocon Cristallin', desc: 'Six branches géométriques parfaites (+1 580$ / biscuit).', cost: 112000, bonus: 1580, icon: '❄️' },
+                { id: 's_wreath', name: 'Couronne de Houx', desc: 'Décoration porte-bonheur (+2 350$ / biscuit).', cost: 185000, bonus: 2350, icon: '🌿' },
+                { id: 's_nutcracker', name: 'Casse-Noisette Royal', desc: 'Gardien officiel de l\'atelier (+3 450$ / biscuit).', cost: 295000, bonus: 3450, icon: '💂' },
+                { id: 's_angel', name: 'Ange des Neiges', desc: 'Ailes déployées et auréole dorée (+4 950$ / biscuit).', cost: 455000, bonus: 4950, icon: '👼' },
+                { id: 's_sleigh', name: 'Traîneau du Père Noël', desc: 'Chargé de jouets magiques (+7 000$ / biscuit).', cost: 680000, bonus: 7000, icon: '🛷' },
+                { id: 's_castle', name: 'Palais du Père Noël', desc: 'La plus grande merveille sucrée du monde (+9 800$ / biscuit).', cost: 980000, bonus: 9800, icon: '🏰' }
+            ],
+            icing: [
+                { id: 'i1', name: 'Vanille Neige', desc: 'Glaçage blanc pur traditionnel.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
+                { id: 'i2', name: 'Sucre d\'Orge', desc: 'Rayures rouges et blanches festives (+8$ / biscuit).', cost: 130, bonus: 8, color: '#ff4d6d', mode: 'candycane' },
+                { id: 'i3', name: 'Menthe Glaciale', desc: 'Fraîcheur turquoise du Pôle (+20$ / biscuit).', cost: 320, bonus: 20, color: '#2ec4b6', mode: 'solid' },
+                { id: 'i4', name: 'Caramel Doré', desc: 'Nappage ambré brillant (+42$ / biscuit).', cost: 740, bonus: 42, color: '#f59e0b', mode: 'solid' },
+                { id: 'i5', name: 'Chocolat Noir', desc: 'Ganache intense et brillante (+78$ / biscuit).', cost: 1600, bonus: 78, color: '#4a2511', mode: 'solid' },
+                { id: 'i6', name: 'Fraise Givré', desc: 'Rose tendre gourmand (+135$ / biscuit).', cost: 3300, bonus: 135, color: '#ff70a6', mode: 'solid' },
+                { id: 'i7', name: 'Myrtille Arctique', desc: 'Bleu profond velouté (+225$ / biscuit).', cost: 6800, bonus: 225, color: '#3a86ff', mode: 'solid' },
+                { id: 'i8', name: 'Citron Étoilé', desc: 'Jaune vif pétillant (+360$ / biscuit).', cost: 13500, bonus: 360, color: '#fde047', mode: 'solid' },
+                { id: 'i9', name: 'Sapin Émeraude', desc: 'Vert forêt scintillant (+560$ / biscuit).', cost: 25500, bonus: 560, color: '#16a34a', mode: 'solid' },
+                { id: 'i10', name: 'Lavande Polaire', desc: 'Mauve doux et féerique (+850$ / biscuit).', cost: 46000, bonus: 850, color: '#c084fc', mode: 'solid' },
+                { id: 'i11', name: 'Rubis Royal', desc: 'Rouge carmin éclatant (+1 280$ / biscuit).', cost: 80000, bonus: 1280, color: '#e11d48', mode: 'solid' },
+                { id: 'i12', name: 'Saphir Glacier', desc: 'Bleu cristal lumineux (+1 890$ / biscuit).', cost: 135000, bonus: 1890, color: '#0284c7', mode: 'solid' },
+                { id: 'i13', name: 'Aurore Boréale', desc: 'Reflets verts et violets animés (+2 750$ / biscuit).', cost: 215000, bonus: 2750, color: '#00f5d4', mode: 'aurora' },
+                { id: 'i14', name: 'Arc-en-Ciel Magique', desc: 'Cycle complet des couleurs des lutins (+3 950$ / biscuit).', cost: 335000, bonus: 3950, color: '#ff595e', mode: 'rainbow' },
+                { id: 'i15', name: 'Or 24 Carats', desc: 'Feuille d\'or pure scintillante (+5 600$ / biscuit).', cost: 510000, bonus: 5600, color: '#ffd700', mode: 'gold24k' },
+                { id: 'i16', name: 'Diamant Cosmique', desc: 'Éclat prismatique ultime (+8 000$ / biscuit).', cost: 760000, bonus: 8000, color: '#e0f2fe', mode: 'diamond' }
+            ],
+            confetti: [
+                { id: 'c1', name: 'Sans Confetti', desc: 'Glaçage lisse sans garniture.', cost: 0, bonus: 0, style: 'none' },
+                { id: 'c2', name: 'Sucre Cristal', desc: 'Grains de sucre scintillants (+7$ / biscuit).', cost: 110, bonus: 7, style: 'crystals' },
+                { id: 'c3', name: 'Éclats Sucre d\'Orge', desc: 'Morceaux croquants rouges & blancs (+18$ / biscuit).', cost: 290, bonus: 18, style: 'candyshards' },
+                { id: 'c4', name: 'Perles de Neige', desc: 'Mini billes blanches nacrées (+38$ / biscuit).', cost: 680, bonus: 38, style: 'snowpearls' },
+                { id: 'c5', name: 'Pépites Chocolat', desc: 'Éclats de cacao croquants (+72$ / biscuit).', cost: 1480, bonus: 72, style: 'chocochips' },
+                { id: 'c6', name: 'Billes Arc-en-Ciel', desc: 'Confettis multicolores de fête (+125$ / biscuit).', cost: 3100, bonus: 125, style: 'rainbow' },
+                { id: 'c7', name: 'Éclats de Menthe', desc: 'Cristaux verts rafraîchissants (+210$ / biscuit).', cost: 6400, bonus: 210, style: 'mintbits' },
+                { id: 'c8', name: 'Pépites Caramel', desc: 'Petits cubes fondants dorés (+340$ / biscuit).', cost: 12800, bonus: 340, style: 'caramel' },
+                { id: 'c9', name: 'Cœurs Rubis', desc: 'Mini cœurs rouges sucrés (+530$ / biscuit).', cost: 24000, bonus: 530, style: 'hearts' },
+                { id: 'c10', name: 'Mini Sapins Sucrés', desc: 'Confettis verts en forme de sapin (+810$ / biscuit).', cost: 43500, bonus: 810, style: 'minitrees' },
+                { id: 'c11', name: 'Perles d\'Argent', desc: 'Billes métalliques précieuses (+1 220$ / biscuit).', cost: 76000, bonus: 1220, style: 'silver' },
+                { id: 'c12', name: 'Flocons Givré', desc: 'Cristaux bleu glacier (+1 800$ / biscuit).', cost: 128000, bonus: 1800, style: 'iceflakes' },
+                { id: 'c13', name: 'Étoiles Filantes', desc: 'Étoiles dorées brillantes (+2 620$ / biscuit).', cost: 205000, bonus: 2620, style: 'stars' },
+                { id: 'c14', name: 'Feuilles d\'Or Pur', desc: 'Paillettes d\'or comestible (+3 780$ / biscuit).', cost: 320000, bonus: 3780, style: 'goldleaf' },
+                { id: 'c15', name: 'Poussière de Diamant', desc: 'Scintillement prismatique animé (+5 400$ / biscuit).', cost: 485000, bonus: 5400, style: 'diamond' },
+                { id: 'c16', name: 'Joyaux du Père Noël', desc: 'Rubis, émeraudes et diamants sucrés (+7 600$ / biscuit).', cost: 720000, bonus: 7600, style: 'royaljewels' }
+            ],
+            packaging: [
+                { id: 'p1', name: 'Sachet Kraft du Village', desc: 'Emballage simple en papier recyclé.', cost: 0, bonusMult: 1.0, boxColor: '#d4a373', ribbonColor: '#9b2226' },
+                { id: 'p2', name: 'Boîte Rouge Ruban Blanc', desc: 'Classique de Noël (+8% valeur commande).', cost: 220, bonusMult: 1.08, boxColor: '#dc2626', ribbonColor: '#ffffff' },
+                { id: 'p3', name: 'Boîte Verte Sapin & Or', desc: 'Élégance hivernale (+16% valeur commande).', cost: 560, bonusMult: 1.16, boxColor: '#15803d', ribbonColor: '#facc15' },
+                { id: 'p4', name: 'Coffret Sucre d\'Orge', desc: 'Rayé rouge et blanc (+25% valeur commande).', cost: 1300, bonusMult: 1.25, boxColor: '#fff1f2', ribbonColor: '#ff4d6d' },
+                { id: 'p5', name: 'Boîte Bleu Nuit Étoilée', desc: 'Ciel polaire profond (+35% valeur commande).', cost: 2900, bonusMult: 1.35, boxColor: '#1e3a8a', ribbonColor: '#fde047' },
+                { id: 'p6', name: 'Écrin Neige Nacrée', desc: 'Blanc pur avec ruban turquoise (+46% valeur commande).', cost: 6200, bonusMult: 1.46, boxColor: '#f8fafc', ribbonColor: '#06b6d4' },
+                { id: 'p7', name: 'Boîte Chocolat & Caramel', desc: 'Gourmande et chaleureuse (+58% valeur commande).', cost: 12800, bonusMult: 1.58, boxColor: '#78350f', ribbonColor: '#fbbf24' },
+                { id: 'p8', name: 'Coffret Velours Rose', desc: 'Douceur féerique (+72% valeur commande).', cost: 25000, bonusMult: 1.72, boxColor: '#be185d', ribbonColor: '#fbcfe8' },
+                { id: 'p9', name: 'Mallette des Lutins', desc: 'Boîte à outils sucrée officielle (+88% valeur commande).', cost: 47000, bonusMult: 1.88, boxColor: '#047857', ribbonColor: '#f97316' },
+                { id: 'p10', name: 'Coffret Violet Mystique', desc: 'Magie des aurores (+105% valeur commande).', cost: 85000, bonusMult: 2.05, boxColor: '#6b21a8', ribbonColor: '#e879f9' },
+                { id: 'p11', name: 'Boîte Argent & Cristal', desc: 'Reflets glacés brillants (+125% valeur commande).', cost: 148000, bonusMult: 2.25, boxColor: '#cbd5e1', ribbonColor: '#0284c7' },
+                { id: 'p12', name: 'Coffret Doré Royal', desc: 'Or massif poli (+148% valeur commande).', cost: 245000, bonusMult: 2.48, boxColor: '#f59e0b', ribbonColor: '#fef08a' },
+                { id: 'p13', name: 'Écrin Rubis Impérial', desc: 'Sertissage précieux (+175% valeur commande).', cost: 390000, bonusMult: 2.75, boxColor: '#9f1239', ribbonColor: '#ffd700' },
+                { id: 'p14', name: 'Coffret Aurore Boréale', desc: 'Couleurs changeantes (+205% valeur commande).', cost: 600000, bonusMult: 3.05, boxColor: '#0d9488', ribbonColor: '#a855f7' },
+                { id: 'p15', name: 'Mini Traîneau Cadeau', desc: 'Livré sur patins d\'or (+240% valeur commande).', cost: 890000, bonusMult: 3.40, boxColor: '#b91c1c', ribbonColor: '#fde047' },
+                { id: 'p16', name: 'Coffre Légendaire du Père Noël', desc: 'L\'emballage suprême du Pôle Nord (+300% valeur commande).', cost: 1300000, bonusMult: 4.00, boxColor: '#ffd700', ribbonColor: '#dc2626' }
+            ],
+            hats: [
+                { id: 'h1', name: 'Toque du Village', desc: 'Toque blanche classique de l\'atelier.', cost: 0, speedBonus: 0, priceBonus: 0, color: '#ffffff', trim: '#dc2626', icon: '👨‍🍳' },
+                { id: 'h2', name: 'Bonnet de Lutin Vert', desc: 'Pointu avec grelot (+12 vitesse, +10$ / biscuit).', cost: 250, speedBonus: 12, priceBonus: 10, color: '#16a34a', trim: '#fde047', icon: '🧝' },
+                { id: 'h3', name: 'Bonnet du Père Noël', desc: 'Rouge velours et pompon blanc (+22 vitesse, +25$ / biscuit).', cost: 650, speedBonus: 22, priceBonus: 25, color: '#dc2626', trim: '#ffffff', icon: '🎅' },
+                { id: 'h4', name: 'Cache-Oreilles Polaire', desc: 'Chaud et confortable (+32 vitesse, +55$ / biscuit).', cost: 1500, speedBonus: 32, priceBonus: 55, color: '#38bdf8', trim: '#ffffff', icon: '🎧' },
+                { id: 'h5', name: 'Chapeau Bonhomme de Neige', desc: 'Haut-de-forme noir à ruban rouge (+42 vitesse, +110$ / biscuit).', cost: 3400, speedBonus: 42, priceBonus: 110, color: '#1e293b', trim: '#ef4444', icon: '🎩' },
+                { id: 'h6', name: 'Bois de Renne Festifs', desc: 'Avec petit nez rouge brillant (+52 vitesse, +200$ / biscuit).', cost: 7400, speedBonus: 52, priceBonus: 200, color: '#92400e', trim: '#ef4444', icon: '🦌' },
+                { id: 'h7', name: 'Couronne Sucre d\'Orge', desc: 'Sucrée et croquante (+62 vitesse, +350$ / biscuit).', cost: 15500, speedBonus: 62, priceBonus: 350, color: '#ff4d6d', trim: '#ffffff', icon: '🍬' },
+                { id: 'h8', name: 'Toque Pain d\'Épices', desc: 'Garnie de glaçage vanille (+72 vitesse, +580$ / biscuit).', cost: 31000, speedBonus: 72, priceBonus: 580, color: '#b5651d', trim: '#ffffff', icon: '🍪' },
+                { id: 'h9', name: 'Casque Casse-Noisette', desc: 'Shako royal de parade (+82 vitesse, +920$ / biscuit).', cost: 59000, speedBonus: 82, priceBonus: 920, color: '#1d4ed8', trim: '#facc15', icon: '💂' },
+                { id: 'h10', name: 'Chapeau Sapin Illuminé', desc: 'Guirlandes clignotantes intégrées (+92 vitesse, +1 450$ / biscuit).', cost: 108000, speedBonus: 92, priceBonus: 1450, color: '#15803d', trim: '#fde047', icon: '🎄' },
+                { id: 'h11', name: 'Chapeau Mage des Glaces', desc: 'Pointu bleu givré étoilé (+102 vitesse, +2 200$ / biscuit).', cost: 190000, speedBonus: 102, priceBonus: 2200, color: '#0284c7', trim: '#e0f2fe', icon: '🧙‍♂️' },
+                { id: 'h12', name: 'Diadème Flocon Cristal', desc: 'Taillé dans la glace éternelle (+112 vitesse, +3 300$ / biscuit).', cost: 325000, speedBonus: 112, priceBonus: 3300, color: '#bae6fd', trim: '#38bdf8', icon: '❄️' },
+                { id: 'h13', name: 'Couronne d\'Étoiles Polaires', desc: 'Rayonne dans tout le village (+124 vitesse, +4 800$ / biscuit).', cost: 530000, speedBonus: 124, priceBonus: 4800, color: '#fde047', trim: '#f59e0b', icon: '⭐' },
+                { id: 'h14', name: 'Tiare Aurore Boréale', desc: 'Ondes lumineuses magiques (+136 vitesse, +6 900$ / biscuit).', cost: 840000, speedBonus: 136, priceBonus: 6900, color: '#2dd4bf', trim: '#c084fc', icon: '🌈' },
+                { id: 'h15', name: 'Couronne Impériale du Pôle', desc: 'Or pur et rubis royaux (+148 vitesse, +9 800$ / biscuit).', cost: 1280000, speedBonus: 148, priceBonus: 9800, color: '#ffd700', trim: '#e11d48', icon: '👑' },
+                { id: 'h16', name: 'Auréole Cosmique du Père Noël', desc: 'Puissance suprême de Noël (+165 vitesse, +14 000$ / biscuit).', cost: 1900000, speedBonus: 165, priceBonus: 14000, color: '#fffbeb', trim: '#facc15', icon: '✨' }
+            ],
+            conveyor: [
+                { id: 'conveyorPlaces', name: 'Agrandir le Convoyeur (20 → 40 places)', desc: 'Ajoute +2 places sur le tapis roulant circulaire (jusqu\'à 40 biscuits en même temps) !', baseCost: 450, mult: 2.15, max: 10, icon: '🔄' },
+                { id: 'conveyorSpeed', name: 'Moteur Turbo du Convoyeur', desc: 'Fait tourner les biscuits plus vite autour de l\'atelier.', baseCost: 350, mult: 1.95, max: 10, icon: '⏩' },
+                { id: 'sorterHandCap', name: 'Mains Géantes du Lutin Trieur (Étape 9)', desc: 'Permet au Lutin Étape 9 de ramasser plus de biscuits d\'un coup sur le convoyeur (1 → 12) !', baseCost: 400, mult: 2.05, max: 11, icon: '🤲' },
+                { id: 'sorterSpeed', name: 'Bottines Fusées du Lutin Trieur (Étape 9)', desc: 'Le Lutin Étape 9 analyse, trie et livre les commandes beaucoup plus vite !', baseCost: 320, mult: 1.9, max: 12, icon: '👟' },
+                { id: 'perfectMultiplier', name: 'Prime Commande Parfaite ⭐', desc: 'Augmente encore plus l\'argent gagné quand le Lutin trouve les bons biscuits !', baseCost: 600, mult: 2.1, max: 10, icon: '💎' }
+            ],
+            upgrades: [
+                { id: 'playerSpeed', name: 'Patins à Glace Turbo (Joueur)', desc: 'Tu glisses à toute allure dans le village du Père Noël.', baseCost: 120, mult: 1.85, max: 12, icon: '⛸️' },
+                { id: 'playerCap', name: 'Hotte / Plateau Géant (Joueur)', desc: 'Transporte jusqu\'à 24 ingrédients ou biscuits en main.', baseCost: 150, mult: 1.9, max: 10, icon: '🎒' },
+                { id: 'wheatSpeed', name: '1. Serre Polaire Accélérée', desc: 'Fait pousser et récolte la farine en un éclair.', baseCost: 130, mult: 1.85, max: 10, icon: '🌾' },
+                { id: 'mixSpeed', name: '2. Pétrin Automatique du Pôle', desc: 'Mélange la farine en pâte ultra rapidement.', baseCost: 150, mult: 1.85, max: 10, icon: '🥣' },
+                { id: 'rollSpeed', name: '3. Rouleau en Marbre Givré', desc: 'Étale la pâte instantanément.', baseCost: 170, mult: 1.85, max: 10, icon: '🪄' },
+                { id: 'shapeSpeed', name: '4. Emporte-Pièce Magique', desc: 'Découpe les 16 formes avec une précision divine.', baseCost: 190, mult: 1.85, max: 10, icon: '🎄' },
+                { id: 'ovenSpeed', name: '5. Four à Magma Boréal', desc: 'Cuit les biscuits à toute vitesse.', baseCost: 220, mult: 1.9, max: 10, icon: '🔥' },
+                { id: 'ovenCap', name: '5. Grille de Four XXL', desc: 'Cuit jusqu\'à 14 biscuits simultanément.', baseCost: 260, mult: 2.0, max: 10, icon: '♨️' },
+                { id: 'glazeSpeed', name: '6. Fontaine de Glaçage Express', desc: 'Applique le glaçage en une fraction de seconde.', baseCost: 210, mult: 1.85, max: 10, icon: '🎨' },
+                { id: 'confettiSpeed', name: '7. Canon à Confettis Festifs', desc: 'Saupoudre les confettis instantanément.', baseCost: 230, mult: 1.85, max: 10, icon: '✨' },
+                { id: 'helperCap', name: 'Mains des Lutins Assistants', desc: 'Tous tes lutins engagés portent plus d\'objets à la fois (1 → 8) !', baseCost: 850, mult: 2.2, max: 7, icon: '🧤' },
+                { id: 'helperSpeed', name: 'Vitesse des Lutins Assistants', desc: 'Tous tes lutins engagés courent et travaillent 2x plus vite.', baseCost: 750, mult: 2.1, max: 10, icon: '⚡' },
+                { id: 'magnet', name: 'Aimant à Pièces d\'Or', desc: 'Attire automatiquement les pièces de tout l\'atelier.', baseCost: 300, mult: 2.1, max: 8, icon: '🧲' }
+            ],
+            staff: [
+                { id: 'elfMiller', name: 'Lutin Meunier (Étape 1→2)', desc: 'Récolte la farine et la mélange en pâte automatiquement.', cost: 650, icon: '🌾', kind: 'staff' },
+                { id: 'elfRoller', name: 'Lutin Rouleur (Étape 2→4)', desc: 'Roule la pâte et découpe les formes en continu.', cost: 1400, icon: '🪄', kind: 'staff' },
+                { id: 'elfBaker', name: 'Lutin Boulanger (Étape 4→5)', desc: 'Enfourne les biscuits crus et sort les biscuits cuits.', cost: 2800, icon: '🔥', kind: 'staff' },
+                { id: 'elfGlazer', name: 'Lutin Glaceur (Étape 5→6)', desc: 'Prend les biscuits cuits et applique le glaçage demandé !', cost: 5200, icon: '🎨', kind: 'staff' },
+                { id: 'elfConfetti', name: 'Lutin Confettis (Étape 6→8)', desc: 'Ajoute les confettis et pose les biscuits sur le Convoyeur !', cost: 9500, icon: '✨', kind: 'staff' },
+                { id: 'elfSupreme', name: 'Chef Lutin Polyvalent ⚡', desc: 'Renfort ultra-rapide qui aide sur toutes les tables !', cost: 24000, icon: '🎅', kind: 'staff' },
+                { id: 'decorTree', name: 'Grand Sapin Illuminé du Village', desc: 'Décore l\'atelier de guirlandes (+120$ / biscuit).', cost: 3500, icon: '🎄', kind: 'decor', bonus: 120 },
+                { id: 'decorSnowman', name: 'Bonhomme de Neige Géant', desc: 'Mascotte souriante du village (+280$ / biscuit).', cost: 11000, icon: '⛄', kind: 'decor', bonus: 280 },
+                { id: 'decorFountain', name: 'Fontaine de Chocolat Chaud', desc: 'Cascade de cacao fumant (+650$ / biscuit).', cost: 32000, icon: '⛲', kind: 'decor', bonus: 650 },
+                { id: 'decorCandyArch', name: 'Arche Géante en Sucre d\'Orge', desc: 'Encadre l\'entrée des clients (+1 500$ / biscuit).', cost: 85000, icon: '🍬', kind: 'decor', bonus: 1500 },
+                { id: 'decorReindeer', name: 'Enclos des Rennes Magiques', desc: 'Les rennes du Père Noël veillent (+3 400$ / biscuit).', cost: 210000, icon: '🦌', kind: 'decor', bonus: 3400 },
+                { id: 'decorSleigh', name: 'Traîneau d\'Or du Père Noël', desc: 'Garé devant l\'atelier (+7 500$ / biscuit).', cost: 520000, icon: '🛷', kind: 'decor', bonus: 7500 }
+            ]
+        };
+
+        // ============================================================
+        // 2. AUDIO SYNTHÉTISEUR (WEB AUDIO API)
+        // ============================================================
+        const sound = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            },
+            beep(freq, type, duration, vol = 0.05) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            },
+            pop() { this.beep(560, 'sine', 0.07, 0.045); },
+            ding() { this.beep(880, 'triangle', 0.16, 0.06); },
+            perfect() {
+                this.beep(659, 'triangle', 0.08, 0.07);
+                setTimeout(() => this.beep(880, 'triangle', 0.09, 0.07), 60);
+                setTimeout(() => this.beep(1318, 'triangle', 0.16, 0.08), 120);
+            },
+            bad() {
+                this.beep(260, 'sawtooth', 0.12, 0.04);
+                setTimeout(() => this.beep(210, 'sawtooth', 0.16, 0.04), 90);
+            },
+            coin() {
+                this.beep(1046, 'sine', 0.07, 0.05);
+                setTimeout(() => this.beep(1396, 'sine', 0.12, 0.05), 50);
+            },
+            upgrade() {
+                this.beep(523, 'triangle', 0.08, 0.07);
+                setTimeout(() => this.beep(784, 'triangle', 0.14, 0.07), 70);
+            }
+        };
+
+        // ============================================================
+        // 3. SAUVEGARDE & ÉTAT DU MONDE 3
+        // ============================================================
+        const SAVE_KEY = 'gingerbread_mart_3_save_v1';
+
+        const DEFAULT_STATE = {
+            money: 80,
+            perfectOrders: 0,
+            totalDelivered: 0,
+            unlockedFlour: ['f1'],
+            selectedFlour: 'f1',
+            unlockedDough: ['d1'],
+            selectedDough: 'd1',
+            unlockedShapes: ['s_gingerman'],
+            selectedShape: 's_gingerman',
+            unlockedIcing: ['i1'],
+            selectedIcing: 'i1',
+            unlockedConfetti: ['c1'],
+            selectedConfetti: 'c1',
+            unlockedPackaging: ['p1'],
+            selectedPackaging: 'p1',
+            unlockedHats: ['h1'],
+            selectedHat: 'h1',
+            levels: {
+                conveyorPlaces: 0,
+                conveyorSpeed: 1,
+                sorterHandCap: 1,
+                sorterSpeed: 1,
+                perfectMultiplier: 1,
+                playerSpeed: 1,
+                playerCap: 1,
+                wheatSpeed: 1,
+                mixSpeed: 1,
+                rollSpeed: 1,
+                shapeSpeed: 1,
+                ovenSpeed: 1,
+                ovenCap: 1,
+                glazeSpeed: 1,
+                confettiSpeed: 1,
+                helperCap: 1,
+                helperSpeed: 1,
+                magnet: 0
+            },
+            staffAndDecor: {
+                elfMiller: false,
+                elfRoller: false,
+                elfBaker: false,
+                elfGlazer: false,
+                elfConfetti: false,
+                elfSupreme: false,
+                decorTree: false,
+                decorSnowman: false,
+                decorFountain: false,
+                decorCandyArch: false,
+                decorReindeer: false,
+                decorSleigh: false
+            }
+        };
+
+        let state = loadGame();
+        let saveBadgeTimer = null;
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        ...DEFAULT_STATE,
+                        ...parsed,
+                        levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) },
+                        staffAndDecor: { ...DEFAULT_STATE.staffAndDecor, ...(parsed.staffAndDecor || {}) }
+                    };
+                }
+            } catch (e) {}
+            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+                const badge = document.getElementById('saveBadge');
+                if (badge) {
+                    badge.style.opacity = '1';
+                    clearTimeout(saveBadgeTimer);
+                    saveBadgeTimer = setTimeout(() => { badge.style.opacity = '0'; }, 1400);
+                }
+            } catch (e) {}
+        }
+
+        function getFlour() { return CATALOG.flour.find(f => f.id === state.selectedFlour) || CATALOG.flour[0]; }
+        function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
+        function getShape() { return CATALOG.shapes.find(s => s.id === state.selectedShape) || CATALOG.shapes[0]; }
+        function getIcing() { return CATALOG.icing.find(i => i.id === state.selectedIcing) || CATALOG.icing[0]; }
+        function getConfetti() { return CATALOG.confetti.find(c => c.id === state.selectedConfetti) || CATALOG.confetti[0]; }
+        function getPackaging() { return CATALOG.packaging.find(p => p.id === state.selectedPackaging) || CATALOG.packaging[0]; }
+        function getHat() { return CATALOG.hats.find(h => h.id === state.selectedHat) || CATALOG.hats[0]; }
+
+        function getDecorBonus() {
+            let b = 0;
+            CATALOG.staff.forEach(item => {
+                if (item.kind === 'decor' && state.staffAndDecor[item.id]) b += item.bonus;
+            });
+            return b;
+        }
+
+        function getCookieUnitValue() {
+            const base = 20 + getFlour().bonus + getDough().bonus + getShape().bonus + getIcing().bonus + getConfetti().bonus + getHat().priceBonus + getDecorBonus();
+            return Math.round(base * getPackaging().bonusMult);
+        }
+
+        function getPrestigeLevel() {
+            let totalLvl = 0;
+            Object.values(state.levels).forEach(v => totalLvl += v);
+            const unlocked = state.unlockedFlour.length + state.unlockedDough.length + state.unlockedShapes.length +
+                state.unlockedIcing.length + state.unlockedConfetti.length + state.unlockedPackaging.length + state.unlockedHats.length;
+            return Math.max(1, Math.floor((totalLvl + unlocked) / 8));
+        }
+
+        // Capacités & Vitesses
+        function getConveyorCapacity() { return Math.min(40, 20 + (state.levels.conveyorPlaces || 0) * 2); }
+        function getConveyorSpeed() { return 0.14 + (state.levels.conveyorSpeed - 1) * 0.025; }
+        function getSorterHandCap() { return Math.min(12, state.levels.sorterHandCap || 1); }
+        function getSorterSpeed() { return 185 + (state.levels.sorterSpeed - 1) * 32; }
+        function getPerfectBonusMult() { return 2.4 + (state.levels.perfectMultiplier - 1) * 0.25; }
+
+        function getMaxHand() { return Math.min(24, 4 + (state.levels.playerCap - 1) * 2); }
+        function getOvenCapacity() { return Math.min(14, 4 + (state.levels.ovenCap - 1)); }
+        function getPlayerSpeed() { return 255 + (state.levels.playerSpeed - 1) * 28 + getHat().speedBonus; }
+
+        function getWheatTime() { return Math.max(0.22, 1.35 / (getFlour().growMult * (1 + (state.levels.wheatSpeed - 1) * 0.35))); }
+        function getMixTime() { return Math.max(0.18, 1.15 / (1 + (state.levels.mixSpeed - 1) * 0.4)); }
+        function getRollTime() { return Math.max(0.18, 1.15 / (getDough().speedMult * (1 + (state.levels.rollSpeed - 1) * 0.4))); }
+        function getShapeTime() { return Math.max(0.16, 1.05 / (1 + (state.levels.shapeSpeed - 1) * 0.4)); }
+        function getBakeTime() { return Math.max(0.55, 2.6 - (state.levels.ovenSpeed - 1) * 0.22); }
+        function getGlazeTime() { return Math.max(0.15, 1.0 / (1 + (state.levels.glazeSpeed - 1) * 0.42)); }
+        function getConfettiTime() { return Math.max(0.15, 0.95 / (1 + (state.levels.confettiSpeed - 1) * 0.42)); }
+
+        function getHelperHandCap() { return Math.min(8, state.levels.helperCap || 1); }
+        function getHelperSpeed() { return 190 + (state.levels.helperSpeed - 1) * 34; }
+        function getHelperWorkFactor() { return Math.max(0.32, 1.05 - (state.levels.helperSpeed - 1) * 0.08); }
+        function getMagnetRadius() { return state.levels.magnet > 0 ? 130 + state.levels.magnet * 85 : 58; }
+
+        // ============================================================
+        // 4. ARCHITECTURE DU VILLAGE DU PÈRE NOËL (1160 x 700)
+        // ============================================================
+        const WORLD_W = 1160;
+        const WORLD_H = 700;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            scale = Math.min(w / WORLD_W, h / WORLD_H);
+            offsetX = (w - WORLD_W * scale) * 0.5;
+            offsetY = (h - WORLD_H * scale) * 0.5;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Limites de déplacement du joueur (élargies à droite pour ramasser l'argent !)
+        const PLAYER_MIN_X = 198;
+        const PLAYER_MAX_X = 925;
+        const PLAYER_MIN_Y = 218;
+        const PLAYER_MAX_Y = 615;
+
+        // Les 8 tables de fabrication + Le Grand Convoyeur Circulaire (Étape 8) + Le Lutin Trieur (Étape 9)
+        const stations = {
+            // Étape 1 : Récolter Farine
+            wheat: { x: 88, y: 135, w: 96, h: 92, zoneX: 215, zoneY: 181, zoneR: 42, progress: 0 },
+            // Étape 2 : Mélanger Pâte
+            mixer: { x: 88, y: 262, w: 96, h: 92, zoneX: 215, zoneY: 308, zoneR: 42, progress: 0 },
+            // Étape 3 : Rouler Pâte
+            roller: { x: 88, y: 390, w: 96, h: 92, zoneX: 215, zoneY: 436, zoneR: 42, progress: 0 },
+            // Étape 4 : Former Biscuit
+            shaper: { x: 88, y: 518, w: 96, h: 92, zoneX: 215, zoneY: 564, zoneR: 42, progress: 0 },
+            // Étape 5 : Cuire au Four du Père Noël
+            oven: { x: 295, y: 120, w: 145, h: 88, zoneX: 367, zoneY: 238, zoneR: 44, slots: [], ready: [] },
+            // Étape 6 : Table de Glaçage
+            glazer: { x: 480, y: 120, w: 125, h: 88, zoneX: 542, zoneY: 238, zoneR: 44, progress: 0 },
+            // Étape 7 : Table des Confettis
+            confettier: { x: 645, y: 120, w: 125, h: 88, zoneX: 707, zoneY: 238, zoneR: 44, progress: 0 },
+            // Étape 8 : Grand Convoyeur Circulaire (Rond de dépôt placé EN BAS pour ne toucher aucun autre rond !)
+            conveyor: {
+                cx: 530, cy: 405, rx: 185, ry: 100,
+                dropZoneX: 530, dropZoneY: 568, dropZoneR: 44,
+                items: [],
+                beltPhase: 0
+            },
+            // Comptoir de livraison du Lutin Trieur (Étape 9)
+            deliveryCounter: { x: 810, y: 345, w: 68, h: 165 }
+        };
+
+        // Joueur
+        const player = {
+            x: 420,
+            y: 265,
+            facing: 1,
+            walkPhase: 0,
+            holding: [],
+            activeStation: null
+        };
+
+        // LE LUTIN TRIEUR (ÉTAPE 9)
+        const sorterElf = {
+            x: 765,
+            y: 425,
+            facing: 1,
+            walkPhase: 0,
+            holding: [],
+            targetCustomerId: null
+        };
+
+        let helpers = [];
+        let customers = [];
+        let moneyPiles = [];
+        let particles = [];
+        let floatingTexts = [];
+        let snowFlakes = [];
+        let customerSpawnTimer = 0.8;
+
+        for (let i = 0; i < 85; i++) {
+            snowFlakes.push({
+                x: Math.random() * WORLD_W,
+                y: Math.random() * WORLD_H,
+                r: 1.5 + Math.random() * 2.5,
+                spdY: 22 + Math.random() * 35,
+                drift: Math.random() * Math.PI * 2
+            });
+        }
+
+        function syncHelpers() {
+            const defs = [
+                { flag: 'elfMiller', role: 'miller', x: 225, y: 240 },
+                { flag: 'elfRoller', role: 'roller', x: 225, y: 495 },
+                { flag: 'elfBaker', role: 'baker', x: 310, y: 260 },
+                { flag: 'elfGlazer', role: 'glazer', x: 540, y: 245 },
+                { flag: 'elfConfetti', role: 'confetti', x: 690, y: 255 },
+                { flag: 'elfSupreme', role: 'supreme', x: 470, y: 260 }
+            ];
+            defs.forEach(d => {
+                if (state.staffAndDecor[d.flag] && !helpers.some(h => h.role === d.role)) {
+                    helpers.push({ role: d.role, x: d.x, y: d.y, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+                }
+            });
+        }
+        syncHelpers();
+
+        // ============================================================
+        // 5. CONTRÔLES (CLAVIER, SOURIS, TOUCHER, JOYSTICK)
+        // ============================================================
+        const keys = {};
+        let pointerTarget = null;
+        let isPointerDown = false;
+        const joyVec = { x: 0, y: 0 };
+
+        function selectIcingById(id) {
+            if (!state.unlockedIcing.includes(id)) return;
+            state.selectedIcing = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
+        function selectConfettiById(id) {
+            if (!state.unlockedConfetti.includes(id)) return;
+            state.selectedConfetti = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
+        function selectPackagingById(id) {
+            if (!state.unlockedPackaging.includes(id)) return;
+            state.selectedPackaging = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            keys[k] = true;
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'q', 'z'].includes(k)) {
+                pointerTarget = null;
+            }
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key, 10) - 1;
+                if (idx < state.unlockedIcing.length) selectIcingById(state.unlockedIcing[idx]);
+            }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+        function toWorld(clientX, clientY) {
+            return {
+                x: Math.max(PLAYER_MIN_X, Math.min(PLAYER_MAX_X, (clientX - offsetX) / scale)),
+                y: Math.max(PLAYER_MIN_Y, Math.min(PLAYER_MAX_Y, (clientY - offsetY) / scale))
+            };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            sound.init();
+            isPointerDown = true;
+            pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPointerDown) pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', () => { isPointerDown = false; });
+
+        canvas.addEventListener('touchstart', (e) => {
+            sound.init();
+            if (e.touches.length > 0) pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        // Joystick mobile
+        const joyZone = document.getElementById('joystickZone');
+        const joyKnob = document.getElementById('joystickKnob');
+        let joyId = null;
+
+        function handleJoyMove(cx, cy) {
+            const rect = joyZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width * 0.5;
+            const centerY = rect.top + rect.height * 0.5;
+            const maxR = rect.width * 0.5 - 14;
+            let dx = cx - centerX;
+            let dy = cy - centerY;
+            const d = Math.hypot(dx, dy);
+            if (d > maxR) { dx = (dx / d) * maxR; dy = (dy / d) * maxR; }
+            joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+            joyVec.x = dx / maxR;
+            joyVec.y = dy / maxR;
+            pointerTarget = null;
+        }
+
+        joyZone.addEventListener('touchstart', (e) => {
+            e.preventDefault(); e.stopPropagation(); sound.init();
+            const t = e.changedTouches[0];
+            joyId = t.identifier;
+            handleJoyMove(t.clientX, t.clientY);
+        }, { passive: false });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) handleJoyMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+            }
+        }, { passive: false });
+
+        function endJoy(e) {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) {
+                    joyId = null; joyVec.x = 0; joyVec.y = 0;
+                    joyKnob.style.transform = 'translate(0px, 0px)';
+                }
+            }
+        }
+        joyZone.addEventListener('touchend', endJoy);
+        joyZone.addEventListener('touchcancel', endJoy);
+
+        // ============================================================
+        // 6. PARTICULES & TEXTES FLOTTANTS
+        // ============================================================
+        function spawnParticles(x, y, color, count) {
+            if (particles.length > 90) return;
+            for (let i = 0; i < count; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 35 + Math.random() * 85;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(ang) * spd,
+                    vy: Math.sin(ang) * spd - 24,
+                    life: 0.45 + Math.random() * 0.25,
+                    maxLife: 0.7,
+                    color,
+                    r: 3 + Math.random() * 2.5
+                });
+            }
+        }
+
+        function spawnText(x, y, text, color) {
+            if (floatingTexts.length > 22) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life: 1.2 });
+        }
+
+        // ============================================================
+        // 7. POSITION SUR LE CONVOYEUR CIRCULAIRE (ÉTAPE 8)
+        // ============================================================
+        function getConveyorPoint(t) {
+            const angle = t * Math.PI * 2;
+            const conv = stations.conveyor;
+            return {
+                x: conv.cx + Math.cos(angle) * conv.rx,
+                y: conv.cy + Math.sin(angle) * conv.ry
+            };
+        }
+
+        function getFrontCustomer() {
+            return customers.find(c => c.state === 'waiting') || customers[0] || null;
+        }
+
+        // ============================================================
+        // 8. BOUCLE LOGIQUE : 9 ÉTAPES, CONVOYEUR & LUTIN TRIEUR
+        // ============================================================
+        function update(dt) {
+            snowFlakes.forEach(sf => {
+                sf.y += sf.spdY * dt;
+                sf.drift += dt * 1.6;
+                sf.x += Math.sin(sf.drift) * 14 * dt;
+                if (sf.y > WORLD_H) { sf.y = -5; sf.x = Math.random() * WORLD_W; }
+            });
+
+            // 1. Déplacement du joueur
+            let mx = joyVec.x;
+            let my = joyVec.y;
+            if (keys['arrowleft'] || keys['a'] || keys['q']) mx -= 1;
+            if (keys['arrowright'] || keys['d']) mx += 1;
+            if (keys['arrowup'] || keys['w'] || keys['z']) my -= 1;
+            if (keys['arrowdown'] || keys['s']) my += 1;
+
+            const spd = getPlayerSpeed();
+            if (mx !== 0 || my !== 0) {
+                const len = Math.hypot(mx, my);
+                if (len > 1) { mx /= len; my /= len; }
+                player.x += mx * spd * dt;
+                player.y += my * spd * dt;
+                if (mx !== 0) player.facing = mx > 0 ? 1 : -1;
+                player.walkPhase += dt * 12;
+            } else if (pointerTarget) {
+                const dx = pointerTarget.x - player.x;
+                const dy = pointerTarget.y - player.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    player.x += (dx / dist) * spd * dt;
+                    player.y += (dy / dist) * spd * dt;
+                    if (Math.abs(dx) > 2) player.facing = dx > 0 ? 1 : -1;
+                    player.walkPhase += dt * 12;
+                } else {
+                    pointerTarget = null;
+                    player.walkPhase = 0;
+                }
+            } else {
+                player.walkPhase = 0;
+            }
+
+            player.x = Math.max(PLAYER_MIN_X, Math.min(PLAYER_MAX_X, player.x));
+            player.y = Math.max(PLAYER_MIN_Y, Math.min(PLAYER_MAX_Y, player.y));
+
+            // 2. Rotation du Convoyeur Circulaire (Étape 8)
+            const conv = stations.conveyor;
+            const cSpd = getConveyorSpeed();
+            conv.beltPhase = (conv.beltPhase + cSpd * dt) % 1;
+            conv.items.forEach(entry => {
+                entry.t = (entry.t + cSpd * dt) % 1;
+            });
+
+            // 3. Cuisson dans le Grand Four (Étape 5)
+            const bakeTime = getBakeTime();
+            for (let i = stations.oven.slots.length - 1; i >= 0; i--) {
+                const slot = stations.oven.slots[i];
+                slot.timer += dt;
+                if (slot.timer >= bakeTime) {
+                    stations.oven.slots.splice(i, 1);
+                    stations.oven.ready.push({
+                        kind: 'baked',
+                        flour: slot.flour,
+                        dough: slot.dough,
+                        shape: slot.shape
+                    });
+                    sound.ding();
+                    spawnParticles(stations.oven.x + 72, stations.oven.y + 44, '#fde047', 6);
+                }
+            }
+
+            // 4. Interactions du Joueur avec les 8 stations de fabrication
+            player.activeStation = null;
+            const maxHand = getMaxHand();
+            const convCap = getConveyorCapacity();
+
+            // ÉTAPE 1 : Récolter Farine
+            if (Math.hypot(player.x - stations.wheat.zoneX, player.y - stations.wheat.zoneY) <= stations.wheat.zoneR) {
+                player.activeStation = 'wheat';
+                if (player.holding.length < maxHand) {
+                    stations.wheat.progress += dt / getWheatTime();
+                    if (stations.wheat.progress >= 1) {
+                        stations.wheat.progress = 0;
+                        player.holding.push({ kind: 'flour', flour: getFlour() });
+                        sound.pop();
+                        spawnParticles(stations.wheat.x + 48, stations.wheat.y + 46, '#fef08a', 5);
+                        updateHUD();
+                    }
+                } else stations.wheat.progress = 0;
+            } else stations.wheat.progress = Math.max(0, stations.wheat.progress - dt * 1.5);
+
+            // ÉTAPE 2 : Mélanger Pâte
+            if (Math.hypot(player.x - stations.mixer.zoneX, player.y - stations.mixer.zoneY) <= stations.mixer.zoneR) {
+                player.activeStation = 'mixer';
+                const idx = player.holding.findIndex(i => i.kind === 'flour');
+                if (idx !== -1) {
+                    stations.mixer.progress += dt / getMixTime();
+                    if (stations.mixer.progress >= 1) {
+                        stations.mixer.progress = 0;
+                        player.holding[idx] = { kind: 'dough', flour: player.holding[idx].flour, dough: getDough() };
+                        sound.pop();
+                        spawnParticles(stations.mixer.x + 48, stations.mixer.y + 46, getDough().color, 6);
+                        updateHUD();
+                    }
+                } else stations.mixer.progress = 0;
+            } else stations.mixer.progress = Math.max(0, stations.mixer.progress - dt * 1.5);
+
+            // ÉTAPE 3 : Rouler Pâte
+            if (Math.hypot(player.x - stations.roller.zoneX, player.y - stations.roller.zoneY) <= stations.roller.zoneR) {
+                player.activeStation = 'roller';
+                const idx = player.holding.findIndex(i => i.kind === 'dough');
+                if (idx !== -1) {
+                    stations.roller.progress += dt / getRollTime();
+                    if (stations.roller.progress >= 1) {
+                        stations.roller.progress = 0;
+                        player.holding[idx].kind = 'rolled';
+                        sound.pop();
+                        spawnParticles(stations.roller.x + 48, stations.roller.y + 46, '#fed7aa', 5);
+                        updateHUD();
+                    }
+                } else stations.roller.progress = 0;
+            } else stations.roller.progress = Math.max(0, stations.roller.progress - dt * 1.5);
+
+            // ÉTAPE 4 : Former le Biscuit
+            if (Math.hypot(player.x - stations.shaper.zoneX, player.y - stations.shaper.zoneY) <= stations.shaper.zoneR) {
+                player.activeStation = 'shaper';
+                const idx = player.holding.findIndex(i => i.kind === 'rolled');
+                if (idx !== -1) {
+                    stations.shaper.progress += dt / getShapeTime();
+                    if (stations.shaper.progress >= 1) {
+                        stations.shaper.progress = 0;
+                        player.holding[idx].kind = 'raw';
+                        player.holding[idx].shape = getShape();
+                        sound.pop();
+                        spawnParticles(stations.shaper.x + 48, stations.shaper.y + 46, '#fde68a', 6);
+                        updateHUD();
+                    }
+                } else stations.shaper.progress = 0;
+            } else stations.shaper.progress = Math.max(0, stations.shaper.progress - dt * 1.5);
+
+            // ÉTAPE 5 : Cuire au Four
+            if (Math.hypot(player.x - stations.oven.zoneX, player.y - stations.oven.zoneY) <= stations.oven.zoneR) {
+                player.activeStation = 'oven';
+                const ovenCap = getOvenCapacity();
+                const rawIdx = player.holding.findIndex(i => i.kind === 'raw');
+                if (rawIdx !== -1 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                    const item = player.holding.splice(rawIdx, 1)[0];
+                    stations.oven.slots.push({ timer: 0, flour: item.flour, dough: item.dough, shape: item.shape });
+                    sound.pop();
+                    updateHUD();
+                }
+                while (stations.oven.ready.length > 0 && player.holding.length < maxHand) {
+                    player.holding.push(stations.oven.ready.shift());
+                    sound.pop();
+                    updateHUD();
+                }
+            }
+
+            // ÉTAPE 6 : Mettre le Glaçage
+            if (Math.hypot(player.x - stations.glazer.zoneX, player.y - stations.glazer.zoneY) <= stations.glazer.zoneR) {
+                player.activeStation = 'glazer';
+                const idx = player.holding.findIndex(i => i.kind === 'baked');
+                if (idx !== -1) {
+                    stations.glazer.progress += dt / getGlazeTime();
+                    if (stations.glazer.progress >= 1) {
+                        stations.glazer.progress = 0;
+                        const ic = getIcing();
+                        player.holding[idx].kind = 'glazed';
+                        player.holding[idx].icing = ic;
+                        sound.pop();
+                        spawnParticles(stations.glazer.x + 62, stations.glazer.y + 44, ic.color, 6);
+                        updateHUD();
+                    }
+                } else stations.glazer.progress = 0;
+            } else stations.glazer.progress = Math.max(0, stations.glazer.progress - dt * 1.5);
+
+            // ÉTAPE 7 : Mettre les Confettis
+            if (Math.hypot(player.x - stations.confettier.zoneX, player.y - stations.confettier.zoneY) <= stations.confettier.zoneR) {
+                player.activeStation = 'confettier';
+                const idx = player.holding.findIndex(i => i.kind === 'glazed');
+                if (idx !== -1) {
+                    stations.confettier.progress += dt / getConfettiTime();
+                    if (stations.confettier.progress >= 1) {
+                        stations.confettier.progress = 0;
+                        const cf = getConfetti();
+                        player.holding[idx].kind = 'finished';
+                        player.holding[idx].confetti = cf;
+                        sound.pop();
+                        spawnParticles(stations.confettier.x + 62, stations.confettier.y + 44, '#fde047', 6);
+                        updateHUD();
+                    }
+                } else stations.confettier.progress = 0;
+            } else stations.confettier.progress = Math.max(0, stations.confettier.progress - dt * 1.5);
+
+            // ÉTAPE 8 : Déposer les biscuits finis sur le CONVOYEUR CIRCULAIRE (Zone EN BAS)
+            if (Math.hypot(player.x - conv.dropZoneX, player.y - conv.dropZoneY) <= conv.dropZoneR) {
+                player.activeStation = 'conveyor';
+                while (conv.items.length < convCap) {
+                    const finIdx = player.holding.findIndex(i => i.kind === 'finished');
+                    if (finIdx === -1) break;
+                    const cookie = player.holding.splice(finIdx, 1)[0];
+                    // Place le biscuit à l'entrée sud du convoyeur (t = 0.25)
+                    conv.items.push({ cookie, t: 0.25 });
+                    sound.pop();
+                    spawnParticles(conv.dropZoneX, conv.dropZoneY - 25, '#fde047', 5);
+                    updateHUD();
+                }
+            }
+
+            updateSorterElf(dt);
+            updateHelpers(dt);
+            updateCustomers(dt);
+            updateMoneyPiles(dt);
+            updateEffects(dt);
+        }
+
+        // ============================================================
+        // 9. ÉTAPE 9 : LE LUTIN TRIEUR (PREND LES BONS OU LES MAUVAIS)
+        // ============================================================
+        function doesCookieMatchCustomer(cookie, cust) {
+            if (!cookie || !cust) return false;
+            const icingMatch = cookie.icing && cookie.icing.id === cust.desiredIcing.id;
+            const shapeMatch = !cust.desiredShape || (cookie.shape && cookie.shape.id === cust.desiredShape.id);
+            return icingMatch && shapeMatch;
+        }
+
+        function updateSorterElf(dt) {
+            const spd = getSorterSpeed();
+            const handCap = getSorterHandCap();
+            const conv = stations.conveyor;
+            const waitingCustomers = customers.filter(c => c.state === 'waiting');
+
+            if (sorterElf.holding.length > 0) {
+                const targetCust = waitingCustomers.find(c => c.id === sorterElf.targetCustomerId) || waitingCustomers[0];
+                if (!targetCust) {
+                    if (conv.items.length < getConveyorCapacity()) {
+                        conv.items.push({ cookie: sorterElf.holding.pop(), t: 0.0 });
+                    }
+                    return;
+                }
+
+                const tx = 778;
+                const ty = targetCust.y;
+                const dist = Math.hypot(tx - sorterElf.x, ty - sorterElf.y);
+                if (dist > 10) {
+                    sorterElf.x += ((tx - sorterElf.x) / dist) * spd * dt;
+                    sorterElf.y += ((ty - sorterElf.y) / dist) * spd * dt;
+                    sorterElf.facing = tx >= sorterElf.x ? 1 : -1;
+                    sorterElf.walkPhase += dt * 13;
+                } else {
+                    sorterElf.walkPhase = 0;
+                    while (sorterElf.holding.length > 0 && targetCust.receivedCookies.length < targetCust.desiredCount) {
+                        targetCust.receivedCookies.push(sorterElf.holding.shift());
+                    }
+                    sound.pop();
+                    if (targetCust.receivedCookies.length >= targetCust.desiredCount) {
+                        completeCustomerOrder(targetCust);
+                    }
+                    updateHUD();
+                }
+                return;
+            }
+
+            if (waitingCustomers.length === 0 || conv.items.length === 0) {
+                const homeX = 745, homeY = 405;
+                const d = Math.hypot(homeX - sorterElf.x, homeY - sorterElf.y);
+                if (d > 8) {
+                    sorterElf.x += ((homeX - sorterElf.x) / d) * (spd * 0.7) * dt;
+                    sorterElf.y += ((homeY - sorterElf.y) / d) * (spd * 0.7) * dt;
+                    sorterElf.walkPhase += dt * 10;
+                } else sorterElf.walkPhase = 0;
+                return;
+            }
+
+            let chosenCust = null;
+            let matchingIndices = [];
+
+            for (const cust of waitingCustomers) {
+                const needed = cust.desiredCount - cust.receivedCookies.length;
+                if (needed <= 0) continue;
+                const matches = [];
+                conv.items.forEach((entry, idx) => {
+                    if (doesCookieMatchCustomer(entry.cookie, cust)) matches.push(idx);
+                });
+                if (matches.length > 0) {
+                    chosenCust = cust;
+                    matchingIndices = matches;
+                    break;
+                }
+            }
+
+            let fallbackMode = false;
+            if (!chosenCust) {
+                const impatientCust = waitingCustomers.find(c => (c.patience / c.maxPatience) <= 0.35);
+                if (impatientCust && conv.items.length > 0) {
+                    chosenCust = impatientCust;
+                    fallbackMode = true;
+                    matchingIndices = conv.items.map((_, idx) => idx);
+                } else {
+                    const watchX = 735, watchY = 405;
+                    const d = Math.hypot(watchX - sorterElf.x, watchY - sorterElf.y);
+                    if (d > 8) {
+                        sorterElf.x += ((watchX - sorterElf.x) / d) * (spd * 0.7) * dt;
+                        sorterElf.y += ((watchY - sorterElf.y) / d) * (spd * 0.7) * dt;
+                        sorterElf.walkPhase += dt * 10;
+                    } else sorterElf.walkPhase = 0;
+                    return;
+                }
+            }
+
+            const targetIdx = matchingIndices[0];
+            const beltPos = getConveyorPoint(conv.items[targetIdx].t);
+            const pickupX = Math.min(775, beltPos.x + 24);
+            const pickupY = beltPos.y;
+            const dPick = Math.hypot(pickupX - sorterElf.x, pickupY - sorterElf.y);
+
+            if (dPick > 18) {
+                sorterElf.x += ((pickupX - sorterElf.x) / dPick) * spd * dt;
+                sorterElf.y += ((pickupY - sorterElf.y) / dPick) * spd * dt;
+                sorterElf.facing = pickupX >= sorterElf.x ? 1 : -1;
+                sorterElf.walkPhase += dt * 13;
+            } else {
+                sorterElf.walkPhase = 0;
+                sorterElf.targetCustomerId = chosenCust.id;
+                const needed = chosenCust.desiredCount - chosenCust.receivedCookies.length;
+                const toTake = Math.min(handCap, needed);
+
+                let taken = 0;
+                for (let i = conv.items.length - 1; i >= 0 && taken < toTake; i--) {
+                    const ok = fallbackMode ? true : doesCookieMatchCustomer(conv.items[i].cookie, chosenCust);
+                    if (ok) {
+                        const removed = conv.items.splice(i, 1)[0];
+                        sorterElf.holding.push(removed.cookie);
+                        taken++;
+                    }
+                }
+                if (taken > 0) {
+                    sound.pop();
+                    updateHUD();
+                }
+            }
+        }
+
+        function completeCustomerOrder(cust) {
+            const pack = getPackaging();
+            const decorExtra = getDecorBonus();
+            const hatBonus = getHat().priceBonus;
+            const perfectMult = getPerfectBonusMult();
+
+            let totalValue = 0;
+            let matchedCount = 0;
+
+            cust.receivedCookies.forEach(ck => {
+                const unit = 20 + (ck.flour?.bonus || 0) + (ck.dough?.bonus || 0) + (ck.shape?.bonus || 0) +
+                    (ck.icing?.bonus || 0) + (ck.confetti?.bonus || 0) + decorExtra + hatBonus;
+                if (doesCookieMatchCustomer(ck, cust)) {
+                    matchedCount++;
+                    totalValue += unit * perfectMult;
+                } else {
+                    totalValue += unit * 0.4;
+                }
+            });
+
+            totalValue = Math.max(8, Math.round(totalValue * pack.bonusMult));
+            const isPerfect = matchedCount === cust.desiredCount;
+
+            state.totalDelivered += 1;
+            if (isPerfect) state.perfectOrders += 1;
+            saveGame();
+
+            // Pièces d'or déposées juste devant le comptoir pour être facilement ramassables !
+            moneyPiles.push({
+                x: 845 + (Math.random() - 0.5) * 28,
+                y: cust.y + (Math.random() - 0.5) * 18,
+                amount: totalValue,
+                perfect: isPerfect,
+                bob: Math.random() * 6
+            });
+
+            if (isPerfect) {
+                sound.perfect();
+                spawnParticles(835, cust.y, '#fde047', 14);
+                spawnText(835, cust.y - 26, `⭐ COMMANDE PARFAITE ! +${totalValue}$`, '#fde047');
+            } else {
+                sound.bad();
+                spawnParticles(835, cust.y, '#94a3b8', 7);
+                spawnText(835, cust.y - 26, `😕 Mauvais biscuit... (${totalValue}$)`, '#fca5a5');
+            }
+
+            cust.carriedPack = pack;
+            cust.state = 'leaving';
+            updateHUD();
+        }
+
+        // ============================================================
+        // 10. LUTINS ASSISTANTS (ÉTAPES 1 À 8)
+        // ============================================================
+        function updateHelpers(dt) {
+            const spd = getHelperSpeed();
+            const wf = getHelperWorkFactor();
+            const hCap = getHelperHandCap();
+            const ovenCap = getOvenCapacity();
+            const convCap = getConveyorCapacity();
+
+            helpers.forEach(h => {
+                const moveSpd = h.role === 'supreme' ? spd * 1.3 : spd;
+                let tx = h.x, ty = h.y;
+
+                if (h.role === 'miller') {
+                    if (h.holding.some(i => i.kind === 'raw')) {
+                        tx = stations.oven.zoneX - 18; ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                            const idx = h.holding.findIndex(i => i.kind === 'raw');
+                            const it = h.holding.splice(idx, 1)[0];
+                            stations.oven.slots.push({ timer: 0, flour: it.flour, dough: it.dough, shape: it.shape });
+                        }
+                    } else if (h.holding.some(i => i.kind === 'rolled')) {
+                        tx = stations.shaper.zoneX; ty = stations.shaper.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getShapeTime() * wf) {
+                                h.timer = 0;
+                                h.holding.forEach(i => { if (i.kind === 'rolled') { i.kind = 'raw'; i.shape = getShape(); } });
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'dough')) {
+                        tx = stations.roller.zoneX; ty = stations.roller.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * wf) {
+                                h.timer = 0;
+                                h.holding.forEach(i => { if (i.kind === 'dough') i.kind = 'rolled'; });
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'flour')) {
+                        tx = stations.mixer.zoneX; ty = stations.mixer.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getMixTime() * wf) {
+                                h.timer = 0;
+                                h.holding = h.holding.map(i => i.kind === 'flour' ? { kind: 'dough', flour: i.flour, dough: getDough() } : i);
+                            }
+                        }
+                    } else {
+                        tx = stations.wheat.zoneX; ty = stations.wheat.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getWheatTime() * wf && h.holding.length < hCap) {
+                                h.timer = 0;
+                                h.holding.push({ kind: 'flour', flour: getFlour() });
+                            }
+                        }
+                    }
+                } else if (h.role === 'roller' || h.role === 'baker') {
+                    if (h.holding.some(i => i.kind === 'raw')) {
+                        tx = stations.oven.zoneX; ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                            const idx = h.holding.findIndex(i => i.kind === 'raw');
+                            const it = h.holding.splice(idx, 1)[0];
+                            stations.oven.slots.push({ timer: 0, flour: it.flour, dough: it.dough, shape: it.shape });
+                        }
+                    } else if (h.holding.some(i => i.kind === 'rolled')) {
+                        tx = stations.shaper.zoneX + 12; ty = stations.shaper.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getShapeTime() * wf) {
+                                h.timer = 0;
+                                h.holding.forEach(i => { if (i.kind === 'rolled') { i.kind = 'raw'; i.shape = getShape(); } });
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'dough')) {
+                        tx = stations.roller.zoneX + 12; ty = stations.roller.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * wf) {
+                                h.timer = 0;
+                                h.holding.forEach(i => { if (i.kind === 'dough') i.kind = 'rolled'; });
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'flour')) {
+                        tx = stations.mixer.zoneX + 12; ty = stations.mixer.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getMixTime() * wf) {
+                                h.timer = 0;
+                                h.holding = h.holding.map(i => i.kind === 'flour' ? { kind: 'dough', flour: i.flour, dough: getDough() } : i);
+                            }
+                        }
+                    } else {
+                        tx = stations.wheat.zoneX + 12; ty = stations.wheat.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getWheatTime() * wf && h.holding.length < hCap) {
+                                h.timer = 0;
+                                h.holding.push({ kind: 'flour', flour: getFlour() });
+                            }
+                        }
+                    }
+                } else if (h.role === 'glazer' || h.role === 'confetti' || h.role === 'supreme') {
+                    // Sort du four -> Glace selon client -> Met confettis -> Pose sur le Convoyeur (Zone EN BAS) !
+                    if (h.holding.some(i => i.kind === 'finished')) {
+                        tx = stations.conveyor.dropZoneX + (h.role === 'supreme' ? -25 : 20);
+                        ty = stations.conveyor.dropZoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 16 && stations.conveyor.items.length < convCap) {
+                            const idx = h.holding.findIndex(i => i.kind === 'finished');
+                            stations.conveyor.items.push({ cookie: h.holding.splice(idx, 1)[0], t: 0.25 });
+                        }
+                    } else if (h.holding.some(i => i.kind === 'glazed')) {
+                        tx = stations.confettier.zoneX; ty = stations.confettier.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 16) {
+                            h.timer += dt;
+                            if (h.timer >= getConfettiTime() * wf) {
+                                h.timer = 0;
+                                h.holding.forEach(i => { if (i.kind === 'glazed') { i.kind = 'finished'; i.confetti = getConfetti(); } });
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'baked')) {
+                        tx = stations.glazer.zoneX; ty = stations.glazer.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 16) {
+                            h.timer += dt;
+                            if (h.timer >= getGlazeTime() * wf) {
+                                h.timer = 0;
+                                const front = getFrontCustomer();
+                                h.holding.forEach(i => {
+                                    if (i.kind === 'baked') {
+                                        i.kind = 'glazed';
+                                        i.icing = front ? front.desiredIcing : getIcing();
+                                    }
+                                });
+                            }
+                        }
+                    } else if (stations.oven.ready.length > 0 && h.holding.length < hCap) {
+                        tx = stations.oven.zoneX + 18; ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 16) {
+                            while (stations.oven.ready.length > 0 && h.holding.length < hCap) {
+                                h.holding.push(stations.oven.ready.shift());
+                            }
+                        }
+                    } else {
+                        tx = stations.glazer.zoneX; ty = stations.glazer.zoneY + 25;
+                    }
+                }
+
+                const dx = tx - h.x;
+                const dy = ty - h.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    h.x += (dx / dist) * moveSpd * dt;
+                    h.y += (dy / dist) * moveSpd * dt;
+                    if (Math.abs(dx) > 1) h.facing = dx > 0 ? 1 : -1;
+                    h.walkPhase += dt * 11;
+                } else h.walkPhase = 0;
+            });
+        }
+
+        // ============================================================
+        // 11. CLIENTS DU VILLAGE DU PÈRE NOËL
+        // ============================================================
+        const VILLAGE_GUESTS = [
+            { skin: '#ffdbac', coat: '#dc2626', hat: '#ffffff' },
+            { skin: '#f1c27d', coat: '#15803d', hat: '#fde047' },
+            { skin: '#8d5524', coat: '#1d4ed8', hat: '#93c5fd' },
+            { skin: '#ffdbac', coat: '#7e22ce', hat: '#f0abfc' }
+        ];
+
+        function pickUnlocked(arrKey, catalogList) {
+            const list = state[arrKey];
+            const id = list[Math.floor(Math.random() * list.length)];
+            return catalogList.find(x => x.id === id) || catalogList[0];
+        }
+
+        let nextCustId = 1;
+        function updateCustomers(dt) {
+            customerSpawnTimer -= dt;
+            if (customerSpawnTimer <= 0 && customers.length < 3) {
+                const st = VILLAGE_GUESTS[Math.floor(Math.random() * VILLAGE_GUESTS.length)];
+                const count = 1 + Math.floor(Math.random() * 3);
+                customers.push({
+                    id: nextCustId++,
+                    x: 1085,
+                    y: 135,
+                    state: 'walkingIn',
+                    slotIdx: customers.length,
+                    desiredCount: count,
+                    desiredIcing: pickUnlocked('unlockedIcing', CATALOG.icing),
+                    desiredShape: state.unlockedShapes.length > 1 ? pickUnlocked('unlockedShapes', CATALOG.shapes) : null,
+                    receivedCookies: [],
+                    carriedPack: null,
+                    patience: 48,
+                    maxPatience: 48,
+                    style: st,
+                    walkPhase: 0
+                });
+                customerSpawnTimer = 4.5;
+                updateHUD();
+            }
+
+            const cSpeed = 145;
+            for (let i = customers.length - 1; i >= 0; i--) {
+                const c = customers[i];
+                if (c.state === 'walkingIn') {
+                    const tx = 915;
+                    const ty = 290 + i * 95;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 8) {
+                        c.x += ((tx - c.x) / d) * cSpeed * dt;
+                        c.y += ((ty - c.y) / d) * cSpeed * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        c.walkPhase = 0;
+                        c.state = 'waiting';
+                        updateHUD();
+                    }
+                } else if (c.state === 'waiting') {
+                    const ty = 290 + i * 95;
+                    if (Math.abs(c.y - ty) > 3) c.y += Math.sign(ty - c.y) * 80 * dt;
+                    c.patience = Math.max(0, c.patience - dt);
+                } else if (c.state === 'leaving') {
+                    const tx = 1105, ty = 640;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 10) {
+                        c.x += ((tx - c.x) / d) * (cSpeed * 1.15) * dt;
+                        c.y += ((ty - c.y) / d) * (cSpeed * 1.15) * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        customers.splice(i, 1);
+                        updateHUD();
+                    }
+                }
+            }
+        }
+
+        function updateMoneyPiles(dt) {
+            const magR = getMagnetRadius();
+            for (let i = moneyPiles.length - 1; i >= 0; i--) {
+                const p = moneyPiles[i];
+                p.bob += dt * 4;
+                const d = Math.hypot(player.x - p.x, player.y - p.y);
+                if (state.levels.magnet > 0 && d < magR && d > 8) {
+                    const pull = 290 + state.levels.magnet * 85;
+                    p.x += ((player.x - p.x) / d) * pull * dt;
+                    p.y += ((player.y - p.y) / d) * pull * dt;
+                }
+                if (d < 58) {
+                    state.money += p.amount;
+                    sound.coin();
+                    spawnParticles(p.x, p.y, '#fef08a', 8);
+                    spawnText(p.x, p.y - 16, `+${p.amount.toLocaleString('fr-FR')} $`, p.perfect ? '#fde047' : '#86efac');
+                    moneyPiles.splice(i, 1);
+                    updateHUD();
+                    saveGame();
+                }
+            }
+        }
+
+        function updateEffects(dt) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.vy += 120 * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) particles.splice(i, 1);
+            }
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 35 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        // ============================================================
+        // 12. RENDU GRAPHIQUE VILLAGE DU PÈRE NOËL & 16 FORMES
+        // ============================================================
+        function getIcingRenderColor(ic, nowMs) {
+            if (!ic) return '#ffffff';
+            if (ic.mode === 'candycane') return Math.floor(nowMs / 350) % 2 === 0 ? '#ff4d6d' : '#ffffff';
+            if (ic.mode === 'aurora') return `hsl(${160 + Math.sin(nowMs * 0.004) * 55}, 92%, 58%)`;
+            if (ic.mode === 'rainbow') return `hsl(${(nowMs * 0.15) % 360}, 90%, 58%)`;
+            if (ic.mode === 'gold24k') return `hsl(46, 98%, ${54 + Math.sin(nowMs * 0.008) * 12}%)`;
+            if (ic.mode === 'diamond') return `hsl(${195 + Math.sin(nowMs * 0.009) * 35}, 100%, 82%)`;
+            return ic.color;
+        }
+
+        function drawCarriedItem(x, y, s, item, nowMs) {
+            if (item.kind === 'flour') {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(s, s);
+                ctx.fillStyle = item.flour.color;
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-8, -9, 16, 18, 5);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#dc2626';
+                ctx.fillRect(-5, -3, 10, 5);
+                ctx.restore();
+            } else if (item.kind === 'dough' || item.kind === 'rolled') {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(s, s);
+                ctx.fillStyle = item.dough.color;
+                ctx.strokeStyle = item.dough.stroke;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (item.kind === 'dough') ctx.arc(0, 0, 9, 0, Math.PI * 2);
+                else ctx.ellipse(0, 0, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            } else {
+                drawCookieShape(x, y, s, item, nowMs);
+            }
+        }
+
+        function drawCookieShape(x, y, s, cookie, nowMs) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(s, s);
+
+            const isRaw = cookie.kind === 'raw';
+            const dough = cookie.dough || CATALOG.dough[0];
+            const shapeId = (cookie.shape && cookie.shape.id) ? cookie.shape.id : 's_gingerman';
+            ctx.fillStyle = isRaw ? '#f3d5a5' : dough.color;
+            ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            if (shapeId === 's_tree') {
+                ctx.moveTo(0, -14); ctx.lineTo(12, 8); ctx.lineTo(-12, 8); ctx.closePath();
+                ctx.rect(-3, 8, 6, 5);
+            } else if (shapeId === 's_star') {
+                for (let i = 0; i < 10; i++) {
+                    const r = i % 2 === 0 ? 13 : 5.5;
+                    const a = (i * Math.PI) / 5 - Math.PI / 2;
+                    if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+                    else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+                }
+                ctx.closePath();
+            } else if (shapeId === 's_bell') {
+                ctx.moveTo(0, -13); ctx.bezierCurveTo(9, -12, 10, 2, 13, 8); ctx.lineTo(-13, 8); ctx.bezierCurveTo(-10, 2, -9, -12, 0, -13);
+            } else if (shapeId === 's_candycane') {
+                ctx.roundRect(-4, -12, 8, 24, 4);
+                ctx.arc(3, -7, 6, Math.PI, 0);
+            } else if (shapeId === 's_stocking') {
+                ctx.roundRect(-6, -12, 10, 18, 3);
+                ctx.roundRect(-6, 2, 16, 8, 4);
+            } else if (shapeId === 's_gift') {
+                ctx.roundRect(-10, -9, 20, 19, 3);
+            } else if (shapeId === 's_snowman') {
+                ctx.arc(0, 4, 9, 0, Math.PI * 2);
+                ctx.arc(0, -7, 6.5, 0, Math.PI * 2);
+            } else if (shapeId === 's_house') {
+                ctx.moveTo(0, -14); ctx.lineTo(13, -3); ctx.lineTo(10, -3); ctx.lineTo(10, 11); ctx.lineTo(-10, 11); ctx.lineTo(-10, -3); ctx.lineTo(-13, -3); ctx.closePath();
+            } else if (shapeId === 's_reindeer') {
+                ctx.arc(0, 2, 9, 0, Math.PI * 2);
+                ctx.moveTo(-5, -6); ctx.lineTo(-9, -15);
+                ctx.moveTo(5, -6); ctx.lineTo(9, -15);
+            } else if (shapeId === 's_snowflake' || shapeId === 's_wreath') {
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+            } else if (shapeId === 's_nutcracker') {
+                ctx.roundRect(-8, -13, 16, 7, 2);
+                ctx.roundRect(-7, -6, 14, 18, 3);
+            } else if (shapeId === 's_angel') {
+                ctx.moveTo(0, -12); ctx.lineTo(12, 10); ctx.lineTo(-12, 10); ctx.closePath();
+                ctx.arc(0, -10, 5, 0, Math.PI * 2);
+            } else if (shapeId === 's_sleigh') {
+                ctx.moveTo(-13, -5); ctx.lineTo(-6, 7); ctx.lineTo(12, 7); ctx.lineTo(14, -4); ctx.closePath();
+            } else if (shapeId === 's_castle') {
+                ctx.moveTo(-12, 11); ctx.lineTo(-12, -9); ctx.lineTo(-4, -9); ctx.lineTo(-4, -14); ctx.lineTo(4, -14); ctx.lineTo(4, -9); ctx.lineTo(12, -9); ctx.lineTo(12, 11); ctx.closePath();
+            } else {
+                ctx.arc(0, -10, 7, 0, Math.PI * 2);
+                ctx.roundRect(-9, -3, 18, 5, 2.5);
+                ctx.roundRect(-5, -3, 10, 11, 3);
+                ctx.roundRect(-5, 6, 4, 7, 2);
+                ctx.roundRect(1, 6, 4, 7, 2);
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            if (cookie.kind === 'glazed' || cookie.kind === 'finished') {
+                const ic = cookie.icing || CATALOG.icing[0];
+                const icColor = getIcingRenderColor(ic, nowMs);
+                ctx.fillStyle = icColor;
+                ctx.beginPath();
+                ctx.arc(0, 0, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            if (cookie.kind === 'finished') {
+                const cf = cookie.confetti || CATALOG.confetti[0];
+                if (cf.style !== 'none') {
+                    const dots = [[-3.5, -2.5], [3.5, -2], [-2.5, 3.5], [3, 3.5], [0, -4]];
+                    dots.forEach((p, idx) => {
+                        if (cf.style === 'crystals' || cf.style === 'iceflakes') ctx.fillStyle = '#e0f2fe';
+                        else if (cf.style === 'candyshards') ctx.fillStyle = idx % 2 === 0 ? '#ff4d6d' : '#ffffff';
+                        else if (cf.style === 'snowpearls' || cf.style === 'silver') ctx.fillStyle = '#f1f5f9';
+                        else if (cf.style === 'chocochips') ctx.fillStyle = '#3e2723';
+                        else if (cf.style === 'mintbits' || cf.style === 'minitrees') ctx.fillStyle = '#22c55e';
+                        else if (cf.style === 'caramel' || cf.style === 'stars' || cf.style === 'goldleaf') ctx.fillStyle = '#facc15';
+                        else if (cf.style === 'hearts') ctx.fillStyle = '#e11d48';
+                        else ctx.fillStyle = `hsl(${(nowMs * 0.35 + idx * 65) % 360}, 100%, 70%)`;
+
+                        ctx.beginPath();
+                        ctx.arc(p[0], p[1], 1.7, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function drawSantaVillage(nowMs) {
+            ctx.fillStyle = '#071426';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+            ctx.fillStyle = '#e0f2fe';
+            ctx.fillRect(24, 52, WORLD_W - 48, WORLD_H - 72);
+
+            const tile = 48;
+            for (let gx = 56; gx < 1096; gx += tile) {
+                for (let gy = 92; gy < 652; gy += tile) {
+                    const isEven = ((gx + gy) / tile) % 2 === 0;
+                    if (gx < 840) {
+                        ctx.fillStyle = isEven ? '#78350f' : '#92400e';
+                    } else {
+                        ctx.fillStyle = isEven ? '#991b1b' : '#b91c1c';
+                    }
+                    ctx.fillRect(gx, gy, tile, tile);
+                }
+            }
+
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(844, 96, 248, 552);
+
+            ctx.strokeStyle = '#7f1d1d';
+            ctx.lineWidth = 16;
+            ctx.strokeRect(48, 84, 1064, 576);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(42, 54, 1076, 32);
+            for (let sx = 60; sx < 1100; sx += 32) {
+                ctx.beginPath();
+                ctx.arc(sx, 86, 13, 0, Math.PI);
+                ctx.fill();
+            }
+
+            const bulbColors = ['#ef4444', '#22c55e', '#facc15', '#38bdf8', '#f472b6'];
+            const phase = Math.floor(nowMs / 350);
+            for (let bx = 75; bx < 1085; bx += 42) {
+                const c = bulbColors[(Math.floor(bx / 42) + phase) % bulbColors.length];
+                ctx.fillStyle = c;
+                ctx.beginPath();
+                ctx.arc(bx, 72, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            [842, 1085].forEach(cx => {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(cx - 5, 95, 10, 46);
+                ctx.fillStyle = '#ef4444';
+                for (let ry = 98; ry < 138; ry += 12) ctx.fillRect(cx - 5, ry, 10, 6);
+            });
+
+            ctx.fillStyle = '#991b1b';
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(910, 58, 175, 24, 8);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#fef08a';
+            ctx.font = 'bold 12px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎅 VILLAGE DU PÈRE NOËL', 997, 74);
+        }
+
+        function drawVillageDecorations(nowMs) {
+            const trees = [{ x: 1030, y: 155, s: 1.0 }];
+            if (state.staffAndDecor.decorTree) {
+                trees.push({ x: 255, y: 140, s: 1.2 }, { x: 805, y: 140, s: 1.2 });
+            }
+            trees.forEach(t => {
+                ctx.save();
+                ctx.translate(t.x, t.y);
+                ctx.scale(t.s, t.s);
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(-5, 18, 10, 12);
+                ctx.fillStyle = '#15803d';
+                ctx.beginPath(); ctx.moveTo(0, -28); ctx.lineTo(22, 18); ctx.lineTo(-22, 18); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#16a34a';
+                ctx.beginPath(); ctx.moveTo(0, -38); ctx.lineTo(17, 2); ctx.lineTo(-17, 2); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath(); ctx.arc(0, -41, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+
+            if (state.staffAndDecor.decorSnowman) {
+                const sx = 260, sy = 595;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(sx, sy - 20, 11, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath(); ctx.moveTo(sx, sy - 20); ctx.lineTo(sx + 10, sy - 18); ctx.lineTo(sx, sy - 16); ctx.fill();
+            }
+
+            if (state.staffAndDecor.decorFountain) {
+                const fx = 345, fy = 595;
+                ctx.fillStyle = '#fef3c7';
+                ctx.beginPath(); ctx.ellipse(fx, fy + 10, 22, 9, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#5c2c16';
+                ctx.beginPath(); ctx.ellipse(fx, fy + 8, 17, 7, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillRect(fx - 4, fy - 12, 8, 20);
+            }
+
+            if (state.staffAndDecor.decorCandyArch) {
+                ctx.strokeStyle = '#ff4d6d';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.arc(844, 380, 36, -Math.PI * 0.5, Math.PI * 0.5);
+                ctx.stroke();
+            }
+
+            if (state.staffAndDecor.decorReindeer) {
+                const rx = 1045, ry = 560;
+                ctx.fillStyle = '#92400e';
+                ctx.beginPath(); ctx.ellipse(rx, ry, 16, 10, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(rx - 14, ry - 10, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath(); ctx.arc(rx - 21, ry - 10, 3.5, 0, Math.PI * 2); ctx.fill();
+            }
+
+            if (state.staffAndDecor.decorSleigh) {
+                const slx = 985, sly = 605;
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath(); ctx.roundRect(slx - 24, sly - 10, 48, 20, 7); ctx.fill();
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(slx - 28, sly + 14); ctx.lineTo(slx + 28, sly + 14); ctx.stroke();
+            }
+        }
+
+        function drawZoneCircle(x, y, r, active) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = active ? 'rgba(34, 197, 94, 0.28)' : 'rgba(255, 255, 255, 0.22)';
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([7, 5]);
+            ctx.strokeStyle = active ? '#4ade80' : '#fde047';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawProgressBar(x, y, w, ratio, color) {
+            if (ratio <= 0) return;
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5, y, w, 9, 4.5);
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5 + 1.5, y + 1.5, Math.max(0, (w - 3) * Math.min(1, ratio)), 6, 3);
+            ctx.fill();
+        }
+
+        function drawLabel(x, y, text) {
+            ctx.font = 'bold 11px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            const tw = ctx.measureText(text).width + 12;
+            ctx.fillStyle = 'rgba(69, 10, 10, 0.92)';
+            ctx.beginPath();
+            ctx.roundRect(x - tw * 0.5, y - 10, tw, 17, 6);
+            ctx.fill();
+            ctx.fillStyle = '#fef3c7';
+            ctx.fillText(text, x, y + 2);
+        }
+
+        function drawStationsAndConveyor(nowMs) {
+            ['wheat', 'mixer', 'roller', 'shaper', 'oven', 'glazer', 'confettier'].forEach(k => {
+                const st = stations[k];
+                drawZoneCircle(st.zoneX, st.zoneY, st.zoneR, player.activeStation === k);
+            });
+            const conv = stations.conveyor;
+            drawZoneCircle(conv.dropZoneX, conv.dropZoneY, conv.dropZoneR, player.activeStation === 'conveyor');
+
+            // 1. Farine
+            const wh = stations.wheat;
+            ctx.fillStyle = '#0369a1'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(wh.x, wh.y, wh.w, wh.h, 12); ctx.fill(); ctx.stroke();
+            const fl = getFlour();
+            for (let wx = 18; wx <= 78; wx += 20) {
+                ctx.strokeStyle = fl.stalkColor; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(wh.x + wx, wh.y + 72); ctx.lineTo(wh.x + wx + Math.sin(nowMs * 0.005 + wx) * 3, wh.y + 24); ctx.stroke();
+            }
+            drawProgressBar(wh.x + 48, wh.y - 22, 76, wh.progress, '#facc15');
+            drawLabel(wh.x + 48, wh.y - 7, '1. Farine');
+
+            // 2. Mélanger
+            const mx = stations.mixer;
+            ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(mx.x, mx.y, mx.w, mx.h, 12); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#e2e8f0'; ctx.beginPath(); ctx.arc(mx.x + 48, mx.y + 46, 26, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = getDough().color; ctx.beginPath(); ctx.arc(mx.x + 48, mx.y + 46, 18, 0, Math.PI * 2); ctx.fill();
+            drawProgressBar(mx.x + 48, mx.y - 22, 76, mx.progress, '#fb923c');
+            drawLabel(mx.x + 48, mx.y - 7, '2. Mélanger');
+
+            // 3. Rouler
+            const rl = stations.roller;
+            ctx.fillStyle = '#0284c7'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(rl.x, rl.y, rl.w, rl.h, 12); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = getDough().color; ctx.beginPath(); ctx.ellipse(rl.x + 48, rl.y + 46, 28, 18, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.roundRect(rl.x + 22, rl.y + 41 + Math.sin(rl.progress * 12) * 7, 52, 9, 4); ctx.fill();
+            drawProgressBar(rl.x + 48, rl.y - 22, 76, rl.progress, '#4ade80');
+            drawLabel(rl.x + 48, rl.y - 7, '3. Rouler');
+
+            // 4. Former
+            const sp = stations.shaper;
+            ctx.fillStyle = '#be123c'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(sp.x, sp.y, sp.w, sp.h, 12); ctx.fill(); ctx.stroke();
+            drawCookieShape(sp.x + 48, sp.y + 46, 1.15, { kind: 'raw', dough: getDough(), shape: getShape() }, nowMs);
+            drawProgressBar(sp.x + 48, sp.y - 22, 76, sp.progress, '#f43f5e');
+            drawLabel(sp.x + 48, sp.y - 7, '4. Former');
+
+            // 5. Four du Père Noël
+            const ov = stations.oven;
+            ctx.fillStyle = '#991b1b'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3.5;
+            ctx.beginPath(); ctx.roundRect(ov.x, ov.y, ov.w, ov.h, 14); ctx.fill(); ctx.stroke();
+            const isBaking = ov.slots.length > 0;
+            ctx.fillStyle = isBaking ? '#f97316' : '#1e293b';
+            ctx.beginPath(); ctx.roundRect(ov.x + 12, ov.y + 18, ov.w - 24, 52, 8); ctx.fill();
+            ov.slots.forEach((s, idx) => drawCookieShape(ov.x + 28 + (idx % 5) * 22, ov.y + 34 + Math.floor(idx / 5) * 18, 0.52, { kind: 'raw', dough: s.dough, shape: s.shape }, nowMs));
+            ov.ready.forEach((c, idx) => drawCookieShape(ov.x + 28 + (idx % 5) * 22, ov.y + 48 + Math.floor(idx / 5) * 18, 0.58, c, nowMs));
+            if (isBaking) drawProgressBar(ov.x + ov.w * 0.5, ov.y - 22, 90, ov.slots[0].timer / getBakeTime(), '#facc15');
+            drawLabel(ov.x + ov.w * 0.5, ov.y - 7, `5. Four (${ov.slots.length + ov.ready.length}/${getOvenCapacity()})`);
+
+            // 6. Table Glaçage
+            const gl = stations.glazer;
+            ctx.fillStyle = '#7e22ce'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(gl.x, gl.y, gl.w, gl.h, 12); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = getIcingRenderColor(getIcing(), nowMs);
+            ctx.beginPath(); ctx.arc(gl.x + 62, gl.y + 44, 22, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2; ctx.stroke();
+            drawProgressBar(gl.x + 62, gl.y - 22, 80, gl.progress, '#e879f9');
+            drawLabel(gl.x + 62, gl.y - 7, '6. Glaçage');
+
+            // 7. Table Confettis
+            const cf = stations.confettier;
+            ctx.fillStyle = '#047857'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(cf.x, cf.y, cf.w, cf.h, 12); ctx.fill(); ctx.stroke();
+            ['#ef4444', '#facc15', '#38bdf8', '#f472b6', '#ffffff'].forEach((col, i) => {
+                ctx.fillStyle = col;
+                ctx.beginPath(); ctx.arc(cf.x + 34 + i * 14, cf.y + 44 + (i % 2) * 8, 5, 0, Math.PI * 2); ctx.fill();
+            });
+            drawProgressBar(cf.x + 62, cf.y - 22, 80, cf.progress, '#34d399');
+            drawLabel(cf.x + 62, cf.y - 7, '7. Confettis');
+
+            // ========================================================
+            // 8. GRAND CONVOYEUR CIRCULAIRE À BISCUITS (20 -> 40 PLACES)
+            // ========================================================
+            const convCap = getConveyorCapacity();
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(conv.cx, conv.cy, conv.rx, conv.ry, 0, 0, Math.PI * 2);
+            ctx.lineWidth = 42;
+            ctx.strokeStyle = '#334155';
+            ctx.stroke();
+
+            ctx.lineWidth = 46;
+            ctx.strokeStyle = '#fde047';
+            ctx.setLineDash([12, 16]);
+            ctx.lineDashOffset = -conv.beltPhase * 280;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.beginPath();
+            ctx.ellipse(conv.cx, conv.cy, conv.rx, conv.ry, 0, 0, Math.PI * 2);
+            ctx.lineWidth = 32;
+            ctx.strokeStyle = '#1e293b';
+            ctx.stroke();
+
+            for (let s = 0; s < convCap; s++) {
+                const pt = getConveyorPoint((s / convCap + conv.beltPhase) % 1);
+                ctx.fillStyle = 'rgba(255,255,255,0.14)';
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#7f1d1d';
+            ctx.strokeStyle = '#fef3c7';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(conv.cx, conv.cy, conv.rx - 32, conv.ry - 32, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#fde047';
+            ctx.font = 'bold 14px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔄 CONVOYEUR DU PÈRE NOËL', conv.cx, conv.cy - 8);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px Fredoka, sans-serif';
+            ctx.fillText(`Biscuits en rotation : ${conv.items.length} / ${convCap} places`, conv.cx, conv.cy + 14);
+            ctx.restore();
+
+            conv.items.forEach(entry => {
+                const pt = getConveyorPoint(entry.t);
+                drawCookieShape(pt.x, pt.y, 0.85, entry.cookie, nowMs);
+            });
+
+            // Étiquette du rond de dépôt placée EN BAS sans toucher aux autres ronds
+            drawLabel(conv.dropZoneX, conv.dropZoneY + 52, '8. Poser sur Convoyeur');
+
+            // Comptoir Étape 9 (Lutin Trieur)
+            const dc = stations.deliveryCounter;
+            ctx.fillStyle = '#b45309';
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(dc.x, dc.y, dc.w, dc.h, 12);
+            ctx.fill();
+            ctx.stroke();
+            drawLabel(dc.x + dc.w * 0.5, dc.y - 10, '9. Comptoir Tri');
+        }
+
+        function drawCharacter(ent, role, nowMs) {
+            ctx.save();
+            const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
+            ctx.translate(ent.x, ent.y - bob);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.beginPath();
+            ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (role === 'sorter') ctx.fillStyle = '#16a34a';
+            else if (role === 'miller') ctx.fillStyle = '#eab308';
+            else if (role === 'roller') ctx.fillStyle = '#0284c7';
+            else if (role === 'baker') ctx.fillStyle = '#dc2626';
+            else if (role === 'glazer') ctx.fillStyle = '#9333ea';
+            else if (role === 'confetti') ctx.fillStyle = '#10b981';
+            else if (role === 'supreme') ctx.fillStyle = '#f59e0b';
+            else ctx.fillStyle = '#c67d3b';
+
+            ctx.strokeStyle = '#2b0902';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(-13, -6, 26, 24, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, -14, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            if (role === 'player') {
+                const hat = getHat();
+                ctx.fillStyle = hat.color;
+                ctx.beginPath();
+                ctx.arc(0, -29, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = hat.trim;
+                ctx.fillRect(-10, -26, 20, 5);
+            } else {
+                ctx.fillStyle = role === 'sorter' ? '#dc2626' : '#facc15';
+                ctx.beginPath();
+                ctx.moveTo(-11, -22);
+                ctx.lineTo(11, -22);
+                ctx.lineTo(0, -40);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, -41, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const look = ent.facing * 3;
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(-4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.arc(4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (role === 'sorter') {
+                drawLabel(0, -48, `9. Lutin Trieur (${ent.holding.length}/${getSorterHandCap()})`);
+            }
+
+            if (ent.holding && ent.holding.length > 0) {
+                ent.holding.forEach((item, idx) => {
+                    drawCarriedItem(ent.facing * 15, -4 - idx * 7, 0.72, item, nowMs);
+                });
+            }
+
+            ctx.restore();
+        }
+
+        function drawCustomers(nowMs) {
+            customers.forEach(c => {
+                ctx.save();
+                const bob = Math.abs(Math.sin(c.walkPhase)) * 3.5;
+                ctx.translate(c.x, c.y - bob);
+
+                ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                ctx.beginPath();
+                ctx.ellipse(0, 17 + bob, 14, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = c.style.coat;
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-12, -5, 24, 22, 9);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.skin;
+                ctx.beginPath();
+                ctx.arc(0, -14, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.hat;
+                ctx.beginPath();
+                ctx.arc(0, -18, 11, Math.PI, 0);
+                ctx.fill();
+
+                if (c.state === 'waiting') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(-48, -62, 96, 32, 9);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = getIcingRenderColor(c.desiredIcing, nowMs);
+                    ctx.beginPath();
+                    ctx.arc(-30, -47, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 10.5px Fredoka, sans-serif';
+                    ctx.textAlign = 'left';
+                    const shapeIcon = c.desiredShape ? c.desiredShape.icon : '🍪';
+                    ctx.fillText(`${shapeIcon} ${c.receivedCookies.length}/${c.desiredCount}`, -18, -43);
+
+                    const ratio = c.patience / c.maxPatience;
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillRect(-40, -35, 80, 4);
+                    ctx.fillStyle = ratio > 0.35 ? '#22c55e' : '#ef4444';
+                    ctx.fillRect(-40, -35, 80 * ratio, 4);
+                } else if (c.carriedPack) {
+                    ctx.fillStyle = c.carriedPack.boxColor;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.roundRect(-24, -10, 18, 16, 4);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = c.carriedPack.ribbonColor;
+                    ctx.fillRect(-16, -10, 3, 16);
+                }
+
+                ctx.restore();
+            });
+        }
+
+        function drawMoneySnowAndEffects() {
+            moneyPiles.forEach(p => {
+                const py = p.y + Math.sin(p.bob) * 3;
+                ctx.fillStyle = p.perfect ? '#facc15' : '#22c55e';
+                ctx.strokeStyle = p.perfect ? '#a16207' : '#15803d';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(p.x - 16, py - 9, 32, 18, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = p.perfect ? '#ffffff' : '#fef08a';
+                ctx.beginPath();
+                ctx.arc(p.x, py, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            particles.forEach(pt => {
+                ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            floatingTexts.forEach(ft => {
+                ctx.globalAlpha = Math.max(0, Math.min(1, ft.life * 1.4));
+                ctx.font = 'bold 15px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            });
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+            snowFlakes.forEach(sf => {
+                ctx.beginPath();
+                ctx.arc(sf.x, sf.y, sf.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // ============================================================
+        // 13. HUD, BARRES RAPIDES & BOUTIQUE COMPLETE
+        // ============================================================
+        const elMoney = document.getElementById('hudMoney');
+        const elPrice = document.getElementById('hudPrice');
+        const elPerfects = document.getElementById('hudPerfects');
+        const elPrestige = document.getElementById('hudPrestige');
+        const elShopBal = document.getElementById('shopBalance');
+        const elShopConvCap = document.getElementById('shopConveyorCap');
+        const elShopSorterInfo = document.getElementById('shopSorterInfo');
+        const elConveyorCount = document.getElementById('hudConveyorCount');
+        const elOrdersList = document.getElementById('hudOrdersList');
+        const elOrderSwatch = document.getElementById('hudOrderSwatch');
+        const elHandSummary = document.getElementById('hudHandSummary');
+        const glazeQuickBar = document.getElementById('glazeQuickBar');
+        const confettiQuickBar = document.getElementById('confettiQuickBar');
+        const packQuickBar = document.getElementById('packQuickBar');
+
+        function formatMoney(n) { return Math.round(n).toLocaleString('fr-FR') + ' $'; }
+
+        function getSwatchBackground(item) {
+            if (item.mode === 'candycane') return 'repeating-linear-gradient(45deg,#ff4d6d,#ff4d6d 4px,#ffffff 4px,#ffffff 8px)';
+            if (item.mode === 'aurora') return 'linear-gradient(135deg,#00f5d4,#00bbf9,#9b5de5)';
+            if (item.mode === 'rainbow') return 'linear-gradient(135deg,#ff595e,#ffca3a,#8ac926,#1982c4)';
+            if (item.mode === 'gold24k') return 'linear-gradient(135deg,#fff200,#f59e0b,#ffd700)';
+            if (item.mode === 'diamond') return 'linear-gradient(135deg,#e0f2fe,#38bdf8,#ffffff)';
+            return item.color || item.boxColor || '#ffffff';
+        }
+
+        function renderQuickBars() {
+            glazeQuickBar.innerHTML = '';
+            state.unlockedIcing.forEach((id, idx) => {
+                const ic = CATALOG.icing.find(i => i.id === id);
+                if (!ic) return;
+                const active = state.selectedIcing === ic.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-red-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer bg-amber-50 text-amber-950`;
+                btn.innerHTML = `<span class="w-2.5 h-2.5 rounded-full border border-red-950" style="background:${getSwatchBackground(ic)}"></span><span>${idx < 9 ? (idx + 1) + '.' : ''}${ic.name.split(' ')[0]}</span>`;
+                btn.addEventListener('click', () => { sound.init(); selectIcingById(ic.id); });
+                glazeQuickBar.appendChild(btn);
+            });
+
+            confettiQuickBar.innerHTML = '';
+            state.unlockedConfetti.forEach(id => {
+                const cf = CATALOG.confetti.find(c => c.id === id);
+                if (!cf) return;
+                const active = state.selectedConfetti === cf.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-red-950 font-bold text-[10px] cursor-pointer bg-sky-50 text-sky-950`;
+                btn.textContent = cf.name.split(' ')[0];
+                btn.addEventListener('click', () => { sound.init(); selectConfettiById(cf.id); });
+                confettiQuickBar.appendChild(btn);
+            });
+
+            packQuickBar.innerHTML = '';
+            state.unlockedPackaging.forEach(id => {
+                const pk = CATALOG.packaging.find(p => p.id === id);
+                if (!pk) return;
+                const active = state.selectedPackaging === pk.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-red-950 font-bold text-[10px] cursor-pointer bg-emerald-50 text-emerald-950`;
+                btn.textContent = pk.name.split(' ')[0];
+                btn.addEventListener('click', () => { sound.init(); selectPackagingById(pk.id); });
+                packQuickBar.appendChild(btn);
+            });
+        }
+
+        function updateHUD() {
+            elMoney.textContent = formatMoney(state.money);
+            elShopBal.textContent = formatMoney(state.money);
+            elPrice.textContent = formatMoney(getCookieUnitValue());
+            elPerfects.textContent = state.perfectOrders;
+            elPrestige.textContent = `Niv. ${getPrestigeLevel()}`;
+            elShopConvCap.textContent = `${getConveyorCapacity()} places`;
+            elShopSorterInfo.textContent = `${getSorterHandCap()} biscuit(s)/trajet`;
+            elConveyorCount.textContent = `${stations.conveyor.items.length}/${getConveyorCapacity()}`;
+
+            const front = getFrontCustomer();
+            if (front) {
+                const shName = front.desiredShape ? front.desiredShape.name.split(' ')[0] : 'Biscuit';
+                elOrdersList.textContent = `${front.desiredCount}x ${shName} • ${front.desiredIcing.name}`;
+                elOrderSwatch.style.background = getSwatchBackground(front.desiredIcing);
+            } else {
+                elOrdersList.textContent = 'Prêt pour le prochain client';
+                elOrderSwatch.style.background = getSwatchBackground(getIcing());
+            }
+
+            if (player.holding.length === 0) {
+                elHandSummary.textContent = `Vide (0/${getMaxHand()})`;
+            } else {
+                const labels = { flour: 'Farine', dough: 'Pâte', rolled: 'Roulée', raw: 'Forme', baked: 'Cuit', glazed: 'Glacé', finished: 'Prêt' };
+                const counts = {};
+                player.holding.forEach(i => { counts[labels[i.kind]] = (counts[labels[i.kind]] || 0) + 1; });
+                const str = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ');
+                elHandSummary.textContent = `${str} (${player.holding.length}/${getMaxHand()})`;
+            }
+        }
+
+        let currentTab = 'flour';
+        const shopModal = document.getElementById('shopModal');
+        const shopGrid = document.getElementById('shopGrid');
+
+        document.getElementById('btnOpenShop').addEventListener('click', () => {
+            sound.init();
+            shopModal.classList.remove('hidden');
+            shopModal.classList.add('flex');
+            renderShop();
+        });
+
+        document.getElementById('btnCloseShop').addEventListener('click', () => {
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        document.querySelectorAll('.shop-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.shop-tab').forEach(b => {
+                    b.classList.remove('bg-white', 'text-red-950');
+                    b.classList.add('bg-red-900/80', 'text-amber-100');
+                });
+                btn.classList.remove('bg-red-900/80', 'text-amber-100');
+                btn.classList.add('bg-white', 'text-red-950');
+                currentTab = btn.dataset.tab;
+                renderShop();
+            });
+        });
+
+        function renderShop() {
+            shopGrid.innerHTML = '';
+            updateHUD();
+            renderQuickBars();
+
+            const recipeTabs = {
+                flour: { list: CATALOG.flour, unlockedKey: 'unlockedFlour', selectedKey: 'selectedFlour', icon: '🌾' },
+                dough: { list: CATALOG.dough, unlockedKey: 'unlockedDough', selectedKey: 'selectedDough', icon: '🥣' },
+                shapes: { list: CATALOG.shapes, unlockedKey: 'unlockedShapes', selectedKey: 'selectedShape', icon: null },
+                icing: { list: CATALOG.icing, unlockedKey: 'unlockedIcing', selectedKey: 'selectedIcing', icon: '🎨' },
+                confetti: { list: CATALOG.confetti, unlockedKey: 'unlockedConfetti', selectedKey: 'selectedConfetti', icon: '✨' },
+                packaging: { list: CATALOG.packaging, unlockedKey: 'unlockedPackaging', selectedKey: 'selectedPackaging', icon: '🎁' },
+                hats: { list: CATALOG.hats, unlockedKey: 'unlockedHats', selectedKey: 'selectedHat', icon: null }
+            };
+
+            if (recipeTabs[currentTab]) {
+                const cfg = recipeTabs[currentTab];
+                 cfg.list.forEach((item, idx) => {
+                    const unlocked = state[cfg.unlockedKey].includes(item.id);
+                    const equipped = state[cfg.selectedKey] === item.id;
+                    const canBuy = !unlocked && state.money >= item.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `snow-card rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${equipped ? 'ring-4 ring-yellow-400' : ''}`;
+                    const swatchColor = item.color || item.boxColor;
+                    const swatch = swatchColor ? `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>` : '';
+
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2">
+                            <span class="text-2xl">${item.icon || cfg.icon}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="font-bold text-sm truncate">#${idx + 1} ${item.name}</span>
+                                    ${swatch}
+                                </div>
+                                <p class="text-[11px] text-slate-600 mt-1">${item.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!unlocked && !canBuy) ? 'disabled' : ''} class="${equipped ? 'bg-amber-400 text-amber-950' : (unlocked ? 'bg-amber-200 hover:bg-amber-300 text-amber-950' : 'btn-pine text-white')} w-full py-1.5 rounded-xl font-bold text-xs cursor-pointer">
+                            ${equipped ? '✓ Équipé' : (unlocked ? 'Sélectionner' : `Acheter • ${formatMoney(item.cost)}`)}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (unlocked || canBuy) {
+                        btn.addEventListener('click', () => {
+                            if (!unlocked) {
+                                state.money -= item.cost;
+                                state[cfg.unlockedKey].push(item.id);
+                                sound.upgrade();
+                            } else sound.pop();
+                            state[cfg.selectedKey] = item.id;
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            } else if (currentTab === 'conveyor' || currentTab === 'upgrades') {
+                const list = currentTab === 'conveyor' ? CATALOG.conveyor : CATALOG.upgrades;
+                list.forEach(up => {
+                    const lvl = state.levels[up.id] || 0;
+                    const isMax = lvl >= up.max;
+                    const exp = (up.id === 'conveyorPlaces' || up.id === 'magnet') ? lvl : (lvl - 1);
+                    const cost = Math.round(up.baseCost * Math.pow(up.mult, Math.max(0, exp)));
+                    const canBuy = !isMax && state.money >= cost;
+
+                    const card = document.createElement('div');
+                    card.className = 'snow-card rounded-2xl p-3.5 text-slate-900 flex flex-col justify-between gap-2.5';
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-3xl">${up.icon}</span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="font-bold text-sm">${up.name}</span>
+                                    <span class="text-[11px] font-bold bg-red-100 text-red-900 px-2 py-0.5 rounded-lg">Niv. ${lvl}/${up.max}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 mt-1">${up.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || isMax) ? 'disabled' : ''} class="btn-pine w-full py-2 rounded-xl text-white font-bold text-xs cursor-pointer">
+                            ${isMax ? '✓ Niveau Maximum' : `Améliorer • ${formatMoney(cost)}`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= cost;
+                            state.levels[up.id] = lvl + 1;
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            } else if (currentTab === 'staff') {
+                CATALOG.staff.forEach(st => {
+                    const owned = !!state.staffAndDecor[st.id];
+                    const canBuy = !owned && state.money >= st.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `snow-card rounded-2xl p-3.5 text-slate-900 flex flex-col justify-between gap-2.5 ${owned ? 'ring-4 ring-emerald-500' : ''}`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-3xl">${st.icon}</span>
+                            <div>
+                                <div class="font-bold text-sm">${st.name}</div>
+                                <p class="text-xs text-slate-600 mt-1">${st.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-pine w-full py-2 rounded-xl text-white font-bold text-xs cursor-pointer">
+                            ${owned ? '✓ Actif dans le Village' : `Recruter / Construire • ${formatMoney(st.cost)}`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= st.cost;
+                            state.staffAndDecor[st.id] = true;
+                            syncHelpers();
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            }
+        }
+
+        const btnSound = document.getElementById('btnSound');
+        btnSound.addEventListener('click', () => {
+            sound.muted = !sound.muted;
+            btnSound.textContent = sound.muted ? '🔇' : '🔊';
+        });
+
+        const resetModal = document.getElementById('resetModal');
+        document.getElementById('btnOpenReset').addEventListener('click', () => {
+            resetModal.classList.remove('hidden');
+            resetModal.classList.add('flex');
+        });
+        document.getElementById('btnCancelReset').addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+        });
+        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+            localStorage.removeItem(SAVE_KEY);
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            helpers = [];
+            customers = [];
+            moneyPiles = [];
+            player.holding = [];
+            sorterElf.holding = [];
+            stations.oven.slots = [];
+            stations.oven.ready = [];
+            stations.conveyor.items = [];
+            updateHUD();
+            renderQuickBars();
+            renderShop();
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        // ============================================================
+        // 14. BOUCLE PRINCIPALE 60 FPS
+        // ============================================================
+        let lastTime = 0;
+        function gameLoop(nowMs) {
+            if (!lastTime) lastTime = nowMs;
+            const dt = Math.min(0.05, (nowMs - lastTime) / 1000);
+            lastTime = nowMs;
+
+            update(dt);
+
+            ctx.save();
+            ctx.fillStyle = '#071426';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+
+            drawSantaVillage(nowMs);
+            drawVillageDecorations(nowMs);
+            drawStationsAndConveyor(nowMs);
+            helpers.forEach(h => drawCharacter(h, h.role, nowMs));
+            drawCharacter(sorterElf, 'sorter', nowMs);
+            drawCustomers(nowMs);
+            drawCharacter(player, 'player', nowMs);
+            drawMoneySnowAndEffects();
+
+            ctx.restore();
+            requestAnimationFrame(gameLoop);
+        }
+
+        updateHUD();
+        renderQuickBars();
+        window.onload = function() {
+            requestAnimationFrame(gameLoop);
+        };
+    })();
+    </script>
+</body>
+</html>
 
