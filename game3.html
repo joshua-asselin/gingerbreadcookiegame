@@ -2086,6 +2086,27 @@
             ctx.fill();
             ctx.stroke();
             drawLabel(dc.x + dc.w * 0.5, dc.y - 10, '9. Comptoir Tri');
+            // Dessin des boîtes posées sur le présentoir (2 colonnes x 9 lignes = 18 max)
+            dc.boxes.forEach((box, idx) => {
+                const col = idx % 2;
+                const row = Math.floor(idx / 2);
+                const bx = dc.x + 8 + col * 28;
+                const by = dc.y + 8 + row * 17;
+
+                ctx.fillStyle = box.pack.boxColor;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(bx, by, 24, 14, 3);
+                ctx.fill();
+                ctx.stroke();
+
+                // Ruban de la boîte
+                ctx.fillStyle = box.pack.ribbonColor;
+                ctx.fillRect(bx + 10, by, 4, 14);
+                ctx.fillRect(bx, by + 5, 24, 4);
+            });
+            drawLabel(dc.x + dc.w * 0.5, dc.y + dc.h + 14, `Boîtes : ${dc.boxes.length}/18`);
         }
 
         function drawCharacter(ent, role, nowMs) {
@@ -2566,6 +2587,7 @@
             stations.oven.slots = [];
             stations.oven.ready = [];
             stations.conveyor.items = [];
+            stations.deliveryCounter.boxes = [];
             updateHUD();
             renderQuickBars();
             renderShop();
