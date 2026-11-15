@@ -1,0 +1,2370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gingerbread Mart 2 — La Maison en Pain d'Épices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #240f06;
+            font-family: 'Fredoka', sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* Nouveau design UI Maison en Pain d'Épices & Glaçage Sucre d'Orge */
+        .ginger-panel {
+            background: linear-gradient(180deg, #6e351a 0%, #461e0c 100%);
+            border: 3px solid #fff8eb;
+            box-shadow: 0 5px 0 #260f04, inset 0 2px 0 rgba(255, 255, 255, 0.25);
+        }
+        .icing-card {
+            background: linear-gradient(180deg, #fffdf9 0%, #fff1dc 100%);
+            border: 3px solid #d98a4e;
+            box-shadow: 0 4px 0 #8c461b;
+        }
+        .btn-candy {
+            background: linear-gradient(180deg, #ff5e7e 0%, #d62849 100%);
+            border: 2px solid #fff8eb;
+            box-shadow: 0 4px 0 #8a1129;
+            transition: transform 0.08s;
+        }
+        .btn-candy:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #8a1129;
+        }
+        .btn-mint {
+            background: linear-gradient(180deg, #38b000 0%, #007200 100%);
+            border: 2px solid #d8f3dc;
+            box-shadow: 0 4px 0 #004b23;
+            transition: transform 0.08s;
+        }
+        .btn-mint:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #004b23;
+        }
+        .btn-mint:disabled {
+            background: #9ca3af;
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 0 #4b5563;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .quick-pill {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .quick-pill.active {
+            transform: translateY(-3px) scale(1.06);
+            box-shadow: 0 0 0 3px #ffd166, 0 4px 0 #260f04;
+        }
+        .shop-scroll::-webkit-scrollbar,
+        .no-scrollbar::-webkit-scrollbar {
+            width: 7px;
+            height: 5px;
+        }
+        .shop-scroll::-webkit-scrollbar-track {
+            background: #2b1207;
+            border-radius: 8px;
+        }
+        .shop-scroll::-webkit-scrollbar-thumb {
+            background: #e07a5f;
+            border-radius: 8px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Principal 60 FPS -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Supérieur Modernisé -->
+    <div class="fixed top-2.5 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Compteurs Financiers & Prestige -->
+        <div class="flex items-center gap-2 pointer-events-auto flex-wrap">
+            <div class="ginger-panel rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-amber-50">
+                <span class="text-xl sm:text-2xl">🪙</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Caisse Manoir</div>
+                    <div id="hudMoney" class="text-base sm:text-xl font-bold text-yellow-300 leading-tight">50 $</div>
+                </div>
+            </div>
+
+            <div class="ginger-panel rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-amber-50">
+                <span class="text-xl sm:text-2xl">🎁</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-pink-200 font-bold leading-none">Valeur / Biscuit</div>
+                    <div id="hudPrice" class="text-base sm:text-xl font-bold text-emerald-300 leading-tight">12 $</div>
+                </div>
+            </div>
+
+            <div class="hidden md:flex ginger-panel rounded-2xl px-3.5 py-1.5 items-center gap-2 text-amber-50">
+                <span class="text-xl">📦</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-amber-300 font-bold leading-none">Boîtes Vendues</div>
+                    <div id="hudBoxesSold" class="text-lg font-bold text-white leading-tight">0</div>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex ginger-panel rounded-2xl px-3 py-1.5 items-center gap-1.5 text-amber-50">
+                <span class="text-lg">👑</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-wider text-sky-200 font-bold leading-none">Prestige</div>
+                    <div id="hudPrestige" class="text-sm sm:text-base font-bold text-sky-300 leading-tight">Niv. 1</div>
+                </div>
+            </div>
+
+            <div id="saveBadge" class="bg-emerald-950/90 border-2 border-emerald-400 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-xl opacity-0 transition-opacity duration-300">
+                Sauvegardé ✓
+            </div>
+        </div>
+
+        <!-- Boutons Boutique & Audio -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <button id="btnOpenShop" class="btn-candy rounded-2xl px-4 py-2 font-bold text-white text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                <span class="text-lg sm:text-xl">🏠</span>
+                <span>Atelier & Boutique</span>
+            </button>
+            <button id="btnSound" class="ginger-panel rounded-2xl p-2 text-lg sm:text-xl text-white hover:brightness-110 cursor-pointer" title="Activer/Couper le son">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <!-- Barre Inférieure : Sélecteurs Rapides (Glaçage + Confettis) & Commande Client -->
+    <div class="fixed bottom-2.5 left-2.5 right-2.5 flex flex-col lg:flex-row items-center justify-between gap-2 pointer-events-none z-10">
+        <!-- Sélecteurs Rapides Glaçage & Confettis -->
+        <div class="ginger-panel rounded-2xl px-3 py-1.5 pointer-events-auto max-w-full lg:max-w-[60%] flex items-center gap-2.5 overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[11px] font-bold text-pink-200">🎨 Glaçage:</span>
+                <div id="glazeQuickBar" class="flex items-center gap-1"></div>
+            </div>
+            <div class="h-6 w-0.5 bg-amber-200/30 shrink-0"></div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[11px] font-bold text-sky-200">✨ Confettis:</span>
+                <div id="confettiQuickBar" class="flex items-center gap-1"></div>
+            </div>
+        </div>
+
+        <!-- Commande du Client & Contenu de la Main -->
+        <div class="ginger-panel rounded-2xl px-3 py-1.5 text-amber-50 text-xs flex items-center gap-2 pointer-events-auto shrink-0 flex-wrap justify-center">
+            <div class="flex items-center gap-1.5 bg-amber-950/85 px-2.5 py-1 rounded-xl border border-amber-400/50">
+                <span class="text-amber-300 font-bold">Client veut :</span>
+                <span id="hudOrderSwatch" class="inline-block w-3.5 h-3.5 rounded-full border border-white"></span>
+                <span id="hudOrderText" class="font-bold text-white">3x Maison • Vanille Royale</span>
+            </div>
+            <div class="bg-amber-950/85 px-2.5 py-1 rounded-xl border border-amber-400/50 font-bold text-yellow-300">
+                Main : <span id="hudHandSummary">Vide (0/4)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Joystick Tactile Mobile -->
+    <div id="joystickZone" class="fixed bottom-28 left-4 w-24 h-24 rounded-full bg-amber-950/50 border-2 border-white/50 flex items-center justify-center z-20 md:hidden">
+        <div id="joystickKnob" class="w-10 h-10 rounded-full bg-pink-500 border-2 border-white shadow-md pointer-events-none"></div>
+    </div>
+
+    <!-- Modale Boutique Réorganisée par Pôles de Production -->
+    <div id="shopModal" class="fixed inset-0 bg-black/75 hidden items-center justify-center p-2.5 sm:p-5 z-30">
+        <div class="ginger-panel rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- En-tête Boutique -->
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b-2 border-amber-200/30 bg-amber-950/70">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl sm:text-3xl">🏰</span>
+                    <div>
+                        <h2 class="text-lg sm:text-2xl font-bold text-white">Catalogue du Manoir en Pain d'Épices</h2>
+                        <p class="text-xs text-amber-200">
+                            Caisse : <span id="shopBalance" class="font-bold text-yellow-300">50 $</span> • 
+                            Capacité Boîte : <span id="shopBoxCap" class="font-bold text-pink-300">3 biscuits</span> • Sauvegarde Auto
+                        </p>
+                    </div>
+                </div>
+                <button id="btnCloseShop" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-lg flex items-center justify-center border-2 border-white cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Navigation par Catégories -->
+            <div class="flex gap-1.5 p-2.5 bg-amber-950/50 overflow-x-auto no-scrollbar">
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-amber-950 cursor-pointer whitespace-nowrap" data-tab="flour">🌾 1. Farines</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 2. Pâtes</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="shapes">🏠 3. Formes</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 4. Glaçages</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ 5. Confettis</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Upgrades Atelier</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="staff">🧝 Lutins & Déco</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-amber-900/80 text-amber-100 cursor-pointer whitespace-nowrap" data-tab="hats">👑 Chapeaux</button>
+            </div>
+
+            <!-- Grille d'articles -->
+            <div id="shopGrid" class="p-3.5 overflow-y-auto shop-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1"></div>
+
+            <!-- Pied de boutique -->
+            <div class="px-4 py-2.5 bg-amber-950/80 border-t-2 border-amber-200/20 flex items-center justify-between gap-2 text-xs text-amber-200">
+                <span>Chaîne : 1.Blé → 2.Pétrin → 3.Rouleau → 4.Forme → 5.Four → 6.Glaçage/Confettis → 7.Boîte → Présentoir !</span>
+                <button id="btnOpenReset" class="px-3 py-1.5 rounded-xl bg-red-900/90 hover:bg-red-700 text-red-100 font-bold border border-red-400 cursor-pointer whitespace-nowrap">
+                    🗑️ Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Confirmation Réinitialisation -->
+    <div id="resetModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-40">
+        <div class="icing-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
+            <div class="text-4xl mb-2">🏠</div>
+            <h3 class="text-xl font-bold mb-2">Réinitialiser le Manoir ?</h3>
+            <p class="text-sm text-amber-800 mb-5">Toutes tes farines, pâtes, formes, lutins et améliorations de Gingerbread Mart 2 seront remis à zéro.</p>
+            <div class="flex gap-3">
+                <button id="btnCancelReset" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
+                <button id="btnConfirmReset" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white cursor-pointer">Effacer tout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        "use strict";
+
+        // ==========================================
+        // 1. CATALOGUE COMPLET GINGERBREAD MART 2
+        // ==========================================
+        const CATALOG = {
+            flour: [
+                { id: 'wheat', name: 'Farine de Blé Doré', desc: 'Farine artisanale cultivée dans la serre du manoir.', cost: 0, bonus: 0, growMult: 1.0, color: '#f5deb3', stalkColor: '#eab308' },
+                { id: 'spelt', name: 'Farine d\'Épeautre Ancien', desc: 'Grain rustique parfumé (+5$ / biscuit, +15% pousse).', cost: 85, bonus: 5, growMult: 1.15, color: '#e6ccb2', stalkColor: '#d97706' },
+                { id: 'almond', name: 'Farine d\'Amande Douce', desc: 'Texture fondante de pâtisserie fine (+14$ / biscuit, +25% pousse).', cost: 240, bonus: 14, growMult: 1.25, color: '#fff3b0', stalkColor: '#f59e0b' },
+                { id: 'hazelnut', name: 'Farine de Noisette Grillée', desc: 'Arôme praliné intense (+28$ / biscuit, +40% pousse).', cost: 620, bonus: 28, growMult: 1.40, color: '#d4a373', stalkColor: '#b45309' },
+                { id: 'stardust', name: 'Farine d\'Étoile Polaire', desc: 'Blé féerique scintillant (+55$ / biscuit, +60% pousse).', cost: 1500, bonus: 55, growMult: 1.60, color: '#e0f2fe', stalkColor: '#38bdf8' },
+                { id: 'ambrosia', name: 'Farine d\'Ambroisie Royale', desc: 'Nectar suprême des maîtres (+110$ / biscuit, +85% pousse).', cost: 3600, bonus: 110, growMult: 1.85, color: '#fef08a', stalkColor: '#facc15' }
+            ],
+            dough: [
+                { id: 'grandcru', name: 'Pâte Épicée Grand Cru', desc: 'Nouvelle recette signature du Manoir en Pain d\'Épices.', cost: 0, bonus: 0, speedMult: 1.0, color: '#b5651d', stroke: '#5c2c06' },
+                { id: 'maple', name: 'Pâte au Sirop d\'Érable', desc: 'Douceur dorée caramélisée (+8$ / biscuit, +15% vitesse).', cost: 110, bonus: 8, speedMult: 1.15, color: '#d97706', stroke: '#78350f' },
+                { id: 'redvelvet', name: 'Pâte Velours Rouge', desc: 'Cacao rouge somptueux (+20$ / biscuit, +30% vitesse).', cost: 310, bonus: 20, speedMult: 1.30, color: '#be123c', stroke: '#4c0519' },
+                { id: 'truffle', name: 'Pâte Truffe Noire & Vanille', desc: 'Intense et raffinée (+42$ / biscuit, +45% vitesse).', cost: 780, bonus: 42, speedMult: 1.45, color: '#3e2723', stroke: '#1b0000' },
+                { id: 'ruby', name: 'Pâte Rose Rubis', desc: 'Éclat fruité précieux (+80$ / biscuit, +65% vitesse).', cost: 1850, bonus: 80, speedMult: 1.65, color: '#f43f5e', stroke: '#881337' },
+                { id: 'diamond', name: 'Pâte Diamant Sucré', desc: 'Cristallisée à la perfection (+150$ / biscuit, +90% vitesse).', cost: 4200, bonus: 150, speedMult: 1.90, color: '#7dd3fc', stroke: '#0369a1' }
+            ],
+            shapes: [
+                { id: 'gingerman', name: 'Bonhomme Classique', desc: 'L\'indémodable héros de pain d\'épices conservé !', cost: 0, bonus: 0, icon: '🧑' },
+                { id: 'gingerhouse', name: 'Maison en Pain d\'Épices', desc: 'La star du jeu ! Mini chalet avec toit enneigé (+12$ / biscuit).', cost: 140, bonus: 12, icon: '🏠' },
+                { id: 'bell', name: 'Cloche Dorée de Noël', desc: 'Tinte de gourmandise (+26$ / biscuit).', cost: 380, bonus: 26, icon: '🔔' },
+                { id: 'reindeer', name: 'Renne Magique', desc: 'Fidèle compagnon du traîneau (+48$ / biscuit).', cost: 920, bonus: 48, icon: '🦌' },
+                { id: 'nutcracker', name: 'Casse-Noisette Royal', desc: 'Soldat sucré de parade (+85$ / biscuit).', cost: 2100, bonus: 85, icon: '💂' },
+                { id: 'sleigh', name: 'Traîneau Enchanté', desc: 'Rempli de friandises (+135$ / biscuit).', cost: 4500, bonus: 135, icon: '🛷' },
+                { id: 'castle', name: 'Château de Sucre', desc: 'Chef-d\'œuvre architectural comestible (+220$ / biscuit).', cost: 8800, bonus: 220, icon: '🏰' }
+            ],
+            icing: [
+                { id: 'vanillaRoyal', name: 'Vanille Royale', desc: 'Glaçage blanc nacré onctueux.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
+                { id: 'candycane', name: 'Sucre d\'Orge', desc: 'Tourbillon rouge et blanc festif (+5$ / biscuit).', cost: 75, bonus: 5, color: '#ff4d6d', mode: 'candycane' },
+                { id: 'mapleGlaze', name: 'Sirop d\'Érable Ambré', desc: 'Nappage doré fondant (+11$ / biscuit).', cost: 180, bonus: 11, color: '#f59e0b', mode: 'solid' },
+                { id: 'polarMint', name: 'Menthe Polaire', desc: 'Fraîcheur turquoise givrée (+20$ / biscuit).', cost: 360, bonus: 20, color: '#2ec4b6', mode: 'solid' },
+                { id: 'frostedBerry', name: 'Myrtille Givrée', desc: 'Bleu nuit velouté (+34$ / biscuit).', cost: 690, bonus: 34, color: '#4361ee', mode: 'solid' },
+                { id: 'whiteChoco', name: 'Chocolat Blanc Velours', desc: 'Crème ivoire fondante (+52$ / biscuit).', cost: 1250, bonus: 52, color: '#fefae0', mode: 'solid' },
+                { id: 'rubyGlaze', name: 'Rubis Framboise', desc: 'Rouge éclatant précieux (+78$ / biscuit).', cost: 2200, bonus: 78, color: '#e63946', mode: 'solid' },
+                { id: 'aurora', name: 'Aurore Boréale', desc: 'Reflets polaires animés (+115$ / biscuit).', cost: 3900, bonus: 115, color: '#00f5d4', mode: 'aurora' },
+                { id: 'gold24k', name: 'Or 24 Carats', desc: 'Feuille d\'or pure scintillante (+165$ / biscuit).', cost: 6800, bonus: 165, color: '#ffd700', mode: 'gold24k' }
+            ],
+            confetti: [
+                { id: 'none', name: 'Aucun Confetti', desc: 'Glaçage pur sans garniture.', cost: 0, bonus: 0, style: 'none' },
+                { id: 'crystals', name: 'Sucre Cristal Étincelant', desc: 'Grains de sucre brillants (+4$ / biscuit).', cost: 65, bonus: 4, style: 'crystals' },
+                { id: 'candyshards', name: 'Éclats de Sucre d\'Orge', desc: 'Morceaux croquants rouges & blancs (+10$ / biscuit).', cost: 170, bonus: 10, style: 'candyshards' },
+                { id: 'silverpearls', name: 'Perles d\'Argent', desc: 'Billes argentées de luxe (+22$ / biscuit).', cost: 410, bonus: 22, style: 'silverpearls' },
+                { id: 'caramelbits', name: 'Pépites Caramel Beurre Salé', desc: 'Éclats fondants dorés (+40$ / biscuit).', cost: 890, bonus: 40, style: 'caramelbits' },
+                { id: 'shootingstars', name: 'Étoiles Filantes', desc: 'Mini étoiles dorées magiques (+68$ / biscuit).', cost: 1850, bonus: 68, style: 'shootingstars' },
+                { id: 'diamonddust', name: 'Poussière de Diamant', desc: 'Paillettes prismatiques animées (+110$ / biscuit).', cost: 3600, bonus: 110, style: 'diamonddust' }
+            ],
+            hats: [
+                { id: 'masterChef', name: 'Toque du Manoir', desc: 'Toque brodée d\'or du propriétaire.', cost: 0, speedBonus: 0, priceBonus: 0, icon: '👨‍🍳' },
+                { id: 'gingerHat', name: 'Chapeau Pain d\'Épices', desc: 'Garni de glaçage blanc (+20 vitesse, +10$ / biscuit).', cost: 250, speedBonus: 20, priceBonus: 10, icon: '🍪' },
+                { id: 'candyCrown', name: 'Couronne Sucre d\'Orge', desc: 'Sucrée et majestueuse (+35 vitesse, +28$ / biscuit).', cost: 850, speedBonus: 35, priceBonus: 28, icon: '🍬' },
+                { id: 'iceWizard', name: 'Chapeau du Mage Givré', desc: 'Magie des glaces (+50 vitesse, +60$ / biscuit).', cost: 2400, speedBonus: 50, priceBonus: 60, icon: '🧙‍♂️' },
+                { id: 'emperorCrown', name: 'Couronne Impériale', desc: 'Prestige absolu du royaume (+70 vitesse, +120$ / biscuit).', cost: 6000, speedBonus: 70, priceBonus: 120, icon: '👑' }
+            ],
+            upgrades: [
+                { id: 'speed', name: 'Bottes en Sucre Filé', desc: 'Déplacement ultra-fluide dans tout le manoir.', baseCost: 60, mult: 1.75, max: 8, icon: '👢' },
+                { id: 'capacity', name: 'Plateau de Service XL', desc: 'Transporte plus d\'ingrédients, biscuits et boîtes en main.', baseCost: 70, mult: 1.85, max: 8, icon: '🤲' },
+                { id: 'wheatGrow', name: 'Engrais Féerique (Blé)', desc: 'Fait pousser la farine beaucoup plus vite !', baseCost: 65, mult: 1.8, max: 7, icon: '🌾' },
+                { id: 'mixerSpeed', name: 'Pétrin Turbo', desc: 'Mélange la farine en pâte en un éclair.', baseCost: 75, mult: 1.8, max: 7, icon: '🥣' },
+                { id: 'rollerSpeed', name: 'Rouleau de Cristal', desc: 'Étale la pâte à grande vitesse.', baseCost: 85, mult: 1.8, max: 7, icon: '🪄' },
+                { id: 'cutterSpeed', name: 'Emporte-Pièce Laser', desc: 'Découpe les formes (Maison, Renne...) instantanément.', baseCost: 95, mult: 1.85, max: 7, icon: '🍪' },
+                { id: 'ovenSpeed', name: 'Four Double-Chaleur', desc: 'Cuisson express dans le grand four en briques.', baseCost: 110, mult: 1.9, max: 7, icon: '🔥' },
+                { id: 'ovenCap', name: 'Grille de Four XL', desc: 'Augmente le nombre de biscuits cuits en même temps.', baseCost: 130, mult: 1.95, max: 6, icon: '♨️' },
+                { id: 'decorSpeed', name: 'Douille & Confettis Auto', desc: 'Applique glaçage et confettis ultra rapidement.', baseCost: 120, mult: 1.85, max: 7, icon: '🧁' },
+                { id: 'boxCapacity', name: 'Boîtes Cadeaux XL 🎁', desc: 'Met plus de biscuits par boîte (jusqu\'à 8 biscuits / boîte) !', baseCost: 160, mult: 2.0, max: 6, icon: '📦' },
+                { id: 'packSpeed', name: 'Emballage Ruban Express', desc: 'Ferme et noue les boîtes cadeaux en un clin d\'œil.', baseCost: 115, mult: 1.85, max: 6, icon: '🎀' },
+                { id: 'elfSpeed', name: 'Bottines Turbo des Lutins', desc: 'Tous tes lutins courent et travaillent 2x plus vite !', baseCost: 180, mult: 1.95, max: 7, icon: '⚡' },
+                { id: 'magnet', name: 'Aimant à Pièces Dorées', desc: 'Attire les pièces et billets de très loin.', baseCost: 140, mult: 2.0, max: 5, icon: '🧲' }
+            ],
+            staff: [
+                { id: 'millerElf', name: 'Lutin Meunier 🌾', desc: 'Récolte la farine et alimente le pétrin automatiquement !', cost: 220, icon: '🌾', kind: 'staff' },
+                { id: 'doughElf', name: 'Lutin Pétrisseur 🥣', desc: 'Mélange la pâte et l\'apporte à la table à rouler !', cost: 340, icon: '🧝‍♂️', kind: 'staff' },
+                { id: 'shaperElf', name: 'Lutin Sculpteur 🏠', desc: 'Roule la pâte, découpe les formes et enfourne !', cost: 480, icon: '🍪', kind: 'staff' },
+                { id: 'decoratorElf', name: 'Lutin Décorateur 🎨', desc: 'Sort du four, glace & met les confettis selon le client !', cost: 650, icon: '🧝‍♀️', kind: 'staff' },
+                { id: 'packerElf', name: 'Lutin Emballeur 🎁', desc: 'Met les biscuits en boîte cadeau et remplit le présentoir !', cost: 850, icon: '📦', kind: 'staff' },
+                { id: 'expressElf', name: 'Lutin Supersonique ⚡', desc: 'Renfort polyvalent ultra-rapide sur toute la chaîne !', cost: 1400, icon: '⚡', kind: 'staff' },
+                { id: 'cashierElf', name: 'Maître Caissier Royal', desc: '+30% de pourboire sur chaque boîte vendue !', cost: 720, icon: '🎩', kind: 'staff' },
+                { id: 'candyFountain', name: 'Fontaine de Chocolat', desc: 'Décoration somptueuse (+15$ / biscuit vendu).', cost: 550, icon: '⛲', kind: 'decor', bonus: 15 },
+                { id: 'gingerChandelier', name: 'Lustre en Sucre d\'Orge', desc: 'Illumine le manoir (+28$ / biscuit vendu).', cost: 1200, icon: '🕯️', kind: 'decor', bonus: 28 },
+                { id: 'royalSleighDecor', name: 'Traîneau d\'Exposition', desc: 'Attire plus de clients VIP (+50$ / biscuit vendu).', cost: 2600, icon: '🛷', kind: 'decor', bonus: 50 }
+            ]
+        };
+
+        // ==========================================
+        // 2. AUDIO SYNTHÉTISEUR (WEB AUDIO API)
+        // ==========================================
+        const sound = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            },
+            beep(freq, type, duration, vol = 0.06) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            },
+            pop() { this.beep(540, 'sine', 0.07, 0.05); },
+            box() {
+                this.beep(440, 'triangle', 0.08, 0.07);
+                setTimeout(() => this.beep(660, 'triangle', 0.12, 0.07), 60);
+            },
+            ding() { this.beep(880, 'triangle', 0.18, 0.07); },
+            perfect() {
+                this.beep(660, 'triangle', 0.08, 0.08);
+                setTimeout(() => this.beep(880, 'triangle', 0.09, 0.08), 60);
+                setTimeout(() => this.beep(1320, 'triangle', 0.16, 0.09), 120);
+            },
+            coin() {
+                this.beep(1046, 'sine', 0.07, 0.06);
+                setTimeout(() => this.beep(1396, 'sine', 0.12, 0.06), 50);
+            },
+            upgrade() {
+                this.beep(523, 'triangle', 0.08, 0.08);
+                setTimeout(() => this.beep(784, 'triangle', 0.14, 0.08), 70);
+            }
+        };
+
+        // ==========================================
+        // 3. SAUVEGARDE & ÉTAT DU JEU
+        // ==========================================
+        const SAVE_KEY = 'gingerbread_mart_2_save_v1';
+
+        const DEFAULT_STATE = {
+            money: 50,
+            boxesSold: 0,
+            cookiesSold: 0,
+            unlockedFlour: ['wheat'],
+            selectedFlour: 'wheat',
+            unlockedDough: ['grandcru'],
+            selectedDough: 'grandcru',
+            unlockedShapes: ['gingerman'],
+            selectedShape: 'gingerman',
+            unlockedIcing: ['vanillaRoyal'],
+            selectedIcing: 'vanillaRoyal',
+            unlockedConfetti: ['none'],
+            selectedConfetti: 'none',
+            unlockedHats: ['masterChef'],
+            selectedHat: 'masterChef',
+            levels: {
+                speed: 1,
+                capacity: 1,
+                wheatGrow: 1,
+                mixerSpeed: 1,
+                rollerSpeed: 1,
+                cutterSpeed: 1,
+                ovenSpeed: 1,
+                ovenCap: 1,
+                decorSpeed: 1,
+                boxCapacity: 1,
+                packSpeed: 1,
+                elfSpeed: 1,
+                magnet: 0
+            },
+            staffAndDecor: {
+                millerElf: false,
+                doughElf: false,
+                shaperElf: false,
+                decoratorElf: false,
+                packerElf: false,
+                expressElf: false,
+                cashierElf: false,
+                candyFountain: false,
+                gingerChandelier: false,
+                royalSleighDecor: false
+            }
+        };
+
+        let state = loadGame();
+        let saveBadgeTimer = null;
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        ...DEFAULT_STATE,
+                        ...parsed,
+                        levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) },
+                        staffAndDecor: { ...DEFAULT_STATE.staffAndDecor, ...(parsed.staffAndDecor || {}) }
+                    };
+                }
+            } catch (e) {}
+            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+                const badge = document.getElementById('saveBadge');
+                if (badge) {
+                    badge.style.opacity = '1';
+                    clearTimeout(saveBadgeTimer);
+                    saveBadgeTimer = setTimeout(() => { badge.style.opacity = '0'; }, 1400);
+                }
+            } catch (e) {}
+        }
+
+        function getFlour() { return CATALOG.flour.find(f => f.id === state.selectedFlour) || CATALOG.flour[0]; }
+        function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
+        function getShape() { return CATALOG.shapes.find(s => s.id === state.selectedShape) || CATALOG.shapes[0]; }
+        function getIcing() { return CATALOG.icing.find(i => i.id === state.selectedIcing) || CATALOG.icing[0]; }
+        function getConfetti() { return CATALOG.confetti.find(c => c.id === state.selectedConfetti) || CATALOG.confetti[0]; }
+        function getHat() { return CATALOG.hats.find(h => h.id === state.selectedHat) || CATALOG.hats[0]; }
+
+        function getDecorBonus() {
+            let b = 0;
+            CATALOG.staff.forEach(item => {
+                if (item.kind === 'decor' && state.staffAndDecor[item.id]) b += item.bonus;
+            });
+            return b;
+        }
+
+        function getCookieUnitValue() {
+            return 12 + getFlour().bonus + getDough().bonus + getShape().bonus + getIcing().bonus + getConfetti().bonus + getHat().priceBonus + getDecorBonus();
+        }
+
+        function getPrestigeLevel() {
+            let totalLvl = 0;
+            Object.values(state.levels).forEach(v => totalLvl += v);
+            const unlockedCount = state.unlockedFlour.length + state.unlockedDough.length + state.unlockedShapes.length + state.unlockedIcing.length + state.unlockedConfetti.length;
+            return Math.max(1, Math.floor((totalLvl + unlockedCount) / 6));
+        }
+
+        function getMaxHand() { return Math.min(16, 4 + (state.levels.capacity - 1) * 2); }
+        function getBoxCapacity() { return Math.min(8, 2 + state.levels.boxCapacity); }
+        function getOvenCapacity() { return Math.min(10, 3 + state.levels.ovenCap); }
+        function getPlayerSpeed() { return 245 + (state.levels.speed - 1) * 35 + getHat().speedBonus; }
+
+        function getWheatTime() { return Math.max(0.25, 1.4 / (getFlour().growMult * (1 + (state.levels.wheatGrow - 1) * 0.35))); }
+        function getMixTime() { return Math.max(0.20, 1.2 / (1 + (state.levels.mixerSpeed - 1) * 0.4)); }
+        function getRollTime() { return Math.max(0.18, 1.15 / (getDough().speedMult * (1 + (state.levels.rollerSpeed - 1) * 0.4))); }
+        function getCutTime() { return Math.max(0.15, 1.05 / (1 + (state.levels.cutterSpeed - 1) * 0.45)); }
+        function getBakeTime() { return Math.max(0.55, 2.8 - (state.levels.ovenSpeed - 1) * 0.35); }
+        function getDecorateTime() { return Math.max(0.15, 1.1 / (1 + (state.levels.decorSpeed - 1) * 0.45)); }
+        function getPackTime() { return Math.max(0.15, 0.95 / (1 + (state.levels.packSpeed - 1) * 0.45)); }
+
+        function getElfSpeed() { return 185 + ((state.levels.elfSpeed || 1) - 1) * 42; }
+        function getElfWorkFactor() { return Math.max(0.35, 1.1 - ((state.levels.elfSpeed || 1) - 1) * 0.12); }
+        function getMagnetRadius() { return state.levels.magnet > 0 ? 120 + state.levels.magnet * 90 : 48; }
+
+        // ==========================================
+        // 4. ARCHITECTURE DU MANOIR EN PAIN D'ÉPICES (1060 x 660)
+        // ==========================================
+        const WORLD_W = 1060;
+        const WORLD_H = 660;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            scale = Math.min(w / WORLD_W, h / WORLD_H);
+            offsetX = (w - WORLD_W * scale) * 0.5;
+            offsetY = (h - WORLD_H * scale) * 0.5;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const stations = {
+            wheat: {
+                x: 92, y: 155, w: 105, h: 105,
+                zoneX: 225, zoneY: 208, zoneR: 46,
+                progress: 0
+            },
+            mixer: {
+                x: 92, y: 315, w: 105, h: 105,
+                zoneX: 225, zoneY: 368, zoneR: 46,
+                progress: 0
+            },
+            roller: {
+                x: 92, y: 475, w: 105, h: 105,
+                zoneX: 225, zoneY: 528, zoneR: 46,
+                progress: 0
+            },
+            shaper: {
+                x: 315, y: 495, w: 115, h: 95,
+                zoneX: 372, zoneY: 452, zoneR: 46,
+                progress: 0
+            },
+            oven: {
+                x: 325, y: 130, w: 145, h: 95,
+                zoneX: 398, zoneY: 255, zoneR: 48,
+                slots: [],
+                ready: []
+            },
+            icing: {
+                x: 525, y: 130, w: 135, h: 95,
+                zoneX: 592, zoneY: 255, zoneR: 48,
+                progress: 0
+            },
+            boxer: {
+                x: 525, y: 495, w: 135, h: 95,
+                zoneX: 592, zoneY: 452, zoneR: 48,
+                currentBoxCookies: [],
+                progress: 0
+            },
+            shelf: {
+                x: 715, y: 245, w: 86, h: 185,
+                zoneX: 682, zoneY: 338, zoneR: 50,
+                boxes: []
+            },
+            cashier: {
+                x: 860, y: 465, w: 96, h: 74
+            }
+        };
+
+        const player = {
+            x: 450,
+            y: 350,
+            facing: 1,
+            walkPhase: 0,
+            holding: [],
+            activeStation: null
+        };
+
+        let helpers = [];
+        let customers = [];
+        let moneyPiles = [];
+        let particles = [];
+        let floatingTexts = [];
+        let customerSpawnTimer = 1.0;
+
+        function syncHelpers() {
+            const roles = [
+                { flag: 'millerElf', role: 'miller', x: 230, y: 270 },
+                { flag: 'doughElf', role: 'dougher', x: 230, y: 440 },
+                { flag: 'shaperElf', role: 'shaper', x: 375, y: 370 },
+                { flag: 'decoratorElf', role: 'decorator', x: 540, y: 310 },
+                { flag: 'packerElf', role: 'packer', x: 610, y: 410 },
+                { flag: 'expressElf', role: 'express', x: 480, y: 350 }
+            ];
+            roles.forEach(r => {
+                if (state.staffAndDecor[r.flag] && !helpers.some(h => h.role === r.role)) {
+                    helpers.push({ role: r.role, x: r.x, y: r.y, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+                }
+            });
+        }
+        syncHelpers();
+
+        // ==========================================
+        // 5. CONTRÔLES (CLAVIER, SOURIS, TOUCHER, JOYSTICK)
+        // ==========================================
+        const keys = {};
+        let pointerTarget = null;
+        let isPointerDown = false;
+        const joyVec = { x: 0, y: 0 };
+
+        function selectGlazeById(id) {
+            if (!state.unlockedIcing.includes(id)) return;
+            state.selectedIcing = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
+
+        function selectConfettiById(id) {
+            if (!state.unlockedConfetti.includes(id)) return;
+            state.selectedConfetti = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            keys[k] = true;
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'q', 'z'].includes(k)) {
+                pointerTarget = null;
+            }
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key, 10) - 1;
+                if (idx < state.unlockedIcing.length) selectGlazeById(state.unlockedIcing[idx]);
+            }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+        function toWorld(clientX, clientY) {
+            return {
+                x: Math.max(210, Math.min(758, (clientX - offsetX) / scale)),
+                y: Math.max(195, Math.min(550, (clientY - offsetY) / scale))
+            };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            sound.init();
+            isPointerDown = true;
+            pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPointerDown) pointerTarget = toWorld(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', () => { isPointerDown = false; });
+
+        canvas.addEventListener('touchstart', (e) => {
+            sound.init();
+            if (e.touches.length > 0) pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) pointerTarget = toWorld(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        // Joystick mobile
+        const joyZone = document.getElementById('joystickZone');
+        const joyKnob = document.getElementById('joystickKnob');
+        let joyId = null;
+
+        function handleJoyMove(cx, cy) {
+            const rect = joyZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width * 0.5;
+            const centerY = rect.top + rect.height * 0.5;
+            const maxR = rect.width * 0.5 - 14;
+            let dx = cx - centerX;
+            let dy = cy - centerY;
+            const d = Math.hypot(dx, dy);
+            if (d > maxR) { dx = (dx / d) * maxR; dy = (dy / d) * maxR; }
+            joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+            joyVec.x = dx / maxR;
+            joyVec.y = dy / maxR;
+            pointerTarget = null;
+        }
+
+        joyZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sound.init();
+            const t = e.changedTouches[0];
+            joyId = t.identifier;
+            handleJoyMove(t.clientX, t.clientY);
+        }, { passive: false });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) handleJoyMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+            }
+        }, { passive: false });
+
+        function endJoy(e) {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joyId) {
+                    joyId = null; joyVec.x = 0; joyVec.y = 0;
+                    joyKnob.style.transform = 'translate(0px, 0px)';
+                }
+            }
+        }
+        joyZone.addEventListener('touchend', endJoy);
+        joyZone.addEventListener('touchcancel', endJoy);
+
+        // ==========================================
+        // 6. PARTICULES & TEXTES FLOTTANTS
+        // ==========================================
+        function spawnParticles(x, y, color, count) {
+            if (particles.length > 80) return;
+            for (let i = 0; i < count; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 35 + Math.random() * 85;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(ang) * spd,
+                    vy: Math.sin(ang) * spd - 24,
+                    life: 0.45 + Math.random() * 0.25,
+                    maxLife: 0.7,
+                    color,
+                    r: 3 + Math.random() * 2.5
+                });
+            }
+        }
+
+        function spawnText(x, y, text, color) {
+            if (floatingTexts.length > 20) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life: 1.1 });
+        }
+
+        // ==========================================
+        // 7. LOGIQUE DE PRODUCTION EN 7 ÉTAPES + BOÎTES
+        // ==========================================
+        function getFrontCustomer() {
+            return customers.find(c => c.state === 'toShelf') || customers[0] || null;
+        }
+
+        function update(dt) {
+            // 1. Déplacement joueur
+            let mx = joyVec.x;
+            let my = joyVec.y;
+            if (keys['arrowleft'] || keys['a'] || keys['q']) mx -= 1;
+            if (keys['arrowright'] || keys['d']) mx += 1;
+            if (keys['arrowup'] || keys['w'] || keys['z']) my -= 1;
+            if (keys['arrowdown'] || keys['s']) my += 1;
+
+            const spd = getPlayerSpeed();
+            if (mx !== 0 || my !== 0) {
+                const len = Math.hypot(mx, my);
+                if (len > 1) { mx /= len; my /= len; }
+                player.x += mx * spd * dt;
+                player.y += my * spd * dt;
+                if (mx !== 0) player.facing = mx > 0 ? 1 : -1;
+                player.walkPhase += dt * 12;
+            } else if (pointerTarget) {
+                const dx = pointerTarget.x - player.x;
+                const dy = pointerTarget.y - player.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    player.x += (dx / dist) * spd * dt;
+                    player.y += (dy / dist) * spd * dt;
+                    if (Math.abs(dx) > 2) player.facing = dx > 0 ? 1 : -1;
+                    player.walkPhase += dt * 12;
+                } else {
+                    pointerTarget = null;
+                    player.walkPhase = 0;
+                }
+            } else {
+                player.walkPhase = 0;
+            }
+
+            // Limite de déplacement élargie jusqu'au comptoir (758) pour ramasser l'argent facilement
+            player.x = Math.max(210, Math.min(758, player.x));
+            player.y = Math.max(195, Math.min(550, player.y));
+
+            // 2. Cuisson au four
+            const bakeTime = getBakeTime();
+            for (let i = stations.oven.slots.length - 1; i >= 0; i--) {
+                const slot = stations.oven.slots[i];
+                slot.timer += dt;
+                if (slot.timer >= bakeTime) {
+                    stations.oven.slots.splice(i, 1);
+                    stations.oven.ready.push({
+                        kind: 'baked',
+                        flour: slot.flour,
+                        dough: slot.dough,
+                        shape: slot.shape
+                    });
+                    sound.ding();
+                    spawnParticles(stations.oven.x + 72, stations.oven.y + 45, '#fde047', 6);
+                }
+            }
+
+            // 3. Interactions du joueur avec les 8 stations
+            player.activeStation = null;
+            const maxHand = getMaxHand();
+            const boxCap = getBoxCapacity();
+
+            // ÉTAPE 1 : Faire pousser & récolter la Farine
+            if (Math.hypot(player.x - stations.wheat.zoneX, player.y - stations.wheat.zoneY) <= stations.wheat.zoneR) {
+                player.activeStation = 'wheat';
+                if (player.holding.length < maxHand) {
+                    stations.wheat.progress += dt / getWheatTime();
+                    if (stations.wheat.progress >= 1) {
+                        stations.wheat.progress = 0;
+                        player.holding.push({ kind: 'flour', flour: getFlour() });
+                        sound.pop();
+                        spawnParticles(stations.wheat.x + 52, stations.wheat.y + 52, '#fef08a', 5);
+                        updateHUD();
+                    }
+                } else {
+                    stations.wheat.progress = 0;
+                }
+            } else {
+                stations.wheat.progress = Math.max(0, stations.wheat.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 2 : Mélanger la Farine en Pâte (Pétrin)
+            if (Math.hypot(player.x - stations.mixer.zoneX, player.y - stations.mixer.zoneY) <= stations.mixer.zoneR) {
+                player.activeStation = 'mixer';
+                const flourIdx = player.holding.findIndex(item => item.kind === 'flour');
+                if (flourIdx !== -1) {
+                    stations.mixer.progress += dt / getMixTime();
+                    if (stations.mixer.progress >= 1) {
+                        stations.mixer.progress = 0;
+                        const item = player.holding[flourIdx];
+                        player.holding[flourIdx] = {
+                            kind: 'dough',
+                            flour: item.flour,
+                            dough: getDough()
+                        };
+                        sound.pop();
+                        spawnParticles(stations.mixer.x + 52, stations.mixer.y + 52, getDough().color, 6);
+                        updateHUD();
+                    }
+                } else {
+                    stations.mixer.progress = 0;
+                }
+            } else {
+                stations.mixer.progress = Math.max(0, stations.mixer.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 3 : Rouler la Pâte
+            if (Math.hypot(player.x - stations.roller.zoneX, player.y - stations.roller.zoneY) <= stations.roller.zoneR) {
+                player.activeStation = 'roller';
+                const doughIdx = player.holding.findIndex(item => item.kind === 'dough');
+                if (doughIdx !== -1) {
+                    stations.roller.progress += dt / getRollTime();
+                    if (stations.roller.progress >= 1) {
+                        stations.roller.progress = 0;
+                        player.holding[doughIdx].kind = 'rolled';
+                        sound.pop();
+                        spawnParticles(stations.roller.x + 52, stations.roller.y + 52, '#fed7aa', 5);
+                        updateHUD();
+                    }
+                } else {
+                    stations.roller.progress = 0;
+                }
+            } else {
+                stations.roller.progress = Math.max(0, stations.roller.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 4 : Découper la Forme (Maison Pain d'Épices, Bonhomme, etc.)
+            if (Math.hypot(player.x - stations.shaper.zoneX, player.y - stations.shaper.zoneY) <= stations.shaper.zoneR) {
+                player.activeStation = 'shaper';
+                const rolledIdx = player.holding.findIndex(item => item.kind === 'rolled');
+                if (rolledIdx !== -1) {
+                    stations.shaper.progress += dt / getCutTime();
+                    if (stations.shaper.progress >= 1) {
+                        stations.shaper.progress = 0;
+                        player.holding[rolledIdx].kind = 'raw';
+                        player.holding[rolledIdx].shape = getShape();
+                        sound.pop();
+                        spawnParticles(stations.shaper.x + 57, stations.shaper.y + 45, '#fde68a', 6);
+                        updateHUD();
+                    }
+                } else {
+                    stations.shaper.progress = 0;
+                }
+            } else {
+                stations.shaper.progress = Math.max(0, stations.shaper.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 5 : Cuire au Grand Four
+            if (Math.hypot(player.x - stations.oven.zoneX, player.y - stations.oven.zoneY) <= stations.oven.zoneR) {
+                player.activeStation = 'oven';
+                const ovenCap = getOvenCapacity();
+                const rawIdx = player.holding.findIndex(item => item.kind === 'raw');
+                if (rawIdx !== -1 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                    const item = player.holding.splice(rawIdx, 1)[0];
+                    stations.oven.slots.push({
+                        timer: 0,
+                        flour: item.flour,
+                        dough: item.dough,
+                        shape: item.shape
+                    });
+                    sound.pop();
+                    updateHUD();
+                }
+                while (stations.oven.ready.length > 0 && player.holding.length < maxHand) {
+                    player.holding.push(stations.oven.ready.shift());
+                    sound.pop();
+                    updateHUD();
+                }
+            }
+
+            // ÉTAPE 6 : Mettre le Glaçage ET les Confettis
+            if (Math.hypot(player.x - stations.icing.zoneX, player.y - stations.icing.zoneY) <= stations.icing.zoneR) {
+                player.activeStation = 'icing';
+                const bakedIdx = player.holding.findIndex(item => item.kind === 'baked');
+                if (bakedIdx !== -1) {
+                    stations.icing.progress += dt / getDecorateTime();
+                    if (stations.icing.progress >= 1) {
+                        stations.icing.progress = 0;
+                        const ic = getIcing();
+                        const cf = getConfetti();
+                        player.holding[bakedIdx].kind = 'decorated';
+                        player.holding[bakedIdx].icing = ic;
+                        player.holding[bakedIdx].confetti = cf;
+                        sound.pop();
+                        spawnParticles(stations.icing.x + 67, stations.icing.y + 45, ic.color, 7);
+                        updateHUD();
+                    }
+                } else {
+                    stations.icing.progress = 0;
+                }
+            } else {
+                stations.icing.progress = Math.max(0, stations.icing.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 7 : Mettre dans une Boîte Cadeau
+            if (Math.hypot(player.x - stations.boxer.zoneX, player.y - stations.boxer.zoneY) <= stations.boxer.zoneR) {
+                player.activeStation = 'boxer';
+                const decIdx = player.holding.findIndex(item => item.kind === 'decorated');
+                if (decIdx !== -1 && stations.boxer.currentBoxCookies.length < boxCap) {
+                    stations.boxer.progress += dt / getPackTime();
+                    if (stations.boxer.progress >= 1) {
+                        stations.boxer.progress = 0;
+                        stations.boxer.currentBoxCookies.push(player.holding.splice(decIdx, 1)[0]);
+                        sound.pop();
+                        spawnParticles(stations.boxer.x + 67, stations.boxer.y + 45, '#ff758f', 5);
+                        if (stations.boxer.currentBoxCookies.length >= boxCap) {
+                            player.holding.push({
+                                kind: 'box',
+                                cookies: [...stations.boxer.currentBoxCookies]
+                            });
+                            stations.boxer.currentBoxCookies = [];
+                            sound.box();
+                            spawnText(stations.boxer.x + 67, stations.boxer.y - 12, `🎁 Boîte (${boxCap} biscuits) prête !`, '#ffd166');
+                        }
+                        updateHUD();
+                    }
+                } else if (stations.boxer.currentBoxCookies.length >= 2 && decIdx === -1 && player.holding.length < maxHand) {
+                    stations.boxer.progress += dt / (getPackTime() * 1.2);
+                    if (stations.boxer.progress >= 1) {
+                        stations.boxer.progress = 0;
+                        const count = stations.boxer.currentBoxCookies.length;
+                        player.holding.push({
+                            kind: 'box',
+                            cookies: [...stations.boxer.currentBoxCookies]
+                        });
+                        stations.boxer.currentBoxCookies = [];
+                        sound.box();
+                        spawnText(stations.boxer.x + 67, stations.boxer.y - 12, `🎁 Boîte (${count} biscuits) !`, '#ffd166');
+                        updateHUD();
+                    }
+                } else {
+                    stations.boxer.progress = 0;
+                }
+            } else {
+                stations.boxer.progress = Math.max(0, stations.boxer.progress - dt * 1.4);
+            }
+
+            // ÉTAPE 8 : Déposer les Boîtes sur le Présentoir
+            if (Math.hypot(player.x - stations.shelf.zoneX, player.y - stations.shelf.zoneY) <= stations.shelf.zoneR) {
+                player.activeStation = 'shelf';
+                while (stations.shelf.boxes.length < 8) {
+                    const boxIdx = player.holding.findIndex(item => item.kind === 'box');
+                    if (boxIdx === -1) break;
+                    stations.shelf.boxes.push(player.holding.splice(boxIdx, 1)[0]);
+                    sound.box();
+                    updateHUD();
+                }
+            }
+
+            updateHelpers(dt);
+            updateCustomers(dt);
+            updateMoneyPiles(dt);
+            updateEffects(dt);
+        }
+
+        // ==========================================
+        // 8. LUTINS HELPERS AUTOMATISÉS
+        // ==========================================
+        function updateHelpers(dt) {
+            const baseSpeed = getElfSpeed();
+            const wf = getElfWorkFactor();
+            const ovenCap = getOvenCapacity();
+            const boxCap = getBoxCapacity();
+
+            helpers.forEach(h => {
+                const spd = h.role === 'express' ? baseSpeed * 1.3 : baseSpeed;
+                let tx = h.x;
+                let ty = h.y;
+
+                if (h.role === 'miller') {
+                    if (h.holding.some(i => i.kind === 'flour')) {
+                        tx = stations.mixer.zoneX; ty = stations.mixer.zoneY - 12;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getMixTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'flour');
+                                const fItem = h.holding[idx];
+                                h.holding[idx] = { kind: 'dough', flour: fItem.flour, dough: getDough() };
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'dough')) {
+                        tx = stations.roller.zoneX; ty = stations.roller.zoneY - 14;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'dough');
+                                h.holding[idx].kind = 'rolled';
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'rolled')) {
+                        tx = stations.shaper.zoneX - 18; ty = stations.shaper.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getCutTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'rolled');
+                                h.holding[idx].kind = 'raw';
+                                h.holding[idx].shape = getShape();
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'raw')) {
+                        tx = stations.oven.zoneX - 22; ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                            const idx = h.holding.findIndex(i => i.kind === 'raw');
+                            const item = h.holding.splice(idx, 1)[0];
+                            stations.oven.slots.push({ timer: 0, flour: item.flour, dough: item.dough, shape: item.shape });
+                        }
+                    } else {
+                        tx = stations.wheat.zoneX; ty = stations.wheat.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getWheatTime() * wf) {
+                                h.timer = 0;
+                                h.holding.push({ kind: 'flour', flour: getFlour() });
+                            }
+                        }
+                    }
+                } else if (h.role === 'dougher' || h.role === 'shaper') {
+                    if (h.holding.some(i => i.kind === 'raw')) {
+                        tx = stations.oven.zoneX - 15; ty = stations.oven.zoneY + 12;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14 && (stations.oven.slots.length + stations.oven.ready.length) < ovenCap) {
+                            const idx = h.holding.findIndex(i => i.kind === 'raw');
+                            const item = h.holding.splice(idx, 1)[0];
+                            stations.oven.slots.push({ timer: 0, flour: item.flour, dough: item.dough, shape: item.shape });
+                        }
+                    } else if (h.holding.some(i => i.kind === 'rolled')) {
+                        tx = stations.shaper.zoneX + 12; ty = stations.shaper.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getCutTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'rolled');
+                                h.holding[idx].kind = 'raw';
+                                h.holding[idx].shape = getShape();
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'dough')) {
+                        tx = stations.roller.zoneX + 14; ty = stations.roller.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getRollTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'dough');
+                                h.holding[idx].kind = 'rolled';
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'flour')) {
+                        tx = stations.mixer.zoneX + 14; ty = stations.mixer.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getMixTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'flour');
+                                h.holding[idx] = { kind: 'dough', flour: h.holding[idx].flour, dough: getDough() };
+                            }
+                        }
+                    } else {
+                        tx = stations.wheat.zoneX + 14; ty = stations.wheat.zoneY + 10;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 14) {
+                            h.timer += dt;
+                            if (h.timer >= getWheatTime() * wf) {
+                                h.timer = 0;
+                                h.holding.push({ kind: 'flour', flour: getFlour() });
+                            }
+                        }
+                    }
+                } else if (h.role === 'decorator' || h.role === 'packer' || h.role === 'express') {
+                    if (h.holding.some(i => i.kind === 'box')) {
+                        tx = stations.shelf.zoneX; ty = stations.shelf.zoneY + (h.role === 'express' ? -22 : 18);
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15 && stations.shelf.boxes.length < 8) {
+                            const idx = h.holding.findIndex(i => i.kind === 'box');
+                            stations.shelf.boxes.push(h.holding.splice(idx, 1)[0]);
+                        }
+                    } else if (h.holding.some(i => i.kind === 'decorated')) {
+                        tx = stations.boxer.zoneX; ty = stations.boxer.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getPackTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'decorated');
+                                stations.boxer.currentBoxCookies.push(h.holding.splice(idx, 1)[0]);
+                                if (stations.boxer.currentBoxCookies.length >= boxCap) {
+                                    h.holding.push({ kind: 'box', cookies: [...stations.boxer.currentBoxCookies] });
+                                    stations.boxer.currentBoxCookies = [];
+                                }
+                            }
+                        }
+                    } else if (h.holding.some(i => i.kind === 'baked')) {
+                        tx = stations.icing.zoneX; ty = stations.icing.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.timer += dt;
+                            if (h.timer >= getDecorateTime() * wf) {
+                                h.timer = 0;
+                                const idx = h.holding.findIndex(i => i.kind === 'baked');
+                                const frontCust = getFrontCustomer();
+                                h.holding[idx].kind = 'decorated';
+                                h.holding[idx].icing = frontCust ? frontCust.desiredIcing : getIcing();
+                                h.holding[idx].confetti = getConfetti();
+                            }
+                        }
+                    } else if (stations.oven.ready.length > 0) {
+                        tx = stations.oven.zoneX + 20; ty = stations.oven.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 15) {
+                            h.holding.push(stations.oven.ready.shift());
+                        }
+                    } else {
+                        tx = stations.icing.zoneX; ty = stations.icing.zoneY + 45;
+                    }
+                }
+
+                const dx = tx - h.x;
+                const dy = ty - h.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 6) {
+                    h.x += (dx / dist) * spd * dt;
+                    h.y += (dy / dist) * spd * dt;
+                    if (Math.abs(dx) > 1) h.facing = dx > 0 ? 1 : -1;
+                    h.walkPhase += dt * 11;
+                } else {
+                    h.walkPhase = 0;
+                }
+            });
+        }
+
+        // ==========================================
+        // 9. CLIENTS & COMMANDES EN BOÎTES (3 À 6 BISCUITS)
+        // ==========================================
+        const CUST_STYLES = [
+            { skin: '#ffdbac', coat: '#e63946', scarf: '#f1faee' },
+            { skin: '#f1c27d', coat: '#457b9d', scarf: '#ffd166' },
+            { skin: '#8d5524', coat: '#2a9d8f', scarf: '#ffccd5' },
+            { skin: '#ffdbac', coat: '#7209b7', scarf: '#4cc9f0' }
+        ];
+
+        function pickRandomUnlockedIcing() {
+            const id = state.unlockedIcing[Math.floor(Math.random() * state.unlockedIcing.length)];
+            return CATALOG.icing.find(i => i.id === id) || CATALOG.icing[0];
+        }
+
+        function updateCustomers(dt) {
+            customerSpawnTimer -= dt;
+            const maxCust = state.staffAndDecor.royalSleighDecor ? 5 : 4;
+            if (customerSpawnTimer <= 0 && customers.length < maxCust) {
+                const st = CUST_STYLES[Math.floor(Math.random() * CUST_STYLES.length)];
+                const desiredCookiesCount = 3 + Math.floor(Math.random() * 4);
+                customers.push({
+                    x: 960,
+                    y: 135,
+                    state: 'toShelf',
+                    desiredCount: desiredCookiesCount,
+                    desiredIcing: pickRandomUnlockedIcing(),
+                    carriedBox: null,
+                    style: st,
+                    walkPhase: 0
+                });
+                customerSpawnTimer = Math.max(2.0, 5.2 - (state.staffAndDecor.royalSleighDecor ? 0.8 : 0));
+                updateHUD();
+            }
+
+            const cSpeed = 148;
+
+            for (let i = customers.length - 1; i >= 0; i--) {
+                const c = customers[i];
+                let tx = c.x;
+                let ty = c.y;
+
+                if (c.state === 'toShelf') {
+                    tx = 835;
+                    ty = 265 + (i % 3) * 52;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 8) {
+                        c.x += ((tx - c.x) / d) * cSpeed * dt;
+                        c.y += ((ty - c.y) / d) * cSpeed * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        c.walkPhase = 0;
+                        if (stations.shelf.boxes.length > 0 && !c.carriedBox) {
+                            c.carriedBox = stations.shelf.boxes.pop();
+                            sound.box();
+                            c.state = 'toCashier';
+                            updateHUD();
+                        }
+                    }
+                } else if (c.state === 'toCashier') {
+                    tx = 905;
+                    ty = 430;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 8) {
+                        c.x += ((tx - c.x) / d) * cSpeed * dt;
+                        c.y += ((ty - c.y) / d) * cSpeed * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        const box = c.carriedBox;
+                        let totalEarned = 0;
+                        let perfectMatches = 0;
+                        const decorExtra = getDecorBonus();
+                        const hatBonus = getHat().priceBonus;
+
+                        box.cookies.forEach(ck => {
+                            let val = 12 + (ck.flour?.bonus || 0) + (ck.dough?.bonus || 0) + (ck.shape?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.confetti?.bonus || 0) + decorExtra + hatBonus;
+                            if (ck.icing && ck.icing.id === c.desiredIcing.id) {
+                                val = Math.ceil(val * 1.5);
+                                perfectMatches++;
+                            }
+                            totalEarned += val;
+                        });
+
+                        if (box.cookies.length >= c.desiredCount) {
+                            totalEarned = Math.ceil(totalEarned * 1.2);
+                        }
+                        if (state.staffAndDecor.cashierElf) {
+                            totalEarned = Math.ceil(totalEarned * 1.3);
+                        }
+
+                        state.boxesSold += 1;
+                        state.cookiesSold += box.cookies.length;
+                        updateHUD();
+                        saveGame();
+
+                        // L'argent tombe juste du côté gauche du comptoir (x = 715 à 748) pour être facilement ramassé !
+                        moneyPiles.push({
+                            x: 725 + (Math.random() - 0.5) * 26,
+                            y: 495 + (Math.random() - 0.5) * 32,
+                            amount: totalEarned,
+                            perfect: perfectMatches > 0,
+                            bob: Math.random() * 6
+                        });
+
+                        if (perfectMatches > 0) {
+                            sound.perfect();
+                            spawnParticles(905, 420, '#ff4d6d', 12);
+                            spawnText(905, 385, `🎁 Boîte Parfaite (${box.cookies.length} biscuits) !`, '#ffd166');
+                        } else {
+                            sound.ding();
+                            spawnParticles(905, 430, '#ffd700', 8);
+                        }
+                        c.state = 'leaving';
+                    }
+                } else if (c.state === 'leaving') {
+                    tx = 965;
+                    ty = 580;
+                    const d = Math.hypot(tx - c.x, ty - c.y);
+                    if (d > 10) {
+                        c.x += ((tx - c.x) / d) * (cSpeed * 1.15) * dt;
+                        c.y += ((ty - c.y) / d) * (cSpeed * 1.15) * dt;
+                        c.walkPhase += dt * 10;
+                    } else {
+                        customers.splice(i, 1);
+                        updateHUD();
+                    }
+                }
+            }
+        }
+
+        function updateMoneyPiles(dt) {
+            const magR = getMagnetRadius();
+            for (let i = moneyPiles.length - 1; i >= 0; i--) {
+                const p = moneyPiles[i];
+                p.bob += dt * 4;
+                const d = Math.hypot(player.x - p.x, player.y - p.y);
+                if (state.levels.magnet > 0 && d < magR && d > 8) {
+                    const pull = 300 + state.levels.magnet * 85;
+                    p.x += ((player.x - p.x) / d) * pull * dt;
+                    p.y += ((player.y - p.y) / d) * pull * dt;
+                }
+                // Rayon de ramassage généreux de 62px
+                if (d < 62) {
+                    state.money += p.amount;
+                    sound.coin();
+                    spawnParticles(p.x, p.y, '#fef08a', 8);
+                    spawnText(p.x, p.y - 16, `+${p.amount} $`, p.perfect ? '#ffd166' : '#55efc4');
+                    moneyPiles.splice(i, 1);
+                    updateHUD();
+                    saveGame();
+                }
+            }
+        }
+
+        function updateEffects(dt) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.vy += 120 * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) particles.splice(i, 1);
+            }
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 35 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        // ==========================================
+        // 10. RENDU DU MANOIR EN PAIN D'ÉPICES & FORMES
+        // ==========================================
+        function getIcingRenderColor(ic, nowMs) {
+            if (!ic) return '#ffffff';
+            if (ic.mode === 'candycane') return Math.floor(nowMs / 350) % 2 === 0 ? '#ff4d6d' : '#ffffff';
+            if (ic.mode === 'aurora') return `hsl(${160 + Math.sin(nowMs * 0.004) * 55}, 90%, 58%)`;
+            if (ic.mode === 'gold24k') return `hsl(46, 98%, ${54 + Math.sin(nowMs * 0.008) * 12}%)`;
+            return ic.color;
+        }
+
+        function drawCarriedItem(x, y, s, item, nowMs) {
+            if (item.kind === 'flour') {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(s, s);
+                ctx.fillStyle = item.flour.color;
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-8, -9, 16, 18, 5);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#d97706';
+                ctx.fillRect(-5, -3, 10, 5);
+                ctx.restore();
+            } else if (item.kind === 'dough' || item.kind === 'rolled') {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(s, s);
+                ctx.fillStyle = item.dough.color;
+                ctx.strokeStyle = item.dough.stroke;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (item.kind === 'dough') ctx.arc(0, 0, 9, 0, Math.PI * 2);
+                else ctx.ellipse(0, 0, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            } else if (item.kind === 'box') {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(s, s);
+                ctx.fillStyle = '#fff8eb';
+                ctx.strokeStyle = '#d62849';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-12, -9, 24, 18, 4);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#ff4d6d';
+                ctx.fillRect(-2, -9, 4, 18);
+                ctx.fillRect(-12, -2, 24, 4);
+                ctx.restore();
+            } else {
+                drawCookieShape(x, y, s, item, nowMs);
+            }
+        }
+
+        function drawCookieShape(x, y, s, cookie, nowMs) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(s, s);
+
+            const isRaw = cookie.kind === 'raw';
+            const dough = cookie.dough || CATALOG.dough[0];
+            const shapeId = (cookie.shape && cookie.shape.id) ? cookie.shape.id : 'gingerman';
+            ctx.fillStyle = isRaw ? '#f3d5a5' : dough.color;
+            ctx.strokeStyle = isRaw ? '#c9a66b' : dough.stroke;
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            if (shapeId === 'gingerhouse') {
+                ctx.moveTo(0, -14);
+                ctx.lineTo(13, -3);
+                ctx.lineTo(10, -3);
+                ctx.lineTo(10, 11);
+                ctx.lineTo(-10, 11);
+                ctx.lineTo(-10, -3);
+                ctx.lineTo(-13, -3);
+                ctx.closePath();
+            } else if (shapeId === 'bell') {
+                ctx.moveTo(0, -13);
+                ctx.bezierCurveTo(9, -12, 10, 2, 13, 8);
+                ctx.lineTo(-13, 8);
+                ctx.bezierCurveTo(-10, 2, -9, -12, 0, -13);
+            } else if (shapeId === 'reindeer') {
+                ctx.arc(0, 1, 9, 0, Math.PI * 2);
+                ctx.moveTo(-5, -7); ctx.lineTo(-9, -15);
+                ctx.moveTo(5, -7); ctx.lineTo(9, -15);
+            } else if (shapeId === 'nutcracker') {
+                ctx.roundRect(-8, -13, 16, 7, 2);
+                ctx.roundRect(-7, -6, 14, 18, 3);
+            } else if (shapeId === 'sleigh') {
+                ctx.moveTo(-13, -6);
+                ctx.lineTo(-6, 6);
+                ctx.lineTo(12, 6);
+                ctx.lineTo(14, -4);
+                ctx.lineTo(4, -4);
+                ctx.lineTo(1, 1);
+                ctx.lineTo(-8, 1);
+                ctx.closePath();
+            } else if (shapeId === 'castle') {
+                ctx.moveTo(-12, 11);
+                ctx.lineTo(-12, -8);
+                ctx.lineTo(-7, -8);
+                ctx.lineTo(-7, -3);
+                ctx.lineTo(-3, -3);
+                ctx.lineTo(-3, -13);
+                ctx.lineTo(3, -13);
+                ctx.lineTo(3, -3);
+                ctx.lineTo(7, -3);
+                ctx.lineTo(7, -8);
+                ctx.lineTo(12, -8);
+                ctx.lineTo(12, 11);
+                ctx.closePath();
+            } else {
+                ctx.arc(0, -10, 7, 0, Math.PI * 2);
+                ctx.roundRect(-9, -3, 18, 5, 2.5);
+                ctx.roundRect(-5, -3, 10, 11, 3);
+                ctx.roundRect(-5, 6, 4, 7, 2);
+                ctx.roundRect(1, 6, 4, 7, 2);
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            if (cookie.kind === 'decorated') {
+                const ic = cookie.icing || CATALOG.icing[0];
+                const icColor = getIcingRenderColor(ic, nowMs);
+                ctx.fillStyle = icColor;
+                ctx.strokeStyle = icColor;
+                ctx.lineWidth = 2;
+
+                if (shapeId === 'gingerhouse') {
+                    ctx.beginPath();
+                    ctx.moveTo(-12, -3);
+                    ctx.lineTo(0, -13);
+                    ctx.lineTo(12, -3);
+                    ctx.stroke();
+                    ctx.fillRect(-3, 3, 6, 7);
+                } else if (shapeId === 'gingerman') {
+                    ctx.beginPath();
+                    ctx.arc(-2.5, -11, 1.3, 0, Math.PI * 2);
+                    ctx.arc(2.5, -11, 1.3, 0, Math.PI * 2);
+                    ctx.arc(0, 0, 1.7, 0, Math.PI * 2);
+                    ctx.arc(0, 4.5, 1.7, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                const cf = cookie.confetti || CATALOG.confetti[0];
+                if (cf.style !== 'none') {
+                    const dots = [[-3.5, -2], [3.5, -1.5], [-2.5, 3.5], [3, 4]];
+                    dots.forEach((p, idx) => {
+                        if (cf.style === 'crystals') ctx.fillStyle = '#e0f2fe';
+                        else if (cf.style === 'candyshards') ctx.fillStyle = idx % 2 === 0 ? '#ff4d6d' : '#ffffff';
+                        else if (cf.style === 'silverpearls') ctx.fillStyle = '#cbd5e1';
+                        else if (cf.style === 'caramelbits') ctx.fillStyle = '#d97706';
+                        else if (cf.style === 'shootingstars') ctx.fillStyle = '#facc15';
+                        else ctx.fillStyle = `hsl(${(nowMs * 0.35 + idx * 70) % 360}, 100%, 72%)`;
+
+                        ctx.beginPath();
+                        ctx.arc(p[0], p[1], 1.6, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function drawGingerbreadHouseInterior() {
+            // Fond extérieur nuit étoilée
+            ctx.fillStyle = '#1b0b04';
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+            // Intérieur strictement borné entre x: [64, 996] et y: [104, 616]
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(64, 104, 932, 512);
+            ctx.clip();
+
+            const tile = 48;
+            for (let gx = 64; gx < 996; gx += tile) {
+                for (let gy = 104; gy < 616; gy += tile) {
+                    const isEven = ((gx + gy) / tile) % 2 === 0;
+                    if (gx < 768) {
+                        ctx.fillStyle = isEven ? '#f7e1c6' : '#ebd0ad';
+                    } else {
+                        ctx.fillStyle = isEven ? '#fff1f2' : '#ffe4e6';
+                    }
+                    ctx.fillRect(gx, gy, tile, tile);
+                }
+            }
+
+            // Séparation douce en sucre d'orge parfaitement alignée à l'intérieur des murs
+            ctx.fillStyle = '#e11d48';
+            ctx.fillRect(768, 104, 6, 512);
+            ctx.fillStyle = '#ffffff';
+            for (let sy = 112; sy < 616; sy += 24) {
+                ctx.fillRect(768, sy, 6, 10);
+            }
+            ctx.restore();
+
+            // Murs épais en Pain d'Épices avec bordure de glaçage blanc
+            ctx.strokeStyle = '#7f3f1d';
+            ctx.lineWidth = 16;
+            ctx.strokeRect(56, 96, 948, 528);
+
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 5;
+            ctx.setLineDash([14, 8]);
+            ctx.strokeRect(56, 96, 948, 528);
+            ctx.setLineDash([]);
+
+            // Toit intérieur en pain d'épices avec glaçage dégoulinant et bonbons colorés
+            ctx.fillStyle = '#6b3114';
+            ctx.fillRect(48, 60, 964, 38);
+
+            // Glaçage blanc ondulé le long du mur haut
+            ctx.fillStyle = '#fff8eb';
+            for (let wx = 70; wx < 992; wx += 28) {
+                ctx.beginPath();
+                ctx.arc(wx, 98, 12, 0, Math.PI);
+                ctx.fill();
+            }
+
+            // Pastilles de bonbons colorés sur le mur
+            const candies = ['#ff4d6d', '#38b000', '#ffbe0b', '#3a86ff', '#ff70a6'];
+            for (let cx = 90; cx < 930; cx += 56) {
+                ctx.fillStyle = candies[Math.floor(cx / 56) % candies.length];
+                ctx.beginPath();
+                ctx.arc(cx, 79, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Panneau Entrée du Manoir
+            ctx.fillStyle = '#d62849';
+            ctx.beginPath();
+            ctx.roundRect(928, 68, 68, 22, 6);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('MANOIR', 962, 83);
+        }
+
+        function drawDecorations() {
+            if (state.staffAndDecor.candyFountain) {
+                const fx = 465, fy = 155;
+                ctx.fillStyle = '#fff8eb';
+                ctx.beginPath();
+                ctx.ellipse(fx, fy + 16, 22, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#5c2c16';
+                ctx.beginPath();
+                ctx.ellipse(fx, fy + 14, 18, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillRect(fx - 4, fy - 8, 8, 22);
+                ctx.beginPath();
+                ctx.ellipse(fx, fy - 8, 12, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (state.staffAndDecor.gingerChandelier) {
+                [260, 480, 680].forEach((lx, i) => {
+                    ctx.fillStyle = i % 2 === 0 ? '#ffd166' : '#ff758f';
+                    ctx.beginPath();
+                    ctx.arc(lx, 114, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            if (state.staffAndDecor.royalSleighDecor) {
+                const sx = 955, sy = 175;
+                ctx.fillStyle = '#d62849';
+                ctx.beginPath();
+                ctx.roundRect(sx - 20, sy - 8, 40, 18, 6);
+                ctx.fill();
+                ctx.strokeStyle = '#ffd166';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(sx - 24, sy + 14);
+                ctx.lineTo(sx + 24, sy + 14);
+                ctx.stroke();
+            }
+
+            if (state.staffAndDecor.cashierElf) {
+                drawCharacter({ x: 920, y: 562, facing: -1, walkPhase: 0, holding: [] }, 'cashier', 0);
+            }
+        }
+
+        function drawZoneCircle(x, y, r, active) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = active ? 'rgba(56, 176, 0, 0.25)' : 'rgba(255, 255, 255, 0.26)';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.strokeStyle = active ? '#38b000' : '#d98a4e';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawProgressBar(x, y, w, ratio, color) {
+            if (ratio <= 0) return;
+            ctx.fillStyle = '#2b1207';
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5, y, w, 10, 5);
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(x - w * 0.5 + 2, y + 2, Math.max(0, (w - 4) * Math.min(1, ratio)), 6, 3);
+            ctx.fill();
+        }
+
+        function drawLabel(x, y, text) {
+            ctx.font = 'bold 11.5px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            const tw = ctx.measureText(text).width + 14;
+            ctx.fillStyle = 'rgba(54, 22, 8, 0.9)';
+            ctx.beginPath();
+            ctx.roundRect(x - tw * 0.5, y - 11, tw, 18, 7);
+            ctx.fill();
+            ctx.fillStyle = '#fff8eb';
+            ctx.fillText(text, x, y + 2);
+        }
+
+        function drawStations(nowMs) {
+            Object.values(stations).forEach(st => {
+                if (st.zoneX) {
+                    const key = Object.keys(stations).find(k => stations[k] === st);
+                    drawZoneCircle(st.zoneX, st.zoneY, st.zoneR, player.activeStation === key);
+                }
+            });
+
+            // 1. CHAMP DE BLÉ & MOULIN À FARINE
+            const wh = stations.wheat;
+            ctx.fillStyle = '#78350f';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(wh.x, wh.y, wh.w, wh.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            const fl = getFlour();
+            for (let wx = 18; wx <= 86; wx += 22) {
+                for (let wy = 24; wy <= 84; wy += 28) {
+                    const sway = Math.sin(nowMs * 0.005 + wx) * 3;
+                    ctx.strokeStyle = fl.stalkColor;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(wh.x + wx, wh.y + wy + 8);
+                    ctx.lineTo(wh.x + wx + sway, wh.y + wy - 10);
+                    ctx.stroke();
+                }
+            }
+            drawProgressBar(wh.x + 52, wh.y - 24, 80, wh.progress, '#facc15');
+            drawLabel(wh.x + 52, wh.y - 8, '1. Farine Blé');
+
+            // 2. PÉTRIN / TABLE DE MÉLANGE
+            const mx = stations.mixer;
+            ctx.fillStyle = '#9c5a2b';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(mx.x, mx.y, mx.w, mx.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(mx.x + 52, mx.y + 52, 30, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = getDough().color;
+            ctx.beginPath();
+            ctx.arc(mx.x + 52, mx.y + 52, 21, 0, Math.PI * 2);
+            ctx.fill();
+            drawProgressBar(mx.x + 52, mx.y - 24, 80, mx.progress, '#fb923c');
+            drawLabel(mx.x + 52, mx.y - 8, '2. Mélanger Pâte');
+
+            // 3. TABLE À ROULER
+            const rl = stations.roller;
+            ctx.fillStyle = '#b07d4f';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(rl.x, rl.y, rl.w, rl.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = getDough().color;
+            ctx.beginPath();
+            ctx.ellipse(rl.x + 52, rl.y + 52, 32, 22, 0, 0, Math.PI * 2);
+            ctx.fill();
+            const rOff = Math.sin(rl.progress * Math.PI * 4) * 9;
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath();
+            ctx.roundRect(rl.x + 24, rl.y + 47 + rOff, 56, 10, 5);
+            ctx.fill();
+            drawProgressBar(rl.x + 52, rl.y - 24, 80, rl.progress, '#38b000');
+            drawLabel(rl.x + 52, rl.y - 8, '3. Rouler Pâte');
+
+            // 4. TABLE DES EMPORTE-PIÈCES (FORMES)
+            const sp = stations.shaper;
+            ctx.fillStyle = '#d98a4e';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(sp.x, sp.y, sp.w, sp.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            drawCookieShape(sp.x + 57, sp.y + 48, 1.25, { kind: 'raw', dough: getDough(), shape: getShape() }, nowMs);
+            drawProgressBar(sp.x + 57, sp.y - 24, 84, sp.progress, '#f43f5e');
+            drawLabel(sp.x + 57, sp.y - 8, `4. Forme: ${getShape().name.split(' ')[0]}`);
+
+            // 5. GRAND FOUR EN PAIN D'ÉPICES
+            const ov = stations.oven;
+            ctx.fillStyle = '#8c2f1b';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.roundRect(ov.x, ov.y, ov.w, ov.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            const isBaking = ov.slots.length > 0;
+            ctx.fillStyle = isBaking ? '#ff6b35' : '#1e293b';
+            ctx.beginPath();
+            ctx.roundRect(ov.x + 14, ov.y + 20, ov.w - 28, 54, 8);
+            ctx.fill();
+
+            ov.slots.forEach((s, idx) => {
+                drawCookieShape(ov.x + 32 + (idx % 4) * 26, ov.y + 38 + Math.floor(idx / 4) * 18, 0.58, { kind: 'raw', dough: s.dough, shape: s.shape }, nowMs);
+            });
+            ov.ready.forEach((c, idx) => {
+                drawCookieShape(ov.x + 32 + (idx % 4) * 26, ov.y + 52 + Math.floor(idx / 4) * 18, 0.64, c, nowMs);
+            });
+            if (isBaking) {
+                drawProgressBar(ov.x + ov.w * 0.5, ov.y - 24, 92, ov.slots[0].timer / getBakeTime(), '#ffa502');
+            }
+            drawLabel(ov.x + ov.w * 0.5, ov.y - 8, `5. Four (${ov.slots.length + ov.ready.length}/${getOvenCapacity()})`);
+
+            // 6. STATION GLAÇAGE & CONFETTIS
+            const ic = stations.icing;
+            ctx.fillStyle = '#9d4edd';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(ic.x, ic.y, ic.w, ic.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = getIcingRenderColor(getIcing(), nowMs);
+            ctx.beginPath();
+            ctx.arc(ic.x + 44, ic.y + 48, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffbe0b';
+            ctx.beginPath();
+            ctx.arc(ic.x + 92, ic.y + 50, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            drawProgressBar(ic.x + 67, ic.y - 24, 84, ic.progress, '#ff70a6');
+            drawLabel(ic.x + 67, ic.y - 8, '6. Glaçage & Confettis');
+
+            // 7. TABLE D'EMBALLAGE (BOÎTES CADEAUX)
+            const bx = stations.boxer;
+            const boxCap = getBoxCapacity();
+            ctx.fillStyle = '#d62849';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(bx.x, bx.y, bx.w, bx.h, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#fff8eb';
+            ctx.beginPath();
+            ctx.roundRect(bx.x + 28, bx.y + 20, 78, 54, 8);
+            ctx.fill();
+
+            bx.currentBoxCookies.forEach((ck, idx) => {
+                const col = idx % 4;
+                const row = Math.floor(idx / 4);
+                drawCookieShape(bx.x + 41 + col * 17, bx.y + 36 + row * 22, 0.52, ck, nowMs);
+            });
+            drawProgressBar(bx.x + 67, bx.y - 24, 84, bx.progress, '#ffd166');
+            drawLabel(bx.x + 67, bx.y - 8, `7. Boîte (${bx.currentBoxCookies.length}/${boxCap})`);
+
+            // 8. GRAND PRÉSENTOIR À BOÎTES CADEAUX
+            const sh = stations.shelf;
+            ctx.fillStyle = '#f4a261';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#7f3f1d';
+            ctx.fillRect(sh.x + 6, sh.y + 60, sh.w - 12, 4);
+            ctx.fillRect(sh.x + 6, sh.y + 122, sh.w - 12, 4);
+
+            sh.boxes.forEach((box, idx) => {
+                const col = idx % 2;
+                const row = Math.floor(idx / 2);
+                drawCarriedItem(sh.x + 26 + col * 34, sh.y + 26 + row * 40, 0.92, box, nowMs);
+            });
+            drawLabel(sh.x + sh.w * 0.5, sh.y - 10, `8. Présentoir (${sh.boxes.length}/8)`);
+
+            // CAISSE ENREGISTREUSE
+            const ca = stations.cashier;
+            ctx.fillStyle = state.staffAndDecor.cashierElf ? '#ffd166' : '#8c461b';
+            ctx.strokeStyle = '#fff8eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(ca.x, ca.y, ca.w, ca.h, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.roundRect(ca.x + 24, ca.y + 16, 48, 36, 6);
+            ctx.fill();
+            ctx.fillStyle = '#38b000';
+            ctx.font = 'bold 13px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('$$$', ca.x + 48, ca.y + 39);
+            drawLabel(ca.x + ca.w * 0.5, ca.y - 10, 'Caisse');
+        }
+
+        function drawCharacter(ent, role, nowMs) {
+            ctx.save();
+            const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
+            ctx.translate(ent.x, ent.y - bob);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.beginPath();
+            ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (role === 'miller') ctx.fillStyle = '#eab308';
+            else if (role === 'dougher') ctx.fillStyle = '#f97316';
+            else if (role === 'shaper') ctx.fillStyle = '#f43f5e';
+            else if (role === 'decorator') ctx.fillStyle = '#a855f7';
+            else if (role === 'packer') ctx.fillStyle = '#ec4899';
+            else if (role === 'express') ctx.fillStyle = '#06b6d4';
+            else if (role === 'cashier') ctx.fillStyle = '#10b981';
+            else ctx.fillStyle = '#c67d3b';
+
+            ctx.strokeStyle = '#4a2511';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(-13, -6, 26, 24, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, -14, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            if (role === 'player') {
+                ctx.fillStyle = state.selectedHat === 'emperorCrown' ? '#ffd700' : (state.selectedHat === 'candyCrown' ? '#ff4d6d' : '#ffffff');
+                ctx.beginPath();
+                ctx.arc(0, -29, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillRect(-9, -27, 18, 6);
+            } else {
+                ctx.fillStyle = '#ff4d6d';
+                ctx.beginPath();
+                ctx.moveTo(-11, -22);
+                ctx.lineTo(11, -22);
+                ctx.lineTo(0, -38);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            const look = ent.facing * 3;
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(-4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.arc(4 + look, -15, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (ent.holding && ent.holding.length > 0) {
+                ent.holding.forEach((item, idx) => {
+                    drawCarriedItem(ent.facing * 15, -4 - idx * 8, 0.72, item, nowMs);
+                });
+            }
+
+            ctx.restore();
+        }
+
+        function drawCustomers(nowMs) {
+            customers.forEach(c => {
+                ctx.save();
+                const bob = Math.abs(Math.sin(c.walkPhase)) * 3.5;
+                ctx.translate(c.x, c.y - bob);
+
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath();
+                ctx.ellipse(0, 17 + bob, 14, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = c.style.coat;
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-12, -5, 24, 22, 9);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.scarf;
+                ctx.fillRect(-11, -4, 22, 5);
+
+                ctx.fillStyle = c.style.skin;
+                ctx.beginPath();
+                ctx.arc(0, -14, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = c.style.coat;
+                ctx.beginPath();
+                ctx.arc(0, -18, 11, Math.PI, 0);
+                ctx.fill();
+
+                if (c.state === 'toShelf') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(-34, -54, 68, 25, 9);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = getIcingRenderColor(c.desiredIcing, nowMs);
+                    ctx.beginPath();
+                    ctx.arc(-18, -41, 6.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 11px Fredoka, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`🎁 x${c.desiredCount}`, -7, -37);
+                } else if (c.carriedBox) {
+                    drawCarriedItem(-15, -4, 0.78, c.carriedBox, nowMs);
+                }
+
+                ctx.restore();
+            });
+        }
+
+        function drawMoneyAndEffects() {
+            moneyPiles.forEach(p => {
+                const py = p.y + Math.sin(p.bob) * 3;
+                ctx.fillStyle = p.perfect ? '#facc15' : '#22c55e';
+                ctx.strokeStyle = p.perfect ? '#a16207' : '#15803d';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.roundRect(p.x - 16, py - 10, 32, 20, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = p.perfect ? '#ffffff' : '#fef08a';
+                ctx.beginPath();
+                ctx.arc(p.x, py, 5.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            particles.forEach(pt => {
+                ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            floatingTexts.forEach(ft => {
+                ctx.globalAlpha = Math.max(0, Math.min(1, ft.life * 1.4));
+                ctx.font = 'bold 16px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#1e293b';
+                ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // ==========================================
+        // 11. HUD, BARRES RAPIDES & BOUTIQUE
+        // ==========================================
+        const elMoney = document.getElementById('hudMoney');
+        const elPrice = document.getElementById('hudPrice');
+        const elBoxesSold = document.getElementById('hudBoxesSold');
+        const elPrestige = document.getElementById('hudPrestige');
+        const elShopBal = document.getElementById('shopBalance');
+        const elShopBoxCap = document.getElementById('shopBoxCap');
+        const elOrderText = document.getElementById('hudOrderText');
+        const elOrderSwatch = document.getElementById('hudOrderSwatch');
+        const elHandSummary = document.getElementById('hudHandSummary');
+        const glazeQuickBar = document.getElementById('glazeQuickBar');
+        const confettiQuickBar = document.getElementById('confettiQuickBar');
+
+        function formatMoney(n) { return n.toLocaleString('fr-FR') + ' $'; }
+
+        function getSwatchBackground(item) {
+            if (item.mode === 'candycane') return 'repeating-linear-gradient(45deg,#ff4d6d,#ff4d6d 4px,#ffffff 4px,#ffffff 8px)';
+            if (item.mode === 'aurora') return 'linear-gradient(135deg,#00f5d4,#00bbf9,#9b5de5)';
+            if (item.mode === 'gold24k') return 'linear-gradient(135deg,#fff200,#f59e0b,#ffd700)';
+            return item.color;
+        }
+
+        function renderQuickBars() {
+            glazeQuickBar.innerHTML = '';
+            state.unlockedIcing.forEach((id, idx) => {
+                const ic = CATALOG.icing.find(i => i.id === id);
+                if (!ic) return;
+                const active = state.selectedIcing === ic.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-amber-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer bg-amber-50 text-amber-950`;
+                btn.innerHTML = `<span class="w-2.5 h-2.5 rounded-full border border-amber-950" style="background:${getSwatchBackground(ic)}"></span><span>${idx + 1}.${ic.name.split(' ')[0]}</span>`;
+                btn.addEventListener('click', () => { sound.init(); selectGlazeById(ic.id); });
+                glazeQuickBar.appendChild(btn);
+            });
+
+            confettiQuickBar.innerHTML = '';
+            state.unlockedConfetti.forEach(id => {
+                const cf = CATALOG.confetti.find(c => c.id === id);
+                if (!cf) return;
+                const active = state.selectedConfetti === cf.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-amber-950 font-bold text-[10px] cursor-pointer bg-sky-50 text-sky-950`;
+                btn.textContent = cf.name.split(' ')[0];
+                btn.addEventListener('click', () => { sound.init(); selectConfettiById(cf.id); });
+                confettiQuickBar.appendChild(btn);
+            });
+        }
+
+        function updateHUD() {
+            elMoney.textContent = formatMoney(state.money);
+            elShopBal.textContent = formatMoney(state.money);
+            elPrice.textContent = formatMoney(getCookieUnitValue());
+            elBoxesSold.textContent = state.boxesSold;
+            elPrestige.textContent = `Niv. ${getPrestigeLevel()}`;
+            elShopBoxCap.textContent = `${getBoxCapacity()} biscuits`;
+
+            const frontCust = getFrontCustomer();
+            if (frontCust) {
+                elOrderText.textContent = `Boîte ${frontCust.desiredCount}x • ${frontCust.desiredIcing.name}`;
+                elOrderSwatch.style.background = getSwatchBackground(frontCust.desiredIcing);
+            } else {
+                elOrderText.textContent = `Boîte ${getBoxCapacity()}x • ${getIcing().name}`;
+                elOrderSwatch.style.background = getSwatchBackground(getIcing());
+            }
+
+            if (player.holding.length === 0) {
+                elHandSummary.textContent = `Vide (0/${getMaxHand()})`;
+            } else {
+                const labels = { flour: 'Farine', dough: 'Pâte', rolled: 'Étalée', raw: 'Forme', baked: 'Cuit', decorated: 'Glacé', box: 'Boîte 🎁' };
+                const counts = {};
+                player.holding.forEach(i => { counts[labels[i.kind]] = (counts[labels[i.kind]] || 0) + 1; });
+                const str = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ');
+                elHandSummary.textContent = `${str} (${player.holding.length}/${getMaxHand()})`;
+            }
+        }
+
+        let currentTab = 'flour';
+        const shopModal = document.getElementById('shopModal');
+        const shopGrid = document.getElementById('shopGrid');
+
+        document.getElementById('btnOpenShop').addEventListener('click', () => {
+            sound.init();
+            shopModal.classList.remove('hidden');
+            shopModal.classList.add('flex');
+            renderShop();
+        });
+
+        document.getElementById('btnCloseShop').addEventListener('click', () => {
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        document.querySelectorAll('.shop-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.shop-tab').forEach(b => {
+                    b.classList.remove('bg-white', 'text-amber-950');
+                    b.classList.add('bg-amber-900/80', 'text-amber-100');
+                });
+                btn.classList.remove('bg-amber-900/80', 'text-amber-100');
+                btn.classList.add('bg-white', 'text-amber-950');
+                currentTab = btn.dataset.tab;
+                renderShop();
+            });
+        });
+
+        function renderShop() {
+            shopGrid.innerHTML = '';
+            updateHUD();
+            renderQuickBars();
+
+            const mapRecipe = {
+                flour: { list: CATALOG.flour, unlockedKey: 'unlockedFlour', selectedKey: 'selectedFlour', icon: '🌾' },
+                dough: { list: CATALOG.dough, unlockedKey: 'unlockedDough', selectedKey: 'selectedDough', icon: '🥣' },
+                shapes: { list: CATALOG.shapes, unlockedKey: 'unlockedShapes', selectedKey: 'selectedShape', icon: null },
+                icing: { list: CATALOG.icing, unlockedKey: 'unlockedIcing', selectedKey: 'selectedIcing', icon: '🎨' },
+                confetti: { list: CATALOG.confetti, unlockedKey: 'unlockedConfetti', selectedKey: 'selectedConfetti', icon: '✨' },
+                hats: { list: CATALOG.hats, unlockedKey: 'unlockedHats', selectedKey: 'selectedHat', icon: null }
+            };
+
+            if (mapRecipe[currentTab]) {
+                const cfg = mapRecipe[currentTab];
+                cfg.list.forEach(item => {
+                    const unlocked = state[cfg.unlockedKey].includes(item.id);
+                    const equipped = state[cfg.selectedKey] === item.id;
+                    const canBuy = !unlocked && state.money >= item.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `icing-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${equipped ? 'ring-4 ring-pink-500' : ''}`;
+                    const swatch = item.color ? `<span class="inline-block w-5 h-5 rounded-full border-2 border-amber-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>` : '';
+
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-2xl">${item.icon || cfg.icon}</span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-base">${item.name}</span>
+                                    ${swatch}
+                                </div>
+                                <p class="text-xs text-amber-800 mt-1">${item.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!unlocked && !canBuy) ? 'disabled' : ''} class="${equipped ? 'bg-amber-400 text-amber-950' : (unlocked ? 'bg-amber-200 hover:bg-amber-300 text-amber-950' : 'btn-mint text-white')} w-full py-2 rounded-xl font-bold text-sm cursor-pointer">
+                            ${equipped ? '✓ Sélectionné' : (unlocked ? 'Utiliser' : `Acheter • ${formatMoney(item.cost)}`)}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (unlocked || canBuy) {
+                        btn.addEventListener('click', () => {
+                            if (!unlocked) {
+                                state.money -= item.cost;
+                                state[cfg.unlockedKey].push(item.id);
+                                sound.upgrade();
+                            } else {
+                                sound.pop();
+                            }
+                            state[cfg.selectedKey] = item.id;
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            } else if (currentTab === 'upgrades') {
+                CATALOG.upgrades.forEach(up => {
+                    const lvl = state.levels[up.id] || 0;
+                    const isMax = lvl >= up.max;
+                    const cost = Math.round(up.baseCost * Math.pow(up.mult, up.id === 'magnet' ? lvl : lvl - 1));
+                    const canBuy = !isMax && state.money >= cost;
+
+                    const card = document.createElement('div');
+                    card.className = 'icing-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5';
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">${up.icon}</span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="font-bold text-base">${up.name}</span>
+                                    <span class="text-xs font-bold bg-pink-200 text-pink-950 px-2 py-0.5 rounded-lg">Niv. ${lvl}/${up.max}</span>
+                                </div>
+                                <p class="text-xs text-amber-800 mt-1">${up.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || isMax) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
+                            ${isMax ? '✓ Niveau Maximum' : `Améliorer • ${formatMoney(cost)}`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= cost;
+                            state.levels[up.id] = lvl + 1;
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            } else if (currentTab === 'staff') {
+                CATALOG.staff.forEach(st => {
+                    const owned = !!state.staffAndDecor[st.id];
+                    const canBuy = !owned && state.money >= st.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `icing-card rounded-2xl p-3.5 text-amber-950 flex flex-col justify-between gap-2.5 ${owned ? 'ring-4 ring-emerald-500' : ''}`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">${st.icon}</span>
+                            <div>
+                                <div class="font-bold text-base">${st.name}</div>
+                                <p class="text-xs text-amber-800 mt-1">${st.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-mint w-full py-2 rounded-xl text-white font-bold text-sm cursor-pointer">
+                            ${owned ? '✓ En service au Manoir' : `Recruter / Acheter • ${formatMoney(st.cost)}`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= st.cost;
+                            state.staffAndDecor[st.id] = true;
+                            syncHelpers();
+                            sound.upgrade();
+                            saveGame();
+                            renderShop();
+                        });
+                    }
+                    shopGrid.appendChild(card);
+                });
+            }
+        }
+
+        const btnSound = document.getElementById('btnSound');
+        btnSound.addEventListener('click', () => {
+            sound.muted = !sound.muted;
+            btnSound.textContent = sound.muted ? '🔇' : '🔊';
+        });
+
+        const resetModal = document.getElementById('resetModal');
+        document.getElementById('btnOpenReset').addEventListener('click', () => {
+            resetModal.classList.remove('hidden');
+            resetModal.classList.add('flex');
+        });
+        document.getElementById('btnCancelReset').addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+        });
+        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+            localStorage.removeItem(SAVE_KEY);
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            helpers = [];
+            customers = [];
+            moneyPiles = [];
+            player.holding = [];
+            stations.oven.slots = [];
+            stations.oven.ready = [];
+            stations.boxer.currentBoxCookies = [];
+            stations.shelf.boxes = [];
+            updateHUD();
+            renderQuickBars();
+            renderShop();
+            resetModal.classList.add('hidden');
+            resetModal.classList.remove('flex');
+            shopModal.classList.add('hidden');
+            shopModal.classList.remove('flex');
+        });
+
+        // ==========================================
+        // 12. BOUCLE PRINCIPALE 60 FPS
+        // ==========================================
+        let lastTime = 0;
+        function gameLoop(nowMs) {
+            if (!lastTime) lastTime = nowMs;
+            const dt = Math.min(0.05, (nowMs - lastTime) / 1000);
+            lastTime = nowMs;
+
+            update(dt);
+
+            ctx.save();
+            ctx.fillStyle = '#1b0b04';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+
+            drawGingerbreadHouseInterior();
+            drawDecorations();
+            drawStations(nowMs);
+            drawMoneyAndEffects();
+            helpers.forEach(h => drawCharacter(h, h.role, nowMs));
+            drawCustomers(nowMs);
+            drawCharacter(player, 'player', nowMs);
+
+            ctx.restore();
+            requestAnimationFrame(gameLoop);
+        }
+
+        updateHUD();
+        renderQuickBars();
+        window.onload = function() {
+            requestAnimationFrame(gameLoop);
+        };
+    })();
+    </script>
+</body>
+</html>
