@@ -1102,7 +1102,7 @@
                 }
             }
 
-            updateSorterElf(dt);
+            handlePlayerConveyorAndDelivery();
             updateHelpers(dt);
             updateCustomers(dt);
             updateMoneyPiles(dt);
@@ -1118,7 +1118,63 @@
             const shapeMatch = !cust.desiredShape || (cookie.shape && cookie.shape.id === cust.desiredShape.id);
             return icingMatch && shapeMatch;
         }
+        function handlePlayerConveyorAndDelivery() {
+            const conv = stations.conveyor;
+            const maxHand = getMaxHand();
 
+            // 1. Reprendre un biscuit qui tourne sur le convoyeur quand tu t'approches de la piste
+            const distFromCenter = Math.hypot(
+                (player.x - conv.cx) / conv.rx,
+                (player.y - conv.cy) / conv.ry
+            );
+            // Si le joueur est près de l'anneau du convoyeur (et pas sur la zone de dépôt en bas)
+            if (distFromCenter > 0.72 && distFromCenter < 1.28 && player.activeStation !== 'conveyor') {
+                if (player.holding.length < maxHand && conv.items.length > 0) {
+                    // Trouve le biscuit le plus proche du joueur sur le tapis
+                    let closestIdx = -1;
+                    let minDist = 42;
+                    conv.items.forEach((entry, idx) => {
+                        const pt = getConveyorPoint(entry.t);
+                        const d = Math.hypot(player.x - pt.x, player.y - pt.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            closestIdx = idx;
+                        }
+                    });
+                    if (closestIdx !== -1) {
+                        const taken = conv.items.splice(closestIdx, 1)[0];
+                        player.holding.push(taken.cookie);
+                        sound.pop();
+                        updateHUD();
+                    }
+                }
+            }
+
+            // 2. Donner les biscuits en main au client le plus proche devant le comptoir (Étape 9)
+            const dc = stations.deliveryCounter;
+            if (player.x > dc.x - 45 && player.x < dc.x + dc.w + 45 && player.y > dc.y - 30 && player.y < dc.y + dc.h + 30) {
+                const finIdx = player.holding.findIndex(i => i.kind === 'finished');
+                if (finIdx !== -1) {
+                    const waitingCustomers = customers.filter(c => c.state === 'waiting');
+                    if (waitingCustomers.length > 0) {
+                        // Cible le client le plus proche en hauteur (Y)
+                        waitingCustomers.sort((a, b) => Math.abs(a.y - player.y) - Math.abs(b.y - player.y));
+                        const targetCust = waitingCustomers[0];
+
+                        if (targetCust.receivedCookies.length < targetCust.desiredCount) {
+                            const cookie = player.holding.splice(finIdx, 1)[0];
+                            targetCust.receivedCookies.push(cookie);
+                            sound.pop();
+                            if (targetCust.receivedCookies.length >= targetCust.desiredCount) {
+                                completeCustomerOrder(targetCust);
+                            }
+                            updateHUD();
+                        }
+                    }
+                }
+            }
+        }
+        
         function updateSorterElf(dt) {
             const spd = getSorterSpeed();
             const handCap = getSorterHandCap();
@@ -1250,9 +1306,9 @@
                     (ck.icing?.bonus || 0) + (ck.confetti?.bonus || 0) + decorExtra + hatBonus;
                 if (doesCookieMatchCustomer(ck, cust)) {
                     matchedCount++;
-                    totalValue += unit * perfectMult;
+                    totalValue += unit * 1.5; // +50 % si c'est le bon biscuit !
                 } else {
-                    totalValue += unit * 0.4;
+                    totalValue += unit; // Prix normal (100 %) pour n'importe quel autre biscuit
                 }
             });
 
@@ -2038,7 +2094,7 @@
             ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            if (role === 'sorter') ctx.fillStyle = '#16a34a';
+            //if (role === 'sorter') ctx.fillStyle = '#16a34a';
             else if (role === 'miller') ctx.fillStyle = '#eab308';
             else if (role === 'roller') ctx.fillStyle = '#0284c7';
             else if (role === 'baker') ctx.fillStyle = '#dc2626';
