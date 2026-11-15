@@ -1150,27 +1150,31 @@
                 }
             }
 
-            // 2. Donner les biscuits en main au client le plus proche devant le comptoir (Étape 9)
+         // 2. Poser jusqu'à 18 boîtes sur le présentoir (Étape 9)
             const dc = stations.deliveryCounter;
             if (player.x > dc.x - 45 && player.x < dc.x + dc.w + 45 && player.y > dc.y - 30 && player.y < dc.y + dc.h + 30) {
-                const finIdx = player.holding.findIndex(i => i.kind === 'finished');
-                if (finIdx !== -1) {
-                    const waitingCustomers = customers.filter(c => c.state === 'waiting');
-                    if (waitingCustomers.length > 0) {
-                        // Cible le client le plus proche en hauteur (Y)
-                        waitingCustomers.sort((a, b) => Math.abs(a.y - player.y) - Math.abs(b.y - player.y));
-                        const targetCust = waitingCustomers[0];
+                while (dc.boxes.length < 18) {
+                    const finIdx = player.holding.findIndex(i => i.kind === 'finished');
+                    if (finIdx === -1) break;
+                    const cookie = player.holding.splice(finIdx, 1)[0];
+                    dc.boxes.push({ cookie, pack: getPackaging() });
+                    sound.pop();
+                    updateHUD();
+                }
+            }
 
-                        if (targetCust.receivedCookies.length < targetCust.desiredCount) {
-                            const cookie = player.holding.splice(finIdx, 1)[0];
-                            targetCust.receivedCookies.push(cookie);
-                            sound.pop();
-                            if (targetCust.receivedCookies.length >= targetCust.desiredCount) {
-                                completeCustomerOrder(targetCust);
-                            }
-                            updateHUD();
-                        }
+            // 3. Les clients devant le comptoir prennent les boîtes posées sur le présentoir
+            const waitingCustomers = customers.filter(c => c.state === 'waiting');
+            if (waitingCustomers.length > 0 && dc.boxes.length > 0) {
+                const targetCust = waitingCustomers[0];
+                while (dc.boxes.length > 0 && targetCust.receivedCookies.length < targetCust.desiredCount) {
+                    const boxItem = dc.boxes.shift();
+                    targetCust.receivedCookies.push(boxItem.cookie);
+                    sound.pop();
+                    if (targetCust.receivedCookies.length >= targetCust.desiredCount) {
+                        completeCustomerOrder(targetCust);
                     }
+                    updateHUD();
                 }
             }
         }
