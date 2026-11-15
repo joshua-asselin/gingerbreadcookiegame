@@ -2366,5 +2366,117 @@
         };
     })();
     </script>
+    <!-- ============================================================ -->
+<!-- SYSTÈME DE REBIRTH (1 000 000 $) & ACCÈS MONDE 3 (BLOC UNIQUE) -->
+<!-- ============================================================ -->
+<div id="rebirthBar" class="fixed top-16 right-2.5 flex items-center gap-2 z-20 pointer-events-auto">
+    <!-- Bouton Rebirth -->
+    <button id="btnRebirth" class="ginger-panel rounded-2xl px-3.5 py-2 font-bold text-amber-100 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer hover:brightness-110">
+        <span>♻️</span>
+        <span id="btnRebirthLabel">Rebirth (1 000 000 $)</span>
+    </button>
+
+    <!-- Bouton Monde 3 (caché tant que Rebirth < 1) -->
+    <a id="btnWorld3" href="monde3.html" class="hidden btn-mint rounded-2xl px-4 py-2 font-bold text-white text-xs sm:text-sm items-center gap-1.5 cursor-pointer shadow-lg">
+        <span>🌍</span>
+        <span>Monde 3</span>
+    </a>
+</div>
+
+<!-- Modale de confirmation Rebirth -->
+<div id="rebirthModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="icing-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
+        <div class="text-4xl mb-2">♻️</div>
+        <h3 class="text-xl font-bold mb-2">Faire un Rebirth ?</h3>
+        <p class="text-sm text-amber-800 mb-3">
+            Coût : <strong>1 000 000 $</strong><br>
+            Ta caisse, tes améliorations et tes recettes seront remises à zéro, mais tu débloqueras définitivement le <strong>🌍 Monde 3</strong> !
+        </p>
+        <div id="rebirthCountInfo" class="text-xs font-bold text-purple-800 bg-purple-100 py-1.5 px-3 rounded-xl mb-4">
+            Rebirths actuels : 0
+        </div>
+        <div class="flex gap-3">
+            <button id="btnCancelRebirth" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
+            <button id="btnConfirmRebirth" class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold text-white cursor-pointer">Rebirth !</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const REBIRTH_COST = 1000000;
+    const SAVE_KEY = 'gingerbread_mart_2_save_v1';
+
+    const btnRebirth = document.getElementById('btnRebirth');
+    const btnRebirthLabel = document.getElementById('btnRebirthLabel');
+    const btnWorld3 = document.getElementById('btnWorld3');
+    const rebirthModal = document.getElementById('rebirthModal');
+    const rebirthCountInfo = document.getElementById('rebirthCountInfo');
+
+    function getSave() {
+        try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); }
+        catch (e) { return {}; }
+    }
+
+    function refreshRebirthUI() {
+        const data = getSave();
+        const money = data.money || 0;
+        const rebirths = data.rebirths || 0;
+
+        rebirthCountInfo.textContent = `Rebirths actuels : ${rebirths}`;
+
+        // Affiche le bouton Monde 3 dès 1 Rebirth
+        if (rebirths >= 1 || data.world3Unlocked) {
+            btnWorld3.classList.remove('hidden');
+            btnWorld3.classList.add('flex');
+        }
+
+        // Met en valeur le bouton Rebirth quand le joueur a 1 000 000 $
+        if (money >= REBIRTH_COST) {
+            btnRebirth.style.background = 'linear-gradient(180deg, #a855f7 0%, #6b21a8 100%)';
+            btnRebirthLabel.textContent = `Rebirth DISPO ! (1 000 000 $)`;
+        } else {
+            btnRebirth.style.background = '';
+            btnRebirthLabel.textContent = `♻️ ${rebirths} | Rebirth (1M $)`;
+        }
+    }
+
+    btnRebirth.addEventListener('click', () => {
+        const data = getSave();
+        const money = data.money || 0;
+        if (money < REBIRTH_COST) {
+            alert(`Il te faut 1 000 000 $ pour faire un Rebirth ! (Tu as actuellement ${money.toLocaleString('fr-FR')} $)`);
+            return;
+        }
+        rebirthModal.classList.remove('hidden');
+        rebirthModal.classList.add('flex');
+    });
+
+    document.getElementById('btnCancelRebirth').addEventListener('click', () => {
+        rebirthModal.classList.add('hidden');
+        rebirthModal.classList.remove('flex');
+    });
+
+    document.getElementById('btnConfirmRebirth').addEventListener('click', () => {
+        const data = getSave();
+        if ((data.money || 0) < REBIRTH_COST) return;
+
+        const nextRebirths = (data.rebirths || 0) + 1;
+        // Réinitialise la sauvegarde en gardant uniquement les Rebirths et l'accès Monde 3
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            money: 50,
+            boxesSold: 0,
+            cookiesSold: 0,
+            rebirths: nextRebirths,
+            world3Unlocked: true
+        }));
+        location.reload();
+    });
+
+    // Vérifie l'état toutes les 500 ms
+    setInterval(refreshRebirthUI, 500);
+    refreshRebirthUI();
+})();
+</script>
 </body>
 </html>
