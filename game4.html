@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -28,7 +27,6 @@
             width: 100%;
             height: 100%;
         }
-        /* Panneaux UI Palais de Cristal & Or */
         .crystal-panel {
             background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%);
             border: 2.5px solid #bae6fd;
@@ -97,18 +95,17 @@
     </style>
 </head>
 <body>
-    <!-- Canvas Principal 60 FPS bien cadré -->
+    <!-- Canvas Principal 60 FPS -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- HUD Supérieur Compact & Aligné -->
+    <!-- HUD Supérieur -->
     <header class="fixed top-2 left-2 right-2 flex items-center justify-between gap-1.5 pointer-events-none z-10">
-        <!-- Compteurs Financiers & Stats -->
-        <div class="flex items-center gap-1.5 pointer-events-auto overflow-x-auto no-scrollbar max-w-[62%]">
+        <div class="flex items-center gap-1.5 pointer-events-auto overflow-x-auto no-scrollbar max-w-[64%]">
             <div class="crystal-panel rounded-xl px-3 py-1 flex items-center gap-1.5 text-sky-50 shrink-0">
                 <span class="text-lg sm:text-xl">🪙</span>
                 <div>
                     <div class="text-[9px] uppercase tracking-wider text-sky-200 font-bold leading-none">Monnaie</div>
-                    <div id="hudMoney" class="text-sm sm:text-lg font-bold text-yellow-300 leading-tight">100 $</div>
+                    <div id="hudMoney" class="text-sm sm:text-lg font-bold text-yellow-300 leading-tight">120 $</div>
                 </div>
             </div>
 
@@ -121,10 +118,10 @@
             </div>
 
             <div class="hidden lg:flex crystal-panel rounded-xl px-2.5 py-1 items-center gap-1.5 text-sky-50 shrink-0">
-                <span class="text-base">🪄</span>
+                <span class="text-base">🍪</span>
                 <div>
-                    <div class="text-[9px] uppercase tracking-wider text-amber-200 font-bold leading-none">Rouleau Équipé</div>
-                    <div id="hudRollerName" class="text-xs font-bold text-yellow-200 leading-tight">Bois Classique</div>
+                    <div class="text-[9px] uppercase tracking-wider text-amber-200 font-bold leading-none">Forme & Chapeau</div>
+                    <div id="hudRollerName" class="text-xs font-bold text-yellow-200 leading-tight">Bonhomme • Toque</div>
                 </div>
             </div>
 
@@ -134,7 +131,6 @@
             </div>
         </div>
 
-        <!-- Boutons Navigation Monde 3, Classement, Boutique & Audio -->
         <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
             <a href="game3.html" class="crystal-panel rounded-xl px-2.5 py-1.5 font-bold text-sky-100 text-xs flex items-center gap-1 hover:brightness-110 cursor-pointer">
                 <span>⬅️</span>
@@ -154,27 +150,27 @@
         </div>
     </header>
 
-    <!-- Barre Inférieure Bien Droite (Sans débordement) -->
+    <!-- Barre Inférieure -->
     <footer class="fixed bottom-2 left-2 right-2 flex flex-col lg:flex-row items-center justify-between gap-1.5 pointer-events-none z-10">
-        <!-- Sélecteurs Rapides (Glaçage + Confettis + Emballage) -->
-        <div class="crystal-panel rounded-xl px-2.5 py-1 pointer-events-auto max-w-full lg:max-w-[56%] flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <!-- Sélecteurs Rapides (Formes + Glace + Confetti) -->
+        <div class="crystal-panel rounded-xl px-2.5 py-1 pointer-events-auto max-w-full lg:max-w-[58%] flex items-center gap-2 overflow-x-auto no-scrollbar">
             <div class="flex items-center gap-1 shrink-0">
-                <span class="text-[10px] font-bold text-sky-200">🎨 Glaçage:</span>
+                <span class="text-[10px] font-bold text-emerald-200">🍪 Forme:</span>
+                <div id="shapeQuickBar" class="flex items-center gap-1"></div>
+            </div>
+            <div class="h-4 w-0.5 bg-sky-200/30 shrink-0"></div>
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[10px] font-bold text-sky-200">🎨 Glace:</span>
                 <div id="glazeQuickBar" class="flex items-center gap-1"></div>
             </div>
             <div class="h-4 w-0.5 bg-sky-200/30 shrink-0"></div>
             <div class="flex items-center gap-1 shrink-0">
-                <span class="text-[10px] font-bold text-amber-200">✨ Confettis:</span>
+                <span class="text-[10px] font-bold text-amber-200">✨ Confetti:</span>
                 <div id="confettiQuickBar" class="flex items-center gap-1"></div>
-            </div>
-            <div class="h-4 w-0.5 bg-sky-200/30 shrink-0"></div>
-            <div class="flex items-center gap-1 shrink-0">
-                <span class="text-[10px] font-bold text-emerald-200">🎁 Boîte:</span>
-                <div id="packQuickBar" class="flex items-center gap-1"></div>
             </div>
         </div>
 
-        <!-- Résumé Convoyeur Carré, Client & Main -->
+        <!-- Résumé Convoyeur, Client & Main -->
         <div class="crystal-panel rounded-xl px-2.5 py-1 text-sky-50 text-[11px] flex items-center gap-2 pointer-events-auto shrink-0 max-w-full overflow-x-auto no-scrollbar">
             <div class="bg-slate-950/80 px-2 py-0.5 rounded-lg border border-sky-400/40 font-bold text-sky-200 whitespace-nowrap">
                 🟨 Convoyeur : <span id="hudConveyorCount" class="text-yellow-300">0/24</span>
@@ -195,19 +191,18 @@
         <div id="joystickKnob" class="w-9 h-9 rounded-full bg-amber-400 border-2 border-white shadow-md pointer-events-none"></div>
     </div>
 
-    <!-- MODALE BOUTIQUE & LUCKY BLOCKS -->
+    <!-- MODALE BOUTIQUE (Pâte, Chapeau, Upgrade, Lutin, Décoration, Confetti, Glace + Lucky Block & Rouleaux) -->
     <div id="shopModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-2 sm:p-4 z-30">
         <div class="crystal-panel rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden">
-            <!-- En-tête Boutique -->
             <div class="flex items-center justify-between px-4 py-2.5 border-b border-sky-300/30 bg-slate-950/85">
                 <div class="flex items-center gap-2.5">
                     <span class="text-2xl">🏰</span>
                     <div>
                         <h2 class="text-base sm:text-xl font-bold text-white">Boutique Royale du Palais de Cristal (Monde 4)</h2>
                         <p class="text-xs text-sky-200 flex flex-wrap gap-2">
-                            <span>Monnaie : <strong id="shopBalance" class="text-yellow-300">100 $</strong></span> •
-                            <span>Rouleau : <strong id="shopRollerBadge" class="text-amber-300">Bois Classique</strong></span> •
-                            <span>Présentoir : <strong id="shopDisplayBadge" class="text-emerald-300">Niv. 1 (12 boîtes)</strong></span>
+                            <span>Monnaie : <strong id="shopBalance" class="text-yellow-300">120 $</strong></span> •
+                            <span>Chapeau : <strong id="shopHatBadge" class="text-pink-300">Toque Pâtissier</strong></span> •
+                            <span>Décos : <strong id="shopDecoBadge" class="text-emerald-300">0/15</strong></span>
                         </p>
                     </div>
                 </div>
@@ -216,26 +211,23 @@
                 </button>
             </div>
 
-            <!-- Onglets Boutique -->
+            <!-- Onglets exacts demandés (min 15 items/niveaux chacun, Formes 24+, sans Rouleau) -->
             <div class="flex gap-1.5 p-2 bg-slate-950/70 overflow-x-auto no-scrollbar">
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="lucky">🎲 Lucky Blocks (Roue)</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="rollers">🪄 Rouleaux & Exclusifs</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="display">🏪 Présentoir & Convoyeur</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="flour">🌾 Farines</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâtes</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="shapes">❄️ Formes</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 Glaçages</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ Confettis</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="packaging">🎁 Emballages</button>
-                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Table Tout-en-Un & Lutins</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-400 text-amber-950 cursor-pointer whitespace-nowrap" data-tab="lucky">🎲 Lucky Block</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="shapes">🍪 Formes (24)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="dough">🥣 Pâte (17)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="icing">🎨 Glace (17)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="confetti">✨ Confetti (17)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="hats">👑 Chapeau (17)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="upgrades">⚡ Upgrade (15)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="elves">🧝 Lutin (15)</button>
+                <button class="shop-tab px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-sky-100 cursor-pointer whitespace-nowrap" data-tab="decorations">🎄 Décoration (16)</button>
             </div>
 
-            <!-- Contenu Boutique (Soit la Roue Lucky Block, soit la Grille d'objets) -->
             <div id="shopBody" class="p-3.5 overflow-y-auto shop-scroll flex-1"></div>
 
-            <!-- Pied de boutique -->
             <div class="px-4 py-2 bg-slate-950/90 border-t border-sky-300/20 flex items-center justify-between gap-2 text-xs text-sky-200">
-                <span class="truncate">1. Farine → 2. Pétrin → 3. Table Tout-en-Un (Rouleau+Forme+Four+Glaçage+Confettis) → 4. Convoyeur Carré → 5. Présentoir !</span>
+                <span class="truncate">1. Pâte → 2. Forme → 3. Four → 4. Glace → 5. Confetti → 6. Convoyeur Carré → 7. Présentoir !</span>
                 <button id="btnOpenReset" class="px-2.5 py-1 rounded-lg bg-red-900 hover:bg-red-700 text-red-100 font-bold border border-red-400 cursor-pointer whitespace-nowrap">
                     🗑️ Réinitialiser
                 </button>
@@ -243,7 +235,7 @@
         </div>
     </div>
 
-    <!-- MODALE CLASSEMENT FIREBASE EN DIRECT -->
+    <!-- MODALE CLASSEMENT FIREBASE -->
     <div id="leaderboardModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-3 z-40">
         <div class="crystal-panel rounded-2xl w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden text-white">
             <div class="flex items-center justify-between px-4 py-3 bg-slate-950/90 border-b border-sky-300/30">
@@ -251,13 +243,12 @@
                     <span class="text-2xl">🏆</span>
                     <div>
                         <h3 class="text-lg font-bold text-yellow-300">Classement Mondial — Plus Riches</h3>
-                        <p class="text-[11px] text-sky-200">Connecté en temps réel à Firebase Realtime Database</p>
+                        <p class="text-[11px] text-sky-200">Synchronisé avec Firebase Realtime Database</p>
                     </div>
                 </div>
                 <button id="btnCloseLeaderboard" class="w-8 h-8 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold flex items-center justify-center border border-white cursor-pointer">✕</button>
             </div>
 
-            <!-- Profil Joueur & Pseudo -->
             <div class="p-3 bg-slate-900/90 border-b border-sky-300/20 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div class="flex-1 flex items-center gap-2">
                     <span class="text-xs font-bold text-sky-200 whitespace-nowrap">Ton Pseudo :</span>
@@ -273,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Liste du Top 10 -->
             <div id="leaderboardList" class="p-3.5 overflow-y-auto shop-scroll flex-1 space-y-2">
                 <div class="text-center text-sky-200 text-sm py-6">Chargement du classement Firebase...</div>
             </div>
@@ -285,7 +275,7 @@
         <div class="snow-card rounded-2xl p-5 max-w-sm w-full text-center text-slate-900">
             <div class="text-4xl mb-2">❄️</div>
             <h3 class="text-lg font-bold mb-1.5">Réinitialiser le Monde 4 ?</h3>
-            <p class="text-xs text-slate-700 mb-4">Ta progression locale (rouleaux, améliorations du présentoir, recettes) sera remise à zéro.</p>
+            <p class="text-xs text-slate-700 mb-4">Ta progression locale sera remise à zéro.</p>
             <div class="flex gap-2.5">
                 <button id="btnCancelReset" class="flex-1 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 font-bold text-slate-800 text-xs cursor-pointer">Annuler</button>
                 <button id="btnConfirmReset" class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white text-xs cursor-pointer">Tout effacer</button>
@@ -298,7 +288,7 @@
         "use strict";
 
         // ============================================================
-        // 1. CONNEXION FIREBASE REALTIME DATABASE (CLASSEMENT EN DIRECT)
+        // 1. CONNEXION FIREBASE REALTIME DATABASE
         // ============================================================
         const FIREBASE_DB_URL = "https://gingerbreadcookie-a1a39-default-rtdb.firebaseio.com";
         const PLAYER_ID_KEY = "gingerbread_m4_player_id";
@@ -313,38 +303,71 @@
 
         async function syncPlayerToFirebase(force = false) {
             const now = Date.now();
-            if (!force && now - lastSyncTime < 6000) return;
+            if (!force && now - lastSyncTime < 4000) return;
             lastSyncTime = now;
 
             const badge = document.getElementById("dbStatusBadge");
             try {
-                const payload = {
+                // 1. Sauvegarde dans le classement public
+                const lbPayload = {
                     name: state.playerName || "Pâtissier du Pôle",
                     money: Math.round(state.money),
                     perfectOrders: state.perfectOrders,
-                    rollerName: getRoller().name,
+                    rollerName: getShape().name,
                     updatedAt: now
                 };
-                const res = await fetch(`${FIREBASE_DB_URL}/leaderboard/${playerId}.json`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok && badge) {
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Firebase OK ✓</span>`;
+                // 2. Sauvegarde complète de toute la progression du joueur dans Firebase
+                const fullSavePayload = {
+                    ...state,
+                    updatedAt: now
+                };
+
+                const [resLb, resSave] = await Promise.all([
+                    fetch(`${FIREBASE_DB_URL}/leaderboard/${playerId}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(lbPayload)
+                    }),
+                    fetch(`${FIREBASE_DB_URL}/saves/${playerId}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(fullSavePayload)
+                    })
+                ]);
+
+                if (resLb.ok && resSave.ok && badge) {
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Firebase Sauvegardé ✓</span>`;
+                } else if (badge) {
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span><span>Active Règles Firebase</span>`;
                 }
             } catch (err) {
                 if (badge) {
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Mode Local</span>`;
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Hors-ligne</span>`;
                 }
             }
         }
 
+        async function loadCloudSaveIfNewer() {
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/saves/${playerId}.json`);
+                if (!res.ok) return;
+                const cloudData = await res.json();
+                if (cloudData && typeof cloudData.money === "number" && cloudData.money > state.money) {
+                    state = {
+                        ...DEFAULT_STATE,
+                        ...cloudData,
+                        levels: { ...DEFAULT_STATE.levels, ...(cloudData.levels || {}) }
+                    };
+                    syncHelpers();
+                    updateHUD();
+                    renderQuickBars();
+                }
+            } catch (e) {}
+        }
+
         async function fetchLeaderboard() {
             const listEl = document.getElementById("leaderboardList");
-            if (listEl) {
-                listEl.innerHTML = `<div class="text-center text-sky-200 text-xs py-6">Actualisation depuis Firebase...</div>`;
-            }
+            if (listEl) listEl.innerHTML = `<div class="text-center text-sky-200 text-xs py-6">Actualisation depuis Firebase...</div>`;
             try {
                 await syncPlayerToFirebase(true);
                 const res = await fetch(`${FIREBASE_DB_URL}/leaderboard.json`);
@@ -367,9 +390,7 @@
                 leaderboardData = entries.slice(0, 15);
                 renderLeaderboard();
             } catch (e) {
-                if (listEl) {
-                    listEl.innerHTML = `<div class="text-center text-rose-300 text-xs py-6">Impossible de joindre Firebase. Vérifie tes règles de lecture/écriture dans l'onglet Règles de Firebase.</div>`;
-                }
+                if (listEl) listEl.innerHTML = `<div class="text-center text-rose-300 text-xs py-6">Impossible de joindre Firebase. Vérifie tes règles Firebase.</div>`;
             }
         }
 
@@ -377,7 +398,7 @@
             const listEl = document.getElementById("leaderboardList");
             if (!listEl) return;
             if (leaderboardData.length === 0) {
-                listEl.innerHTML = `<div class="text-center text-sky-200 text-xs py-6">Aucun joueur enregistré pour le moment. Clique sur "Enregistrer & Sync" pour être 1er !</div>`;
+                listEl.innerHTML = `<div class="text-center text-sky-200 text-xs py-6">Aucun joueur enregistré. Clique sur "Enregistrer & Sync" !</div>`;
                 return;
             }
             listEl.innerHTML = "";
@@ -395,12 +416,10 @@
                             <div class="font-bold text-xs sm:text-sm text-white truncate">
                                 ${escapeHtml(entry.name)} ${isMe ? '<span class="text-[10px] bg-yellow-400 text-amber-950 px-1.5 py-0.5 rounded ml-1">TOI</span>' : ''}
                             </div>
-                            <div class="text-[10px] text-sky-300 truncate">🪄 ${escapeHtml(entry.rollerName)} • ⭐ ${entry.perfectOrders} cmd</div>
+                            <div class="text-[10px] text-sky-300 truncate">🍪 ${escapeHtml(entry.rollerName)} • ⭐ ${entry.perfectOrders} cmd</div>
                         </div>
                     </div>
-                    <div class="font-bold text-xs sm:text-sm text-yellow-300 shrink-0">
-                        ${formatMoney(entry.money)}
-                    </div>
+                    <div class="font-bold text-xs sm:text-sm text-yellow-300 shrink-0">${formatMoney(entry.money)}</div>
                 `;
                 listEl.appendChild(row);
             });
@@ -411,122 +430,193 @@
         }
 
         // ============================================================
-        // 2. CATALOGUES DU MONDE 4 (ROULEAUX, EXCLUSIFS, RECETTES)
+        // 2. CATALOGUES COMPLETS (SANS ROULEAU, 24 FORMES SANS CARRÉ + 15+ PAR SECTION)
         // ============================================================
         const CATALOG = {
-            // ROULEAUX (Standards achetables OU gagnables + EXCLUSIFS uniquement dans Lucky Block !)
-            rollers: [
-                { id: 'r1', name: 'Rouleau Bois Classique', desc: 'Le rouleau de base du Palais.', cost: 0, bonus: 0, speedMult: 1.0, color: '#d97706', exclusive: false },
-                { id: 'r2', name: 'Rouleau Marbre Blanc', desc: 'Glisse sans coller (+15$, +20% vitesse table).', cost: 260, bonus: 15, speedMult: 1.20, color: '#f8fafc', exclusive: false },
-                { id: 'r3', name: 'Rouleau Cuivre Poli', desc: 'Chaleur douce (+38$, +40% vitesse table).', cost: 780, bonus: 38, speedMult: 1.40, color: '#ea580c', exclusive: false },
-                { id: 'r4', name: 'Rouleau Argent Givré', desc: 'Forgé dans la glace (+85$, +65% vitesse table).', cost: 2200, bonus: 85, speedMult: 1.65, color: '#cbd5e1', exclusive: false },
-                { id: 'r5', name: 'Rouleau Saphir Royal', desc: 'Pierre précieuse bleue (+180$, +95% vitesse table).', cost: 6400, bonus: 180, speedMult: 1.95, color: '#0284c7', exclusive: false },
-                { id: 'r6', name: 'Rouleau Émeraude Boréale', desc: 'Éclat vert magique (+380$, +130% vitesse table).', cost: 18500, bonus: 380, speedMult: 2.30, color: '#10b981', exclusive: false },
-                { id: 'r7', name: 'Rouleau Rubis Impérial', desc: 'Puissance de feu (+780$, +170% vitesse table).', cost: 52000, bonus: 780, speedMult: 2.70, color: '#e11d48', exclusive: false },
-                { id: 'r8', name: 'Rouleau Or Massif 24K', desc: 'Le plus grand rouleau achetable (+1 600$, +220% vitesse).', cost: 145000, bonus: 1600, speedMult: 3.20, color: '#facc15', exclusive: false },
-                // 4 ROULEAUX EXCLUSIFS (UNIQUEMENT VIA LUCKY BLOCK !)
-                { id: 'rx_candycane', name: '★ EXCLUSIF : Sucre d\'Orge Turbo', desc: 'Uniquement via Lucky Block ! (+650$, +180% vitesse table).', cost: 0, bonus: 650, speedMult: 2.80, color: '#ff4d6d', exclusive: true },
-                { id: 'rx_aurora', name: '★ EXCLUSIF : Cristal d\'Aurore', desc: 'Uniquement via Lucky Block ! (+1 950$, +260% vitesse table).', cost: 0, bonus: 1950, speedMult: 3.60, color: '#2dd4bf', exclusive: true },
-                { id: 'rx_dragon', name: '★ EXCLUSIF : Dragon de Glace', desc: 'Uniquement via Lucky Block ! (+4 500$, +340% vitesse table).', cost: 0, bonus: 4500, speedMult: 4.40, color: '#38bdf8', exclusive: true },
-                { id: 'rx_cosmic', name: '★ EXCLUSIF : Galaxie du Père Noël', desc: 'Légendaire Lucky Block ! (+9 500$, +450% vitesse table).', cost: 0, bonus: 9500, speedMult: 5.50, color: '#c084fc', exclusive: true }
-            ],
-            flour: [
-                { id: 'f1', name: 'Farine de Cristal Pur', desc: 'Farine fine des serres du Palais.', cost: 0, bonus: 0, growMult: 1.0, color: '#f8fafc', stalkColor: '#38bdf8' },
-                { id: 'f2', name: 'Farine d\'Avoine Givré', desc: 'Douce et légère (+12$, +20% pousse).', cost: 180, bonus: 12, growMult: 1.20, color: '#fef9c3', stalkColor: '#eab308' },
-                { id: 'f3', name: 'Farine d\'Amande Royale', desc: 'Arôme délicat (+35$, +40% pousse).', cost: 550, bonus: 35, growMult: 1.40, color: '#fffbeb', stalkColor: '#f59e0b' },
-                { id: 'f4', name: 'Farine de Noisette Grillée', desc: 'Notes pralinées (+90$, +65% pousse).', cost: 1650, bonus: 90, growMult: 1.65, color: '#d4a373', stalkColor: '#92400e' },
-                { id: 'f5', name: 'Farine de Pistache Émeraude', desc: 'Couleur festive (+220$, +90% pousse).', cost: 4800, bonus: 220, growMult: 1.90, color: '#dcfce7', stalkColor: '#22c55e' },
-                { id: 'f6', name: 'Farine de Vanille Bourbon', desc: 'Parfum intense (+540$, +120% pousse).', cost: 14000, bonus: 540, growMult: 2.20, color: '#fff1f2', stalkColor: '#f43f5e' },
-                { id: 'f7', name: 'Farine d\'Aurore Boréale', desc: 'Grains lumineux (+1 300$, +160% pousse).', cost: 40000, bonus: 1300, growMult: 2.60, color: '#fae8ff', stalkColor: '#d946ef' },
-                { id: 'f8', name: 'Farine d\'Étoile Céleste', desc: 'La farine suprême (+3 200$, +210% pousse).', cost: 115000, bonus: 3200, growMult: 3.10, color: '#fef08a', stalkColor: '#facc15' }
-            ],
-            dough: [
-                { id: 'd1', name: 'Pâte Épicée du Palais', desc: 'Cannelle, gingembre et muscade.', cost: 0, bonus: 0, speedMult: 1.0, color: '#b5651d', stroke: '#5c2c06' },
-                { id: 'd2', name: 'Pâte Miel & Érable', desc: 'Dorée et fondante (+16$, +20% vitesse).', cost: 220, bonus: 16, speedMult: 1.20, color: '#d97706', stroke: '#78350f' },
-                { id: 'd3', name: 'Pâte Cacao Chaud', desc: 'Chocolat au lait (+45$, +40% vitesse).', cost: 680, bonus: 45, speedMult: 1.40, color: '#6f4e37', stroke: '#2c1e16' },
-                { id: 'd4', name: 'Pâte Velours Rouge', desc: 'Rouge royal (+115$, +65% vitesse).', cost: 2100, bonus: 115, speedMult: 1.65, color: '#be123c', stroke: '#4c0519' },
-                { id: 'd5', name: 'Pâte Caramel Beurre Salé', desc: 'Onctueuse (+280$, +90% vitesse).', cost: 6200, bonus: 280, speedMult: 1.90, color: '#ca8a04', stroke: '#422006' },
-                { id: 'd6', name: 'Pâte Sucre d\'Orge Marbrée', desc: 'Menthe et fraise (+690$, +120% vitesse).', cost: 18000, bonus: 690, speedMult: 2.20, color: '#f43f5e', stroke: '#9f1239' },
-                { id: 'd7', name: 'Pâte Cristal de Glace', desc: 'Bleu glacier (+1 650$, +160% vitesse).', cost: 52000, bonus: 1650, speedMult: 2.60, color: '#38bdf8', stroke: '#0369a1' },
-                { id: 'd8', name: 'Pâte Or Liquide Royale', desc: 'Dorée à l\'or fin (+4 000$, +210% vitesse).', cost: 150000, bonus: 4000, speedMult: 3.10, color: '#facc15', stroke: '#854d0e' }
-            ],
+            // 22 FORMES (AUCUN CARRÉ !) + 2 EXCLUSIVES LUCKY BLOCK = 24 FORMES
             shapes: [
-                { id: 's_gingerman', name: 'Bonhomme Pain d\'Épices', desc: 'Le grand classique souriant.', cost: 0, bonus: 0, icon: '🧑' },
-                { id: 's_snowflake', name: 'Flocon de Cristal', desc: 'Symétrie glacée parfaite (+18$ / biscuit).', cost: 240, bonus: 18, icon: '❄️' },
-                { id: 's_tree', name: 'Sapin Illuminé', desc: 'Sapin de fête (+48$ / biscuit).', cost: 720, bonus: 48, icon: '🎄' },
-                { id: 's_star', name: 'Étoile Polaire', desc: 'Brille dans la nuit (+120$ / biscuit).', cost: 2200, bonus: 120, icon: '⭐' },
-                { id: 's_gift', name: 'Paquet Cadeau Royal', desc: 'Avec ruban doré (+290$ / biscuit).', cost: 6500, bonus: 290, icon: '🎁' },
-                { id: 's_reindeer', name: 'Renne Magique', desc: 'Fier et rapide (+720$ / biscuit).', cost: 19000, bonus: 720, icon: '🦌' },
-                { id: 's_sleigh', name: 'Traîneau d\'Or', desc: 'Chargé de cadeaux (+1 750$ / biscuit).', cost: 55000, bonus: 1750, icon: '🛷' },
-                { id: 's_castle', name: 'Palais de Cristal', desc: 'La merveille absolue (+4 200$ / biscuit).', cost: 160000, bonus: 4200, icon: '🏰' }
+                { id: 's_gingerman', name: 'Bonhomme Pain d\'Épices', desc: 'La silhouette classique du Palais.', cost: 0, bonus: 0, icon: '🧑' },
+                { id: 's_tree', name: 'Sapin de Noël', desc: 'Beau sapin enneigé (+14$ / biscuit).', cost: 150, bonus: 14, icon: '🎄' },
+                { id: 's_house', name: 'Maison Pain d\'Épices', desc: 'Chalet gourmand à toit pointu (+32$ / biscuit).', cost: 390, bonus: 32, icon: '🏠' },
+                { id: 's_star', name: 'Étoile Polaire', desc: 'Cinq branches scintillantes (+68$ / biscuit).', cost: 980, bonus: 68, icon: '⭐' },
+                { id: 's_candycane', name: 'Canne Sucre d\'Orge', desc: 'Crosse sucrée courbée (+140$ / biscuit).', cost: 2450, bonus: 140, icon: '🍬' },
+                { id: 's_snowflake', name: 'Flocon de Cristal', desc: 'Cristal à 6 pointes (+280$ / biscuit).', cost: 6100, bonus: 280, icon: '❄️' },
+                { id: 's_heart', name: 'Cœur de Neige', desc: 'Douceur romantique (+550$ / biscuit).', cost: 15000, bonus: 550, icon: '❤️' },
+                { id: 's_bell', name: 'Cloche de Minuit', desc: 'Tinte la fête (+1 080$ / biscuit).', cost: 37000, bonus: 1080, icon: '🔔' },
+                { id: 's_stocking', name: 'Botte du Père Noël', desc: 'Prête pour les cadeaux (+2 100$ / biscuit).', cost: 90000, bonus: 2100, icon: '🧦' },
+                { id: 's_snowman', name: 'Bonhomme de Neige', desc: 'Trois boules & chapeau (+4 100$ / biscuit).', cost: 215000, bonus: 4100, icon: '⛄' },
+                { id: 's_wreath', name: 'Couronne de Houx', desc: 'Anneau festif (+7 900$ / biscuit).', cost: 510000, bonus: 7900, icon: '⭕' },
+                { id: 's_moon', name: 'Croissant de Lune', desc: 'Lune d\'hiver (+15 200$ / biscuit).', cost: 1200000, bonus: 15200, icon: '🌙' },
+                { id: 's_mitten', name: 'Moufle Polaire', desc: 'Bien au chaud (+29 000$ / biscuit).', cost: 2800000, bonus: 29000, icon: '🧤' },
+                { id: 's_reindeer', name: 'Tête de Renne', desc: 'Avec grands bois (+55 000$ / biscuit).', cost: 6500000, bonus: 55000, icon: '🦌' },
+                { id: 's_penguin', name: 'Pingouin Royal', desc: 'Petit manchot (+105 000$ / biscuit).', cost: 15000000, bonus: 105000, icon: '🐧' },
+                { id: 's_angel', name: 'Ange des Neiges', desc: 'Ailes déployées (+198 000$ / biscuit).', cost: 34000000, bonus: 198000, icon: '👼' },
+                { id: 's_sleigh', name: 'Traîneau Magique', desc: 'Prêt à décoller (+375 000$ / biscuit).', cost: 78000000, bonus: 375000, icon: '🛷' },
+                { id: 's_crown', name: 'Couronne Royale', desc: 'Trois pointes d\'or (+710 000$ / biscuit).', cost: 175000000, bonus: 710000, icon: '👑' },
+                { id: 's_butterfly', name: 'Papillon de Givre', desc: 'Ailes symétriques (+1 350 000$ / biscuit).', cost: 390000000, bonus: 1350000, icon: '🦋' },
+                { id: 's_bear', name: 'Ours Polaire', desc: 'Oreilles rondes (+2 550 000$ / biscuit).', cost: 860000000, bonus: 2550000, icon: '🐻‍❄️' },
+                { id: 's_castle', name: 'Palais de Cristal', desc: 'Tours et tourelles (+4 800 000$ / biscuit).', cost: 1900000000, bonus: 4800000, icon: '🏰' },
+                { id: 's_comet', name: 'Comète Boréale', desc: 'Étoile filante (+9 000 000$ / biscuit).', cost: 4200000000, bonus: 9000000, icon: '☄️' },
+                { id: 'sx_dragon', name: '★ EXCLUSIF : Dragon des Glaces', desc: 'Uniquement Lucky Block ! (+6 500$ / biscuit).', cost: 0, bonus: 6500, icon: '🐉', exclusive: true },
+                { id: 'sx_unicorn', name: '★ EXCLUSIF : Licorne Céleste', desc: 'Uniquement Lucky Block ! (+28 000$ / biscuit).', cost: 0, bonus: 28000, icon: '🦄', exclusive: true }
             ],
+
+            // 15 PÂTES + 2 EXCLUSIVES LUCKY BLOCK
+            dough: [
+                { id: 'd1', name: 'Pâte Épicée Classique', desc: 'Cannelle, gingembre et muscade.', cost: 0, bonus: 0, speedMult: 1.0, color: '#b5651d', stroke: '#5c2c06' },
+                { id: 'd2', name: 'Pâte Miel Doré', desc: 'Douceur florale (+12$ / biscuit).', cost: 160, bonus: 12, speedMult: 1.15, color: '#d97706', stroke: '#78350f' },
+                { id: 'd3', name: 'Pâte Sirop d\'Érable', desc: 'Récolte d\'hiver (+28$ / biscuit).', cost: 420, bonus: 28, speedMult: 1.30, color: '#b45309', stroke: '#451a03' },
+                { id: 'd4', name: 'Pâte Cacao Chaud', desc: 'Chocolat fondant (+60$ / biscuit).', cost: 1100, bonus: 60, speedMult: 1.45, color: '#6f4e37', stroke: '#2c1e16' },
+                { id: 'd5', name: 'Pâte Vanille Bourbon', desc: 'Gousses intenses (+125$ / biscuit).', cost: 2800, bonus: 125, speedMult: 1.62, color: '#fde68a', stroke: '#92400e' },
+                { id: 'd6', name: 'Pâte Noisette Pralinée', desc: 'Croquante (+250$ / biscuit).', cost: 7000, bonus: 250, speedMult: 1.80, color: '#a16207', stroke: '#422006' },
+                { id: 'd7', name: 'Pâte Velours Rouge', desc: 'Rouge royal (+490$ / biscuit).', cost: 17500, bonus: 490, speedMult: 2.00, color: '#be123c', stroke: '#4c0519' },
+                { id: 'd8', name: 'Pâte Caramel Beurre Salé', desc: 'Onctueuse (+940$ / biscuit).', cost: 43000, bonus: 940, speedMult: 2.22, color: '#ca8a04', stroke: '#422006' },
+                { id: 'd9', name: 'Pâte Pistache Royale', desc: 'Vert émeraude (+1 800$ / biscuit).', cost: 105000, bonus: 1800, speedMult: 2.45, color: '#65a30d', stroke: '#1a2e05' },
+                { id: 'd10', name: 'Pâte Sucre d\'Orge', desc: 'Menthe & fraise (+3 400$ / biscuit).', cost: 255000, bonus: 3400, speedMult: 2.70, color: '#f43f5e', stroke: '#9f1239' },
+                { id: 'd11', name: 'Pâte Speculoos Givré', desc: 'Épices du Nord (+6 400$ / biscuit).', cost: 610000, bonus: 6400, speedMult: 2.98, color: '#9a3412', stroke: '#431407' },
+                { id: 'd12', name: 'Pâte Myrtille Polaire', desc: 'Fruits des neiges (+12 000$ / biscuit).', cost: 1450000, bonus: 12000, speedMult: 3.28, color: '#4338ca', stroke: '#1e1b4b' },
+                { id: 'd13', name: 'Pâte Cristal de Glace', desc: 'Bleu glacier (+22 500$ / biscuit).', cost: 3400000, bonus: 22500, speedMult: 3.60, color: '#38bdf8', stroke: '#0369a1' },
+                { id: 'd14', name: 'Pâte Aurore Boréale', desc: 'Reflets magiques (+42 000$ / biscuit).', cost: 7900000, bonus: 42000, speedMult: 3.95, color: '#2dd4bf', stroke: '#115e59' },
+                { id: 'd15', name: 'Pâte Or Liquide 24K', desc: 'La pâte suprême (+78 000$ / biscuit).', cost: 18000000, bonus: 78000, speedMult: 4.35, color: '#facc15', stroke: '#854d0e' },
+                { id: 'dx_stardust', name: '★ EXCLUSIF : Pâte Poussière d\'Étoile', desc: 'Uniquement Lucky Block ! (+3 500$, +250% vitesse).', cost: 0, bonus: 3500, speedMult: 3.50, color: '#e879f9', stroke: '#701a75', exclusive: true },
+                { id: 'dx_phoenix', name: '★ EXCLUSIF : Pâte Phénix Solaire', desc: 'Uniquement Lucky Block ! (+16 000$, +380% vitesse).', cost: 0, bonus: 16000, speedMult: 4.80, color: '#fb923c', stroke: '#7c2d12', exclusive: true }
+            ],
+
+            // 15 GLACES + 2 EXCLUSIVES LUCKY BLOCK
             icing: [
-                { id: 'i1', name: 'Vanille Neige', desc: 'Glaçage blanc pur.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
-                { id: 'i2', name: 'Bleu Glacier', desc: 'Reflet cristallin (+14$ / biscuit).', cost: 190, bonus: 14, color: '#38bdf8', mode: 'solid' },
-                { id: 'i3', name: 'Sucre d\'Orge', desc: 'Rayures rouges et blanches (+38$ / biscuit).', cost: 580, bonus: 38, color: '#ff4d6d', mode: 'candycane' },
-                { id: 'i4', name: 'Menthe Boréale', desc: 'Turquoise frais (+95$ / biscuit).', cost: 1750, bonus: 95, color: '#2ec4b6', mode: 'solid' },
-                { id: 'i5', name: 'Caramel Ambré', desc: 'Brillant et doré (+230$ / biscuit).', cost: 5200, bonus: 230, color: '#f59e0b', mode: 'solid' },
-                { id: 'i6', name: 'Aurore Polaire', desc: 'Couleurs animées (+560$ / biscuit).', cost: 15500, bonus: 560, color: '#00f5d4', mode: 'aurora' },
-                { id: 'i7', name: 'Or 24 Carats', desc: 'Feuille d\'or pure (+1 400$ / biscuit).', cost: 45000, bonus: 1400, color: '#ffd700', mode: 'gold24k' },
-                { id: 'i8', name: 'Diamant Prismatique', desc: 'Éclat ultime (+3 500$ / biscuit).', cost: 130000, bonus: 3500, color: '#e0f2fe', mode: 'diamond' }
+                { id: 'i1', name: 'Vanille Neige', desc: 'Glaçage blanc pur de base.', cost: 0, bonus: 0, color: '#ffffff', mode: 'solid' },
+                { id: 'i2', name: 'Bleu Glacier', desc: 'Reflet cristallin (+10$ / biscuit).', cost: 140, bonus: 10, color: '#38bdf8', mode: 'solid' },
+                { id: 'i3', name: 'Rose Framboise', desc: 'Fruité et doux (+24$ / biscuit).', cost: 380, bonus: 24, color: '#f472b6', mode: 'solid' },
+                { id: 'i4', name: 'Sucre d\'Orge', desc: 'Rayures rouges & blanches (+55$ / biscuit).', cost: 980, bonus: 55, color: '#ff4d6d', mode: 'candycane' },
+                { id: 'i5', name: 'Menthe Boréale', desc: 'Turquoise frais (+115$ / biscuit).', cost: 2500, bonus: 115, color: '#2ec4b6', mode: 'solid' },
+                { id: 'i6', name: 'Citron Givrant', desc: 'Jaune vif (+235$ / biscuit).', cost: 6200, bonus: 235, color: '#fde047', mode: 'solid' },
+                { id: 'i7', name: 'Caramel Ambré', desc: 'Doré et brillant (+470$ / biscuit).', cost: 15500, bonus: 470, color: '#f59e0b', mode: 'solid' },
+                { id: 'i8', name: 'Lavande Royale', desc: 'Violet doux (+920$ / biscuit).', cost: 38000, bonus: 920, color: '#c084fc', mode: 'solid' },
+                { id: 'i9', name: 'Chocolat Noir 85%', desc: 'Intense (+1 800$ / biscuit).', cost: 92000, bonus: 1800, color: '#451a03', mode: 'solid' },
+                { id: 'i10', name: 'Vert Sapin', desc: 'Couleur festive (+3 500$ / biscuit).', cost: 220000, bonus: 3500, color: '#16a34a', mode: 'solid' },
+                { id: 'i11', name: 'Rubis Écarlate', desc: 'Rouge brillant (+6 800$ / biscuit).', cost: 520000, bonus: 6800, color: '#dc2626', mode: 'solid' },
+                { id: 'i12', name: 'Aurore Polaire', desc: 'Couleurs animées (+13 000$ / biscuit).', cost: 1250000, bonus: 13000, color: '#00f5d4', mode: 'aurora' },
+                { id: 'i13', name: 'Arc-en-Ciel Magique', desc: 'Spectre complet (+25 000$ / biscuit).', cost: 2950000, bonus: 25000, color: '#ec4899', mode: 'aurora' },
+                { id: 'i14', name: 'Or 24 Carats', desc: 'Feuille d\'or pure (+48 000$ / biscuit).', cost: 6900000, bonus: 48000, color: '#ffd700', mode: 'gold24k' },
+                { id: 'i15', name: 'Diamant Prismatique', desc: 'Éclat ultime (+90 000$ / biscuit).', cost: 16000000, bonus: 90000, color: '#e0f2fe', mode: 'diamond' },
+                { id: 'ix_nebula', name: '★ EXCLUSIF : Glace Nébuleuse', desc: 'Uniquement Lucky Block ! (+4 200$ / biscuit).', cost: 0, bonus: 4200, color: '#a855f7', mode: 'aurora', exclusive: true },
+                { id: 'ix_supernova', name: '★ EXCLUSIF : Glace Supernova', desc: 'Uniquement Lucky Block ! (+19 000$ / biscuit).', cost: 0, bonus: 19000, color: '#fde047', mode: 'diamond', exclusive: true }
             ],
+
+            // 15 CONFETTIS + 2 EXCLUSIFS LUCKY BLOCK
             confetti: [
-                { id: 'c1', name: 'Sans Confetti', desc: 'Glaçage lisse.', cost: 0, bonus: 0, style: 'none' },
-                { id: 'c2', name: 'Cristaux de Glace', desc: 'Éclats givrés (+12$ / biscuit).', cost: 160, bonus: 12, style: 'crystals' },
-                { id: 'c3', name: 'Éclats Sucre d\'Orge', desc: 'Croquants rouges & blancs (+34$ / biscuit).', cost: 490, bonus: 34, style: 'candyshards' },
-                { id: 'c4', name: 'Billes Arc-en-Ciel', desc: 'Multicolores (+85$ / biscuit).', cost: 1450, bonus: 85, style: 'rainbow' },
-                { id: 'c5', name: 'Étoiles Dorées', desc: 'Brillantes (+210$ / biscuit).', cost: 4300, bonus: 210, style: 'stars' },
-                { id: 'c6', name: 'Feuilles d\'Or', desc: 'Paillettes précieuses (+510$ / biscuit).', cost: 12500, bonus: 510, style: 'goldleaf' },
-                { id: 'c7', name: 'Poussière de Diamant', desc: 'Scintillement animé (+1 250$ / biscuit).', cost: 36000, bonus: 1250, style: 'diamond' },
-                { id: 'c8', name: 'Joyaux Royaux', desc: 'Rubis & diamants (+3 100$ / biscuit).', cost: 105000, bonus: 3100, style: 'royaljewels' }
+                { id: 'c1', name: 'Sans Confetti', desc: 'Glaçage lisse de base.', cost: 0, bonus: 0, style: 'none' },
+                { id: 'c2', name: 'Sucre Neige', desc: 'Paillettes blanches (+9$ / biscuit).', cost: 120, bonus: 9, style: 'crystals' },
+                { id: 'c3', name: 'Cristaux de Glace', desc: 'Éclats bleus givrés (+22$ / biscuit).', cost: 340, bonus: 22, style: 'crystals' },
+                { id: 'c4', name: 'Éclats Sucre d\'Orge', desc: 'Croquants rouges & blancs (+50$ / biscuit).', cost: 880, bonus: 50, style: 'candyshards' },
+                { id: 'c5', name: 'Billes Arc-en-Ciel', desc: 'Multicolores (+105$ / biscuit).', cost: 2200, bonus: 105, style: 'rainbow' },
+                { id: 'c6', name: 'Cœurs Sucrés', desc: 'Roses et rouges (+215$ / biscuit).', cost: 5500, bonus: 215, style: 'rainbow' },
+                { id: 'c7', name: 'Flocons Miniatures', desc: 'Dentelle de sucre (+430$ / biscuit).', cost: 13800, bonus: 430, style: 'crystals' },
+                { id: 'c8', name: 'Perles Nacrés', desc: 'Reflets blancs (+850$ / biscuit).', cost: 34000, bonus: 850, style: 'stars' },
+                { id: 'c9', name: 'Étoiles Dorées', desc: 'Brillantes (+1 650$ / biscuit).', cost: 82000, bonus: 1650, style: 'stars' },
+                { id: 'c10', name: 'Pépites Caramel', desc: 'Croustillantes (+3 200$ / biscuit).', cost: 195000, bonus: 3200, style: 'goldleaf' },
+                { id: 'c11', name: 'Feuilles d\'Or', desc: 'Paillettes précieuses (+6 200$ / biscuit).', cost: 460000, bonus: 6200, style: 'goldleaf' },
+                { id: 'c12', name: 'Éclats d\'Émeraude', desc: 'Verts scintillants (+11 800$ / biscuit).', cost: 1100000, bonus: 11800, style: 'royaljewels' },
+                { id: 'c13', name: 'Poussière d\'Aurore', desc: 'Lueur boréale (+22 500$ / biscuit).', cost: 2600000, bonus: 22500, style: 'diamond' },
+                { id: 'c14', name: 'Poussière de Diamant', desc: 'Scintillement pur (+43 000$ / biscuit).', cost: 6100000, bonus: 43000, style: 'diamond' },
+                { id: 'c15', name: 'Joyaux Royaux', desc: 'Rubis & diamants (+82 000$ / biscuit).', cost: 14000000, bonus: 82000, style: 'royaljewels' },
+                { id: 'cx_meteor', name: '★ EXCLUSIF : Éclats de Météore', desc: 'Uniquement Lucky Block ! (+3 800$ / biscuit).', cost: 0, bonus: 3800, style: 'stars', exclusive: true },
+                { id: 'cx_infinity', name: '★ EXCLUSIF : Gemmes d\'Infini', desc: 'Uniquement Lucky Block ! (+17 500$ / biscuit).', cost: 0, bonus: 17500, style: 'royaljewels', exclusive: true }
             ],
-            packaging: [
-                { id: 'p1', name: 'Sachet Cristal', desc: 'Emballage transparent de base.', cost: 0, bonusMult: 1.0, boxColor: '#bae6fd', ribbonColor: '#0284c7' },
-                { id: 'p2', name: 'Boîte Bleu Roi & Or', desc: 'Élégante (+15% valeur commande).', cost: 320, bonusMult: 1.15, boxColor: '#1d4ed8', ribbonColor: '#fde047' },
-                { id: 'p3', name: 'Coffret Rouge Noël', desc: 'Velours rouge (+32% valeur commande).', cost: 980, bonusMult: 1.32, boxColor: '#dc2626', ribbonColor: '#ffffff' },
-                { id: 'p4', name: 'Écrin Émeraude', desc: 'Vert sapin (+55% valeur commande).', cost: 2900, bonusMult: 1.55, boxColor: '#15803d', ribbonColor: '#facc15' },
-                { id: 'p5', name: 'Coffret Aurore', desc: 'Reflets violets (+85% valeur commande).', cost: 8500, bonusMult: 1.85, boxColor: '#6b21a8', ribbonColor: '#2dd4bf' },
-                { id: 'p6', name: 'Boîte Or Massif', desc: 'Luxe du Palais (+125% valeur commande).', cost: 25000, bonusMult: 2.25, boxColor: '#f59e0b', ribbonColor: '#fef08a' },
-                { id: 'p7', name: 'Coffre Diamant Pur', desc: 'Prestige suprême (+180% valeur commande).', cost: 75000, bonusMult: 2.80, boxColor: '#e0f2fe', ribbonColor: '#38bdf8' }
+
+            // 15 CHAPEAUX + 2 EXCLUSIFS LUCKY BLOCK
+            hats: [
+                { id: 'h1', name: 'Toque Pâtissier', desc: 'La toque blanche classique du Palais.', cost: 0, bonus: 0, color: '#ffffff', trim: '#38bdf8', style: 'toque' },
+                { id: 'h2', name: 'Bonnet de Lutin', desc: 'Vert pomme avec grelot (+14$ / biscuit).', cost: 180, bonus: 14, color: '#22c55e', trim: '#fde047', style: 'elf' },
+                { id: 'h3', name: 'Bonnet Père Noël', desc: 'Rouge velours & pompon (+35$ / biscuit).', cost: 480, bonus: 35, color: '#ef4444', trim: '#ffffff', style: 'santa' },
+                { id: 'h4', name: 'Bonnet Bleu Polaire', desc: 'Doux et chaud (+80$ / biscuit).', cost: 1250, bonus: 80, color: '#0284c7', trim: '#bae6fd', style: 'santa' },
+                { id: 'h5', name: 'Chapeau Sucre d\'Orge', desc: 'Rayures festives (+175$ / biscuit).', cost: 3200, bonus: 175, color: '#ff4d6d', trim: '#ffffff', style: 'tophat' },
+                { id: 'h6', name: 'Haut-de-Forme Chocolat', desc: 'Chic et gourmand (+360$ / biscuit).', cost: 8000, bonus: 360, color: '#78350f', trim: '#f59e0b', style: 'tophat' },
+                { id: 'h7', name: 'Bois de Renne Dorés', desc: 'Magie du traîneau (+720$ / biscuit).', cost: 19500, bonus: 720, color: '#b45309', trim: '#fde047', style: 'antlers' },
+                { id: 'h8', name: 'Diadème de Glace', desc: 'Cristaux bleus (+1 400$ / biscuit).', cost: 47000, bonus: 1400, color: '#38bdf8', trim: '#e0f2fe', style: 'crown' },
+                { id: 'h9', name: 'Toque Étoilée', desc: 'Chef 5 étoiles (+2 750$ / biscuit).', cost: 112000, bonus: 2750, color: '#fef08a', trim: '#d97706', style: 'toque' },
+                { id: 'h10', name: 'Chapeau Sorcier des Neiges', desc: 'Étoiles d\'argent (+5 300$ / biscuit).', cost: 265000, bonus: 5300, color: '#4f46e5', trim: '#fde047', style: 'elf' },
+                { id: 'h11', name: 'Couronne d\'Émeraude', desc: 'Joyaux verts (+10 200$ / biscuit).', cost: 620000, bonus: 10200, color: '#10b981', trim: '#fef08a', style: 'crown' },
+                { id: 'h12', name: 'Couronne de Rubis', desc: 'Puissance royale (+19 500$ / biscuit).', cost: 1450000, bonus: 19500, color: '#e11d48', trim: '#fde047', style: 'crown' },
+                { id: 'h13', name: 'Couronne d\'Or 24K', desc: 'Or pur massif (+37 000$ / biscuit).', cost: 3400000, bonus: 37000, color: '#facc15', trim: '#ffffff', style: 'crown' },
+                { id: 'h14', name: 'Auréole Aurore Boréale', desc: 'Lumière céleste (+70 000$ / biscuit).', cost: 7800000, bonus: 70000, color: '#2dd4bf', trim: '#c084fc', style: 'halo' },
+                { id: 'h15', name: 'Couronne Diamant Suprême', desc: 'Le chapeau ultime (+135 000$ / biscuit).', cost: 18000000, bonus: 135000, color: '#e0f2fe', trim: '#38bdf8', style: 'crown' },
+                { id: 'hx_dragon', name: '★ EXCLUSIF : Casque Dragon Polaire', desc: 'Uniquement Lucky Block ! (+5 500$ / biscuit).', cost: 0, bonus: 5500, color: '#38bdf8', trim: '#fde047', style: 'crown', exclusive: true },
+                { id: 'hx_galaxy', name: '★ EXCLUSIF : Couronne Galactique', desc: 'Uniquement Lucky Block ! (+24 000$ / biscuit).', cost: 0, bonus: 24000, color: '#c084fc', trim: '#2dd4bf', style: 'halo', exclusive: true }
             ],
-            // AMÉLIORATIONS DIRECTES DU PRÉSENTOIR & CONVOYEUR CARRÉ
-            displayAndConveyor: [
-                { id: 'displayCapacity', name: 'Agrandir le Présentoir (12 → 36 boîtes)', desc: 'Ajoute +4 emplacements de boîtes sur le Présentoir devant les clients !', baseCost: 300, mult: 1.95, max: 6, icon: '🏪' },
-                { id: 'displayValueMult', name: 'Vitrine Dorée du Présentoir (+20%/niv)', desc: 'Augmente directement la valeur de vente de toutes les boîtes posées sur le Présentoir !', baseCost: 450, mult: 2.05, max: 10, icon: '💎' },
-                { id: 'displayAutoServe', name: 'Service Express du Présentoir', desc: 'Les clients récupèrent leurs boîtes sur le Présentoir quasi instantanément.', baseCost: 350, mult: 1.9, max: 8, icon: '⚡' },
-                { id: 'conveyorPlaces', name: 'Agrandir le Convoyeur Carré (24 → 48)', desc: 'Ajoute +4 places sur le convoyeur carré central !', baseCost: 400, mult: 2.0, max: 6, icon: '🟨' },
-                { id: 'conveyorSpeed', name: 'Vitesse du Convoyeur Carré', desc: 'Fait défiler les biscuits plus vite sur les 4 côtés du convoyeur carré.', baseCost: 320, mult: 1.9, max: 8, icon: '⏩' }
-            ],
-            // AMÉLIORATIONS TABLE TOUT-EN-UN & LUTINS
+
+            // 15 UPGRADES DISTINCTS (SANS ROULEAU)
             upgrades: [
-                { id: 'allInOneSpeed', name: 'Turbo Table Tout-en-Un (Rouleau→Confettis)', desc: 'Accélère simultanément le Rouleau, la Forme, le Four, le Glaçage et les Confettis !', baseCost: 220, mult: 1.85, max: 12, icon: '🔥' },
-                { id: 'prepSpeed', name: 'Serre & Pétrin Express (Étapes 1 & 2)', desc: 'Récolte la farine et pétrit la pâte ultra rapidement.', baseCost: 160, mult: 1.8, max: 10, icon: '🌾' },
-                { id: 'playerSpeed', name: 'Patins de Cristal (Vitesse Joueur)', desc: 'Déplace-toi à toute allure dans le Palais.', baseCost: 140, mult: 1.8, max: 10, icon: '⛸️' },
-                { id: 'playerCap', name: 'Plateau Royal XXL (Capacité Main)', desc: 'Transporte jusqu\'à 26 ingrédients ou biscuits d\'un coup.', baseCost: 180, mult: 1.85, max: 10, icon: '🎒' },
-                { id: 'magnet', name: 'Super Aimant à Pièces d\'Or', desc: 'Attire automatiquement toutes les pièces d\'or autour du Présentoir !', baseCost: 250, mult: 1.95, max: 8, icon: '🧲' },
-                { id: 'helperSpeed', name: 'Vitesse & Mains des Lutins', desc: 'Améliore tous les lutins engagés.', baseCost: 600, mult: 2.0, max: 8, icon: '🧝' }
+                { id: 'u_doughSpeed', name: '1. Pétrin Express', desc: 'Prépare la pâte plus rapidement sur la table 1.', baseCost: 120, mult: 1.85, max: 12, icon: '🥣' },
+                { id: 'u_cutterSpeed', name: '2. Emporte-Pièce Laser', desc: 'Découpe les 24 formes en un éclair sur la table 2.', baseCost: 145, mult: 1.85, max: 12, icon: '❄️' },
+                { id: 'u_ovenSpeed', name: '3. Four Polaire Haute Chaleur', desc: 'Cuit les biscuits plus vite dans le four 3.', baseCost: 175, mult: 1.85, max: 12, icon: '🔥' },
+                { id: 'u_glazeSpeed', name: '4. Nappeuse à Glace Rapide', desc: 'Applique le glaçage instantanément sur la table 4.', baseCost: 210, mult: 1.85, max: 12, icon: '🎨' },
+                { id: 'u_confettiSpeed', name: '5. Pluie de Confettis Auto', desc: 'Saupoudre les confettis en un clin d\'œil sur la table 5.', baseCost: 245, mult: 1.85, max: 12, icon: '✨' },
+                { id: 'u_playerSpeed', name: '6. Patins de Cristal (Vitesse)', desc: 'Ton bonhomme se déplace à toute allure dans le Palais.', baseCost: 130, mult: 1.8, max: 12, icon: '⛸️' },
+                { id: 'u_playerCap', name: '7. Plateau Royal XXL (Mains)', desc: 'Transporte jusqu\'à 30 ingrédients/biscuits à la fois.', baseCost: 170, mult: 1.85, max: 12, icon: '🎒' },
+                { id: 'u_displayCap', name: '8. Agrandir le Présentoir', desc: 'Ajoute +4 places de boîtes sur le Présentoir (jusqu\'à 36).', baseCost: 280, mult: 1.95, max: 6, icon: '🏪' },
+                { id: 'u_displayVal', name: '9. Vitrine Dorée Présentoir', desc: '+20% de valeur de vente par niveau sur le Présentoir !', baseCost: 420, mult: 2.0, max: 12, icon: '💎' },
+                { id: 'u_displayServe', name: '10. Service Express Présentoir', desc: 'Sert les boîtes du Présentoir aux clients quasi instantanément.', baseCost: 320, mult: 1.9, max: 10, icon: '⚡' },
+                { id: 'u_convCap', name: '11. Agrandir Convoyeur Carré', desc: 'Ajoute +4 emplacements sur le convoyeur carré central.', baseCost: 360, mult: 1.95, max: 6, icon: '🟨' },
+                { id: 'u_convSpeed', name: '12. Vitesse Convoyeur Carré', desc: 'Accélère la rotation des biscuits sur le convoyeur carré.', baseCost: 300, mult: 1.9, max: 10, icon: '⏩' },
+                { id: 'u_magnet', name: '13. Super Aimant à Pièces', desc: 'Attire automatiquement toutes les pièces d\'or à distance.', baseCost: 240, mult: 1.95, max: 10, icon: '🧲' },
+                { id: 'u_elfPower', name: '14. Boost Général des Lutins', desc: 'Augmente la vitesse de déplacement et les mains de tous les lutins.', baseCost: 550, mult: 2.0, max: 12, icon: '🧝' },
+                { id: 'u_royalTip', name: '15. Pourboires Royaux du Palais', desc: '+15% de bonus sur toutes les ventes de biscuits !', baseCost: 650, mult: 2.05, max: 12, icon: '🪙' }
             ],
-            staff: [
-                { id: 'elfPrep', name: 'Lutin Meunier & Pétrisseur (1→2)', desc: 'Récolte la farine et prépare la pâte automatiquement.', cost: 650, icon: '🌾' },
-                { id: 'elfStation', name: 'Lutin Maître Table Tout-en-Un', desc: 'Transforme la pâte jusqu\'au biscuit fini et le pose sur le convoyeur carré !', cost: 1800, icon: '🪄' },
-                { id: 'elfDisplay', name: 'Lutin du Présentoir (Convoyeur→Boîtes)', desc: 'Prend les biscuits finis sur le convoyeur carré et remplit le Présentoir !', cost: 3400, icon: '🏪' }
+
+            // 15 LUTINS RECRUTABLES (SANS ROULEAU)
+            elves: [
+                { id: 'e1', name: 'Lutin 1 : Pétrisseur Junior', desc: 'Prépare la pâte et la passe à la table Forme.', cost: 450, role: 'dough', color: '#0284c7' },
+                { id: 'e2', name: 'Lutin 2 : Découpeur d\'Étoiles', desc: 'Découpe les formes directement depuis la pâte.', cost: 750, role: 'cut', color: '#0ea5e9' },
+                { id: 'e3', name: 'Lutin 3 : Maître du Four', desc: 'Fait cuire les biscuits découpés au Four.', cost: 1200, role: 'bake', color: '#f97316' },
+                { id: 'e4', name: 'Lutin 4 : Artiste Glacier', desc: 'Glace les biscuits cuits sur la table Glace.', cost: 2000, role: 'glaze', color: '#ec4899' },
+                { id: 'e5', name: 'Lutin 5 : Finisseur Confettis', desc: 'Ajoute les confettis et pose les biscuits sur le Convoyeur Carré.', cost: 3200, role: 'confetti', color: '#a855f7' },
+                { id: 'e6', name: 'Lutin 6 : Porteur Présentoir', desc: 'Prend les biscuits sur le Convoyeur Carré et remplit le Présentoir.', cost: 5200, role: 'display', color: '#16a34a' },
+                { id: 'e7', name: 'Lutin 7 : Chef Pétrisseur Pro', desc: 'Deuxième pétrisseur ultra-rapide pour doubler la pâte.', cost: 8500, role: 'dough', color: '#0369a1' },
+                { id: 'e8', name: 'Lutin 8 : Sculpteur de Glace', desc: 'Deuxième découpeur de formes haute cadence.', cost: 15000, role: 'cut', color: '#2563eb' },
+                { id: 'e9', name: 'Lutin 9 : Gardien des Flammes', desc: 'Deuxième boulanger au Four Polaire.', cost: 26000, role: 'bake', color: '#dc2626' },
+                { id: 'e10', name: 'Lutin 10 : Peintre Royal', desc: 'Deuxième décorateur au Glaçage.', cost: 45000, role: 'glaze', color: '#db2777' },
+                { id: 'e11', name: 'Lutin 11 : Mage des Étoiles', desc: 'Deuxième finisseur Confettis vers Convoyeur Carré.', cost: 78000, role: 'confetti', color: '#7c3aed' },
+                { id: 'e12', name: 'Lutin 12 : Majordome du Présentoir', desc: 'Deuxième porteur vers le Présentoir Royal.', cost: 135000, role: 'display', color: '#15803d' },
+                { id: 'e13', name: 'Lutin 13 : Maître Mouleur Suprême', desc: 'Troisième découpeur de formes ultra-rapide.', cost: 240000, role: 'cut', color: '#4f46e5' },
+                { id: 'e14', name: 'Lutin 14 : Pyromancien du Four', desc: 'Troisième boulanger haute vitesse.', cost: 420000, role: 'bake', color: '#ea580c' },
+                { id: 'e15', name: 'Lutin 15 : Grand Archiduc Lutin', desc: 'Troisième porteur élite pour un Présentoir toujours plein !', cost: 750000, role: 'display', color: '#eab308' }
+            ],
+
+            // 15 DÉCORATIONS + 1 EXCLUSIF LUCKY BLOCK
+            decorations: [
+                { id: 'dec1', name: '1. Tapis Rouge Royal', desc: 'Déroule un tapis d\'accueil (+15$ / biscuit).', cost: 200, bonus: 15, icon: '🟥' },
+                { id: 'dec2', name: '2. Petit Sapin Enneigé', desc: 'Sapin décoré à l\'entrée (+35$ / biscuit).', cost: 520, bonus: 35, icon: '🎄' },
+                { id: 'dec3', name: '3. Bonhomme de Neige', desc: 'Avec écharpe bleue (+80$ / biscuit).', cost: 1350, bonus: 80, icon: '⛄' },
+                { id: 'dec4', name: '4. Sucre d\'Orge Géant', desc: 'Colonne sucrée brillante (+180$ / biscuit).', cost: 3400, bonus: 180, icon: '🍬' },
+                { id: 'dec5', name: '5. Tas de Cadeaux Royaux', desc: 'Paquets dorés au pied du sapin (+380$ / biscuit).', cost: 8500, bonus: 380, icon: '🎁' },
+                { id: 'dec6', name: '6. Lanterne de Cristal', desc: 'Lumière polaire chaleureuse (+780$ / biscuit).', cost: 21000, bonus: 780, icon: '🏮' },
+                { id: 'dec7', name: '7. Grand Sapin Illuminé', desc: 'Sapin géant étoilé (+1 600$ / biscuit).', cost: 52000, bonus: 1600, icon: '🌲' },
+                { id: 'dec8', name: '8. Statue de Renne en Glace', desc: 'Sculpture cristalline (+3 200$ / biscuit).', cost: 125000, bonus: 3200, icon: '🦌' },
+                { id: 'dec9', name: '9. Fontaine de Chocolat Chaud', desc: 'Cascade gourmande (+6 400$ / biscuit).', cost: 300000, bonus: 6400, icon: '⛲' },
+                { id: 'dec10', name: '10. Trône du Père Noël', desc: 'Velours rouge et or (+12 500$ / biscuit).', cost: 720000, bonus: 12500, icon: '🪑' },
+                { id: 'dec11', name: '11. Horloge Astronomique', desc: 'Compte les heures magiques (+24 000$ / biscuit).', cost: 1700000, bonus: 24000, icon: '🕰️' },
+                { id: 'dec12', name: '12. Lustre de Diamants', desc: 'Brille au plafond du Palais (+46 000$ / biscuit).', cost: 4000000, bonus: 46000, icon: '💠' },
+                { id: 'dec13', name: '13. Traîneau d\'Or Exposé', desc: 'Le traîneau royal en vitrine (+88 000$ / biscuit).', cost: 9200000, bonus: 88000, icon: '🛷' },
+                { id: 'dec14', name: '14. Cristal d\'Aurore Géant', desc: 'Énergie boréale pure (+165 000$ / biscuit).', cost: 21000000, bonus: 165000, icon: '🔮' },
+                { id: 'dec15', name: '15. Couronne Impériale du Pôle', desc: 'Le joyau suprême du Palais (+320 000$ / biscuit).', cost: 48000000, bonus: 320000, icon: '👑' },
+                { id: 'decx_tree', name: '★ EXCLUSIF : Arbre de Cristal Géant', desc: 'Uniquement Lucky Block ! (+12 000$ / biscuit).', cost: 0, bonus: 12000, icon: '💎', exclusive: true }
             ]
         };
 
-        // Segments de la roue Lucky Block (8 cases)
         const WHEEL_PRIZES = [
-            { label: 'Rouleau Supérieur Gratuit', type: 'upgradeRoller', color: '#0284c7', icon: '🪄' },
-            { label: '★ Rouleau EXCLUSIF !', type: 'exclusiveRoller', color: '#d97706', icon: '🌟' },
-            { label: 'Jackpot +2 500 $', type: 'cash', amount: 2500, color: '#16a34a', icon: '💰' },
-            { label: 'Rouleau Supérieur Gratuit', type: 'upgradeRoller', color: '#7c3aed', icon: '🪄' },
-            { label: '★ Rouleau EXCLUSIF !', type: 'exclusiveRoller', color: '#e11d48', icon: '👑' },
-            { label: 'Bonus +800 $', type: 'cash', amount: 800, color: '#0d9488', icon: '🪙' },
-            { label: 'Rouleau Supérieur Gratuit', type: 'upgradeRoller', color: '#2563eb', icon: '🪄' },
-            { label: 'Méga Jackpot +8 000 $', type: 'cash', amount: 8000, color: '#ca8a04', icon: '💎' }
+            { label: 'Pack 2 Exclusivités !', type: 'multiExclusive', count: 2, color: '#d97706', icon: '🌟' },
+            { label: 'Exclusif : Chapeau / Déco', type: 'exclusiveTheme', theme: 'hatOrDeco', color: '#7c3aed', icon: '👑' },
+            { label: 'Jackpot +3 000 $', type: 'cash', amount: 3000, color: '#16a34a', icon: '💰' },
+            { label: 'Exclusif : Pâte / Glace', type: 'exclusiveTheme', theme: 'doughOrIcing', color: '#0284c7', icon: '🎨' },
+            { label: 'MÉGA PACK 3 Exclusivités !', type: 'multiExclusive', count: 3, color: '#e11d48', icon: '🔥' },
+            { label: 'Exclusif : Forme / Confetti', type: 'exclusiveTheme', theme: 'shapeOrConfetti', color: '#0d9488', icon: '🍪' },
+            { label: 'Bonus +1 200 $', type: 'cash', amount: 1200, color: '#2563eb', icon: '🪙' },
+            { label: 'Méga Jackpot +10 000 $', type: 'cash', amount: 10000, color: '#ca8a04', icon: '💎' }
         ];
 
         // ============================================================
-        // 3. AUDIO SYNTHÉTISEUR (WEB AUDIO API)
+        // 3. AUDIO SYNTHÉTISEUR
         // ============================================================
         const sound = {
             ctx: null,
@@ -572,46 +662,43 @@
         };
 
         // ============================================================
-        // 4. SAUVEGARDE & ÉTAT DU MONDE 4
+        // 4. SAUVEGARDE & ÉTAT DU JEU
         // ============================================================
-        const SAVE_KEY = 'gingerbread_mart_4_save_v1';
+        const SAVE_KEY = 'gingerbread_mart_4_save_v3';
 
         const DEFAULT_STATE = {
             playerName: 'ChefPolaire',
             money: 120,
             perfectOrders: 0,
-            unlockedRollers: ['r1'],
-            selectedRoller: 'r1',
-            unlockedFlour: ['f1'],
-            selectedFlour: 'f1',
-            unlockedDough: ['d1'],
-            selectedDough: 'd1',
             unlockedShapes: ['s_gingerman'],
             selectedShape: 's_gingerman',
+            unlockedDough: ['d1'],
+            selectedDough: 'd1',
             unlockedIcing: ['i1'],
             selectedIcing: 'i1',
             unlockedConfetti: ['c1'],
             selectedConfetti: 'c1',
-            unlockedPackaging: ['p1'],
-            selectedPackaging: 'p1',
+            unlockedHats: ['h1'],
+            selectedHat: 'h1',
+            unlockedElves: [],
+            unlockedDecorations: [],
             luckySpinsDone: 0,
             levels: {
-                displayCapacity: 0,
-                displayValueMult: 0,
-                displayAutoServe: 1,
-                conveyorPlaces: 0,
-                conveyorSpeed: 1,
-                allInOneSpeed: 1,
-                prepSpeed: 1,
-                playerSpeed: 1,
-                playerCap: 1,
-                magnet: 1,
-                helperSpeed: 1
-            },
-            staff: {
-                elfPrep: false,
-                elfStation: false,
-                elfDisplay: false
+                u_doughSpeed: 1,
+                u_cutterSpeed: 1,
+                u_ovenSpeed: 1,
+                u_glazeSpeed: 1,
+                u_confettiSpeed: 1,
+                u_playerSpeed: 1,
+                u_playerCap: 1,
+                u_displayCap: 0,
+                u_displayVal: 0,
+                u_displayServe: 1,
+                u_convCap: 0,
+                u_convSpeed: 1,
+                u_magnet: 1,
+                u_elfPower: 1,
+                u_royalTip: 0
             }
         };
 
@@ -625,8 +712,7 @@
                     return {
                         ...DEFAULT_STATE,
                         ...parsed,
-                        levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) },
-                        staff: { ...DEFAULT_STATE.staff, ...(parsed.staff || {}) }
+                        levels: { ...DEFAULT_STATE.levels, ...(parsed.levels || {}) }
                     };
                 }
             } catch (e) {}
@@ -640,61 +726,50 @@
             } catch (e) {}
         }
 
-        function getRoller() { return CATALOG.rollers.find(r => r.id === state.selectedRoller) || CATALOG.rollers[0]; }
-        function getFlour() { return CATALOG.flour.find(f => f.id === state.selectedFlour) || CATALOG.flour[0]; }
-        function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
         function getShape() { return CATALOG.shapes.find(s => s.id === state.selectedShape) || CATALOG.shapes[0]; }
+        function getDough() { return CATALOG.dough.find(d => d.id === state.selectedDough) || CATALOG.dough[0]; }
         function getIcing() { return CATALOG.icing.find(i => i.id === state.selectedIcing) || CATALOG.icing[0]; }
         function getConfetti() { return CATALOG.confetti.find(c => c.id === state.selectedConfetti) || CATALOG.confetti[0]; }
-        function getPackaging() { return CATALOG.packaging.find(p => p.id === state.selectedPackaging) || CATALOG.packaging[0]; }
+        function getHat() { return CATALOG.hats.find(h => h.id === state.selectedHat) || CATALOG.hats[0]; }
+
+        function getDecorationsBonus() {
+            let sum = 0;
+            (state.unlockedDecorations || []).forEach(id => {
+                const d = CATALOG.decorations.find(x => x.id === id);
+                if (d) sum += d.bonus;
+            });
+            return sum;
+        }
 
         function getDisplayValueMultiplier() {
-            return 1 + (state.levels.displayValueMult || 0) * 0.20;
+            return (1 + (state.levels.u_displayVal || 0) * 0.20) * (1 + (state.levels.u_royalTip || 0) * 0.15);
         }
 
         function getCookieUnitValue() {
-            const base = 25 + getRoller().bonus + getFlour().bonus + getDough().bonus + getShape().bonus + getIcing().bonus + getConfetti().bonus;
-            return Math.round(base * getPackaging().bonusMult * getDisplayValueMultiplier());
+            const base = 25 + getShape().bonus + getDough().bonus + getIcing().bonus +
+                getConfetti().bonus + getHat().bonus + getDecorationsBonus();
+            return Math.round(base * getDisplayValueMultiplier());
         }
 
-        function getDisplayCapacity() {
-            return Math.min(36, 12 + (state.levels.displayCapacity || 0) * 4);
-        }
+        function getDisplayCapacity() { return Math.min(36, 12 + (state.levels.u_displayCap || 0) * 4); }
+        function getConveyorCapacity() { return Math.min(48, 24 + (state.levels.u_convCap || 0) * 4); }
+        function getConveyorSpeed() { return 0.14 + ((state.levels.u_convSpeed || 1) - 1) * 0.025; }
+        function getMaxHand() { return Math.min(30, 6 + ((state.levels.u_playerCap || 1) - 1) * 2); }
+        function getPlayerSpeed() { return 280 + ((state.levels.u_playerSpeed || 1) - 1) * 26; }
+        function getMagnetRadius() { return 95 + (state.levels.u_magnet || 1) * 60; }
 
-        function getConveyorCapacity() {
-            return Math.min(48, 24 + (state.levels.conveyorPlaces || 0) * 4);
-        }
-
-        function getConveyorSpeed() {
-            return 0.14 + ((state.levels.conveyorSpeed || 1) - 1) * 0.025;
-        }
-
-        function getMaxHand() {
-            return Math.min(26, 6 + ((state.levels.playerCap || 1) - 1) * 2);
-        }
-
-        function getPlayerSpeed() {
-            return 275 + ((state.levels.playerSpeed || 1) - 1) * 28;
-        }
-
-        function getMagnetRadius() {
-            return 95 + (state.levels.magnet || 0) * 65;
-        }
-
-        function getPrepTime() {
-            return Math.max(0.18, 0.95 / (getFlour().growMult * (1 + ((state.levels.prepSpeed || 1) - 1) * 0.35)));
-        }
-
-        // Temps par étape sur la TABLE TOUT-EN-UN (accéléré par le Rouleau équipé + amélioration Table !)
-        function getAllInOneStepTime() {
-            const rollerMult = getRoller().speedMult || 1.0;
-            const doughMult = getDough().speedMult || 1.0;
-            const upgMult = 1 + ((state.levels.allInOneSpeed || 1) - 1) * 0.35;
-            return Math.max(0.12, 0.72 / (rollerMult * Math.sqrt(doughMult) * upgMult));
+        function getStepTime(step) {
+            const dMult = getDough().speedMult || 1.0;
+            if (step === 'dough') return Math.max(0.14, 0.85 / (dMult * (1 + ((state.levels.u_doughSpeed || 1) - 1) * 0.32)));
+            if (step === 'cut') return Math.max(0.14, 0.80 / (1 + ((state.levels.u_cutterSpeed || 1) - 1) * 0.35));
+            if (step === 'bake') return Math.max(0.18, 1.05 / (1 + ((state.levels.u_ovenSpeed || 1) - 1) * 0.35));
+            if (step === 'glaze') return Math.max(0.14, 0.75 / (1 + ((state.levels.u_glazeSpeed || 1) - 1) * 0.35));
+            if (step === 'confetti') return Math.max(0.14, 0.70 / (1 + ((state.levels.u_confettiSpeed || 1) - 1) * 0.35));
+            return 0.8;
         }
 
         // ============================================================
-        // 5. ARCHITECTURE DU PALAIS DE CRISTAL (1160 x 700)
+        // 5. ARCHITECTURE DU PALAIS (5 TABLES DISTINCTES SANS ROULEAU + CONVOYEUR CARRÉ + PRÉSENTOIR)
         // ============================================================
         const WORLD_W = 1160;
         const WORLD_H = 700;
@@ -713,7 +788,6 @@
             canvas.height = Math.floor(h * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            // Garde une marge propre pour le HUD haut et bas
             const topMargin = 48;
             const bottomMargin = 44;
             const usableH = Math.max(200, h - topMargin - bottomMargin);
@@ -724,44 +798,42 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Zone marchable large et fluide (jusqu'à x=945 pour ramasser toute la monnaie sans blocage !)
-        const PLAYER_MIN_X = 195;
-        const PLAYER_MAX_X = 945;
+        const PLAYER_MIN_X = 165;
+        const PLAYER_MAX_X = 950;
         const PLAYER_MIN_Y = 120;
-        const PLAYER_MAX_Y = 615;
+        const PLAYER_MAX_Y = 620;
 
-        // Stations simplifiées (seulement 3 postes + Convoyeur Carré + Présentoir !)
+        // 5 TABLES DISTINCTES (Rouleau supprimé !) : 1. Pâte -> 2. Forme -> 3. Four -> 4. Glace -> 5. Confetti
         const stations = {
-            // 1. Serre à Farine
-            wheat: { x: 85, y: 145, w: 100, h: 105, zoneX: 222, zoneY: 197, zoneR: 44, progress: 0 },
-            // 2. Pétrin à Pâte
-            mixer: { x: 85, y: 295, w: 100, h: 105, zoneX: 222, zoneY: 347, zoneR: 44, progress: 0 },
-            // 3. MÉGA TABLE TOUT-EN-UN (Rouleau + Moulage + Four + Glaçage + Confettis sur LA MÊME TABLE !)
-            megaTable: {
-                x: 85, y: 445, w: 100, h: 155,
-                zoneX: 225, zoneY: 522, zoneR: 50,
-                progress: 0,
-                currentSubStep: ''
-            },
-            // 4. CONVOYEUR CARRÉ CENTRAL (Beaucoup plus beau et net !)
+            // Colonne gauche : 1. Pâte -> 2. Forme
+            doughTable:  { x: 68, y: 165, w: 86, h: 96, zoneX: 192, zoneY: 213, zoneR: 42, progress: 0 },
+            cutterTable: { x: 68, y: 365, w: 86, h: 96, zoneX: 192, zoneY: 413, zoneR: 42, progress: 0 },
+
+            // Rangée haute : 3. Four -> 4. Glace -> 5. Confetti
+            ovenTable:     { x: 315, y: 92, w: 94, h: 82, zoneX: 362, zoneY: 205, zoneR: 40, progress: 0 },
+            glazeTable:    { x: 470, y: 92, w: 94, h: 82, zoneX: 517, zoneY: 205, zoneR: 40, progress: 0 },
+            confettiTable: { x: 625, y: 92, w: 94, h: 82, zoneX: 672, zoneY: 205, zoneR: 40, progress: 0 },
+
+            // Centre : 6. Convoyeur Carré Royal
             conveyor: {
-                cx: 520, cy: 360,
-                halfW: 165, halfH: 135,
-                dropZoneX: 520, dropZoneY: 552, dropZoneR: 46,
+                cx: 515, cy: 405,
+                halfW: 155, halfH: 112,
+                dropZoneX: 515, dropZoneY: 568, dropZoneR: 44,
                 items: [],
                 beltPhase: 0
             },
-            // 5. PRÉSENTOIR ROYAL (Upgradable directement dans la boutique !)
+
+            // Droite : 7. Présentoir Royal
             display: {
-                x: 785, y: 245, w: 72, h: 245,
-                zoneX: 742, zoneY: 367, zoneR: 52,
+                x: 785, y: 255, w: 72, h: 245,
+                zoneX: 742, zoneY: 377, zoneR: 50,
                 boxes: []
             }
         };
 
         const player = {
-            x: 340,
-            y: 360,
+            x: 310,
+            y: 350,
             facing: 1,
             walkPhase: 0,
             holding: [],
@@ -787,27 +859,43 @@
         }
 
         function syncHelpers() {
-            const defs = [
-                { flag: 'elfPrep', role: 'prep', x: 235, y: 270 },
-                { flag: 'elfStation', role: 'station', x: 245, y: 520 },
-                { flag: 'elfDisplay', role: 'display', x: 715, y: 365 }
-            ];
-            defs.forEach(d => {
-                if (state.staff[d.flag] && !helpers.some(h => h.role === d.role)) {
-                    helpers.push({ role: d.role, x: d.x, y: d.y, holding: [], timer: 0, facing: 1, walkPhase: 0 });
+            (state.unlockedElves || []).forEach((elfId, idx) => {
+                if (!helpers.some(h => h.id === elfId)) {
+                    const def = CATALOG.elves.find(e => e.id === elfId);
+                    if (def) {
+                        helpers.push({
+                            id: elfId,
+                            role: def.role,
+                            color: def.color,
+                            x: 240 + (idx % 5) * 35,
+                            y: 260 + Math.floor(idx / 5) * 45,
+                            holding: [],
+                            timer: 0,
+                            facing: 1,
+                            walkPhase: 0
+                        });
+                    }
                 }
             });
         }
         syncHelpers();
 
         // ============================================================
-        // 6. CONTRÔLES (CLAVIER, SOURIS, TACTILE, JOYSTICK)
+        // 6. CONTRÔLES DU BONHOMME (CLAVIER, CLIC/GLISSER, JOYSTICK)
         // ============================================================
         const keys = {};
         let pointerTarget = null;
         let isPointerDown = false;
         const joyVec = { x: 0, y: 0 };
 
+        function selectShapeById(id) {
+            if (!state.unlockedShapes.includes(id)) return;
+            state.selectedShape = id;
+            sound.pop();
+            saveGame();
+            updateHUD();
+            renderQuickBars();
+        }
         function selectIcingById(id) {
             if (!state.unlockedIcing.includes(id)) return;
             state.selectedIcing = id;
@@ -819,14 +907,6 @@
         function selectConfettiById(id) {
             if (!state.unlockedConfetti.includes(id)) return;
             state.selectedConfetti = id;
-            sound.pop();
-            saveGame();
-            updateHUD();
-            renderQuickBars();
-        }
-        function selectPackagingById(id) {
-            if (!state.unlockedPackaging.includes(id)) return;
-            state.selectedPackaging = id;
             sound.pop();
             saveGame();
             updateHUD();
@@ -918,7 +998,7 @@
         joyZone.addEventListener('touchcancel', endJoy);
 
         // ============================================================
-        // 7. CONVOYEUR CARRÉ : POSITION SUR LE PÉRIMÈTRE RECTANGULAIRE
+        // 7. CONVOYEUR CARRÉ & UTILITAIRES
         // ============================================================
         function getSquareConveyorPoint(t) {
             const conv = stations.conveyor;
@@ -932,16 +1012,12 @@
             const top = conv.cy - conv.halfH;
             const bottom = conv.cy + conv.halfH;
 
-            // Haut : gauche -> droite
             if (dist <= w) return { x: left + dist, y: top };
             dist -= w;
-            // Droite : haut -> bas
             if (dist <= h) return { x: right, y: top + dist };
             dist -= h;
-            // Bas : droite -> gauche
             if (dist <= w) return { x: right - dist, y: bottom };
             dist -= w;
-            // Gauche : bas -> haut
             return { x: left, y: bottom - dist };
         }
 
@@ -972,7 +1048,7 @@
         }
 
         // ============================================================
-        // 8. BOUCLE LOGIQUE : TABLE TOUT-EN-UN + CONVOYEUR CARRÉ + PRÉSENTOIR
+        // 8. LOGIQUE DU BONHOMME SUR LES 5 TABLES + CONVOYEUR + PRÉSENTOIR
         // ============================================================
         function update(dt) {
             snowFlakes.forEach(sf => {
@@ -982,7 +1058,7 @@
                 if (sf.y > WORLD_H) { sf.y = -5; sf.x = Math.random() * WORLD_W; }
             });
 
-            // Déplacement joueur
+            // Déplacement libre du bonhomme
             let mx = joyVec.x;
             let my = joyVec.y;
             if (keys['arrowleft'] || keys['a'] || keys['q']) mx -= 1;
@@ -1022,107 +1098,101 @@
             const conv = stations.conveyor;
             const cSpd = getConveyorSpeed();
             conv.beltPhase = (conv.beltPhase + cSpd * dt) % 1;
-            conv.items.forEach(entry => {
-                entry.t = (entry.t + cSpd * dt) % 1;
-            });
+            conv.items.forEach(entry => { entry.t = (entry.t + cSpd * dt) % 1; });
 
             player.activeStation = null;
             const maxHand = getMaxHand();
             const convCap = getConveyorCapacity();
             const dispCap = getDisplayCapacity();
 
-            // 1. SERRE À FARINE
-            if (Math.hypot(player.x - stations.wheat.zoneX, player.y - stations.wheat.zoneY) <= stations.wheat.zoneR) {
-                player.activeStation = 'wheat';
+            // TABLE 1 : PÂTE
+            const stDough = stations.doughTable;
+            if (Math.hypot(player.x - stDough.zoneX, player.y - stDough.zoneY) <= stDough.zoneR) {
+                player.activeStation = 'doughTable';
                 if (player.holding.length < maxHand) {
-                    stations.wheat.progress += dt / getPrepTime();
-                    if (stations.wheat.progress >= 1) {
-                        stations.wheat.progress = 0;
-                        player.holding.push({ kind: 'flour', flour: getFlour() });
+                    stDough.progress += dt / getStepTime('dough');
+                    if (stDough.progress >= 1) {
+                        stDough.progress = 0;
+                        player.holding.push({ kind: 'dough', dough: getDough() });
                         sound.pop();
-                        spawnParticles(stations.wheat.x + 50, stations.wheat.y + 52, '#bae6fd', 5);
+                        spawnParticles(stDough.x + 43, stDough.y + 48, getDough().color, 5);
                         updateHUD();
                     }
-                } else stations.wheat.progress = 0;
-            } else stations.wheat.progress = Math.max(0, stations.wheat.progress - dt * 1.5);
+                } else stDough.progress = 0;
+            } else stDough.progress = Math.max(0, stDough.progress - dt * 1.5);
 
-            // 2. PÉTRIN À PÂTE
-            if (Math.hypot(player.x - stations.mixer.zoneX, player.y - stations.mixer.zoneY) <= stations.mixer.zoneR) {
-                player.activeStation = 'mixer';
-                const idx = player.holding.findIndex(i => i.kind === 'flour');
+            // TABLE 2 : FORME (EMPORTE-PIÈCE DIRECTEMENT SUR LA PÂTE)
+            const stCut = stations.cutterTable;
+            if (Math.hypot(player.x - stCut.zoneX, player.y - stCut.zoneY) <= stCut.zoneR) {
+                player.activeStation = 'cutterTable';
+                const idx = player.holding.findIndex(i => i.kind === 'dough');
                 if (idx !== -1) {
-                    stations.mixer.progress += dt / getPrepTime();
-                    if (stations.mixer.progress >= 1) {
-                        stations.mixer.progress = 0;
-                        player.holding[idx] = { kind: 'dough', flour: player.holding[idx].flour, dough: getDough() };
+                    stCut.progress += dt / getStepTime('cut');
+                    if (stCut.progress >= 1) {
+                        stCut.progress = 0;
+                        player.holding[idx].kind = 'raw';
+                        player.holding[idx].shape = getShape();
                         sound.pop();
-                        spawnParticles(stations.mixer.x + 50, stations.mixer.y + 52, getDough().color, 6);
+                        spawnParticles(stCut.x + 43, stCut.y + 48, '#bae6fd', 6);
                         updateHUD();
                     }
-                } else stations.mixer.progress = 0;
-            } else stations.mixer.progress = Math.max(0, stations.mixer.progress - dt * 1.5);
+                } else stCut.progress = 0;
+            } else stCut.progress = Math.max(0, stCut.progress - dt * 1.5);
 
-            // 3. MÉGA TABLE TOUT-EN-UN (Rouleau -> Forme -> Four -> Glaçage -> Confettis sur LA MÊME TABLE !)
-            const mt = stations.megaTable;
-            if (Math.hypot(player.x - mt.zoneX, player.y - mt.zoneY) <= mt.zoneR) {
-                player.activeStation = 'megaTable';
-                // Trouve l'objet en cours le moins avancé dans la main du joueur
-                const stepOrder = ['dough', 'rolled', 'raw', 'baked', 'glazed'];
-                let targetIdx = -1;
-                for (const kind of stepOrder) {
-                    const found = player.holding.findIndex(i => i.kind === kind);
-                    if (found !== -1) {
-                        targetIdx = found;
-                        break;
-                    }
-                }
-
-                if (targetIdx !== -1) {
-                    const item = player.holding[targetIdx];
-                    const labelsMap = {
-                        dough: '🪄 Rouleau...',
-                        rolled: '❄️ Moulage...',
-                        raw: '🔥 Cuisson Four...',
-                        baked: '🎨 Glaçage...',
-                        glazed: '✨ Confettis...'
-                    };
-                    mt.currentSubStep = labelsMap[item.kind] || '';
-                    mt.progress += dt / getAllInOneStepTime();
-
-                    if (mt.progress >= 1) {
-                        mt.progress = 0;
-                        if (item.kind === 'dough') {
-                            item.kind = 'rolled';
-                            sound.pop();
-                        } else if (item.kind === 'rolled') {
-                            item.kind = 'raw';
-                            item.shape = getShape();
-                            sound.pop();
-                        } else if (item.kind === 'raw') {
-                            item.kind = 'baked';
-                            sound.ding();
-                        } else if (item.kind === 'baked') {
-                            item.kind = 'glazed';
-                            item.icing = getIcing();
-                            sound.pop();
-                        } else if (item.kind === 'glazed') {
-                            item.kind = 'finished';
-                            item.confetti = getConfetti();
-                            sound.perfect();
-                            spawnParticles(mt.x + 50, mt.y + 75, '#fde047', 8);
-                        }
+            // TABLE 3 : FOUR POLAIRE
+            const stOven = stations.ovenTable;
+            if (Math.hypot(player.x - stOven.zoneX, player.y - stOven.zoneY) <= stOven.zoneR) {
+                player.activeStation = 'ovenTable';
+                const idx = player.holding.findIndex(i => i.kind === 'raw');
+                if (idx !== -1) {
+                    stOven.progress += dt / getStepTime('bake');
+                    if (stOven.progress >= 1) {
+                        stOven.progress = 0;
+                        player.holding[idx].kind = 'baked';
+                        sound.ding();
+                        spawnParticles(stOven.x + 47, stOven.y + 41, '#fb923c', 7);
                         updateHUD();
                     }
-                } else {
-                    mt.progress = 0;
-                    mt.currentSubStep = '';
-                }
-            } else {
-                mt.progress = Math.max(0, mt.progress - dt * 1.5);
-                if (mt.progress === 0) mt.currentSubStep = '';
-            }
+                } else stOven.progress = 0;
+            } else stOven.progress = Math.max(0, stOven.progress - dt * 1.5);
 
-            // 4. CONVOYEUR CARRÉ : Déposer les biscuits finis dans la zone sud du convoyeur
+            // TABLE 4 : GLACE (GLAÇAGE)
+            const stGlaze = stations.glazeTable;
+            if (Math.hypot(player.x - stGlaze.zoneX, player.y - stGlaze.zoneY) <= stGlaze.zoneR) {
+                player.activeStation = 'glazeTable';
+                const idx = player.holding.findIndex(i => i.kind === 'baked');
+                if (idx !== -1) {
+                    stGlaze.progress += dt / getStepTime('glaze');
+                    if (stGlaze.progress >= 1) {
+                        stGlaze.progress = 0;
+                        player.holding[idx].kind = 'glazed';
+                        player.holding[idx].icing = getIcing();
+                        sound.pop();
+                        spawnParticles(stGlaze.x + 47, stGlaze.y + 41, getIcing().color, 7);
+                        updateHUD();
+                    }
+                } else stGlaze.progress = 0;
+            } else stGlaze.progress = Math.max(0, stGlaze.progress - dt * 1.5);
+
+            // TABLE 5 : CONFETTI
+            const stConf = stations.confettiTable;
+            if (Math.hypot(player.x - stConf.zoneX, player.y - stConf.zoneY) <= stConf.zoneR) {
+                player.activeStation = 'confettiTable';
+                const idx = player.holding.findIndex(i => i.kind === 'glazed');
+                if (idx !== -1) {
+                    stConf.progress += dt / getStepTime('confetti');
+                    if (stConf.progress >= 1) {
+                        stConf.progress = 0;
+                        player.holding[idx].kind = 'finished';
+                        player.holding[idx].confetti = getConfetti();
+                        sound.perfect();
+                        spawnParticles(stConf.x + 47, stConf.y + 41, '#fde047', 8);
+                        updateHUD();
+                    }
+                } else stConf.progress = 0;
+            } else stConf.progress = Math.max(0, stConf.progress - dt * 1.5);
+
+            // 6. CONVOYEUR CARRÉ : Déposer les biscuits finis
             if (Math.hypot(player.x - conv.dropZoneX, player.y - conv.dropZoneY) <= conv.dropZoneR) {
                 player.activeStation = 'conveyor';
                 while (conv.items.length < convCap) {
@@ -1131,22 +1201,19 @@
                     const cookie = player.holding.splice(finIdx, 1)[0];
                     conv.items.push({ cookie, t: 0.62 });
                     sound.pop();
-                    spawnParticles(conv.dropZoneX, conv.dropZoneY - 25, '#fde047', 5);
+                    spawnParticles(conv.dropZoneX, conv.dropZoneY - 22, '#fde047', 5);
                     updateHUD();
                 }
             }
 
-            // Reprendre un biscuit qui tourne sur le convoyeur carré quand on s'approche du bord
+            // Reprendre un biscuit du convoyeur carré en approchant du bord
             if (player.activeStation !== 'conveyor' && player.holding.length < maxHand && conv.items.length > 0) {
                 let closestIdx = -1;
-                let minDist = 38;
+                let minDist = 36;
                 conv.items.forEach((entry, idx) => {
                     const pt = getSquareConveyorPoint(entry.t);
                     const d = Math.hypot(player.x - pt.x, player.y - pt.y);
-                    if (d < minDist) {
-                        minDist = d;
-                        closestIdx = idx;
-                    }
+                    if (d < minDist) { minDist = d; closestIdx = idx; }
                 });
                 if (closestIdx !== -1) {
                     const taken = conv.items.splice(closestIdx, 1)[0];
@@ -1156,7 +1223,7 @@
                 }
             }
 
-            // 5. PRÉSENTOIR ROYAL : Déposer les biscuits finis en boîtes pour les clients
+            // 7. PRÉSENTOIR ROYAL : Déposer les biscuits finis devant les clients
             const disp = stations.display;
             if (Math.hypot(player.x - disp.zoneX, player.y - disp.zoneY) <= disp.zoneR) {
                 player.activeStation = 'display';
@@ -1164,14 +1231,13 @@
                     const finIdx = player.holding.findIndex(i => i.kind === 'finished');
                     if (finIdx === -1) break;
                     const cookie = player.holding.splice(finIdx, 1)[0];
-                    disp.boxes.push({ cookie, pack: getPackaging() });
+                    disp.boxes.push({ cookie });
                     sound.pop();
                     spawnParticles(disp.x + 36, disp.y + 120, '#38bdf8', 5);
                     updateHUD();
                 }
             }
 
-            // Service automatique depuis le Présentoir vers les clients
             serveCustomersFromDisplay(dt);
             updateHelpers(dt);
             updateCustomers(dt);
@@ -1190,14 +1256,13 @@
 
             const targetCust = waitingCustomers[0];
             if (targetCust.receivedCookies.length < targetCust.desiredCount) {
-                // Cherche d'abord une boîte correspondant au client, sinon prend la première disponible
                 let boxIdx = disp.boxes.findIndex(b => doesCookieMatchCustomer(b.cookie, targetCust));
                 if (boxIdx === -1) boxIdx = 0;
 
                 const boxItem = disp.boxes.splice(boxIdx, 1)[0];
                 targetCust.receivedCookies.push(boxItem.cookie);
                 sound.pop();
-                serveCooldown = Math.max(0.05, 0.35 / (1 + ((state.levels.displayAutoServe || 1) - 1) * 0.45));
+                serveCooldown = Math.max(0.05, 0.35 / (1 + ((state.levels.u_displayServe || 1) - 1) * 0.45));
 
                 if (targetCust.receivedCookies.length >= targetCust.desiredCount) {
                     completeCustomerOrder(targetCust);
@@ -1208,20 +1273,19 @@
 
         function doesCookieMatchCustomer(cookie, cust) {
             if (!cookie || !cust) return false;
-            const icingMatch = cookie.icing && cookie.icing.id === cust.desiredIcing.id;
-            const shapeMatch = !cust.desiredShape || (cookie.shape && cookie.shape.id === cust.desiredShape.id);
-            return icingMatch && shapeMatch;
+            return cookie.icing && cookie.icing.id === cust.desiredIcing.id;
         }
 
         function completeCustomerOrder(cust) {
-            const pack = getPackaging();
             const dispMult = getDisplayValueMultiplier();
+            const hatBonus = getHat().bonus;
+            const decoBonus = getDecorationsBonus();
             let totalValue = 0;
             let matchedCount = 0;
 
             cust.receivedCookies.forEach(ck => {
-                const unit = 25 + (ck.roller?.bonus || 0) + (ck.flour?.bonus || 0) + (ck.dough?.bonus || 0) +
-                    (ck.shape?.bonus || 0) + (ck.icing?.bonus || 0) + (ck.confetti?.bonus || 0);
+                const unit = 25 + (ck.shape?.bonus || 0) + (ck.dough?.bonus || 0) +
+                    (ck.icing?.bonus || 0) + (ck.confetti?.bonus || 0) + hatBonus + decoBonus;
                 if (doesCookieMatchCustomer(ck, cust)) {
                     matchedCount++;
                     totalValue += unit * 1.6;
@@ -1230,13 +1294,12 @@
                 }
             });
 
-            totalValue = Math.max(12, Math.round(totalValue * pack.bonusMult * dispMult));
+            totalValue = Math.max(12, Math.round(totalValue * dispMult));
             const isPerfect = matchedCount === cust.desiredCount;
 
             if (isPerfect) state.perfectOrders += 1;
             saveGame(true);
 
-            // Pièces d'or déposées dans l'allée dégagée devant le Présentoir (faciles à ramasser !)
             moneyPiles.push({
                 x: 885 + (Math.random() - 0.5) * 35,
                 y: cust.y + (Math.random() - 0.5) * 20,
@@ -1255,99 +1318,105 @@
                 spawnText(865, cust.y - 24, `🍪 Vendu +${formatMoney(totalValue)}`, '#bae6fd');
             }
 
-            cust.carriedPack = pack;
             cust.state = 'leaving';
             updateHUD();
         }
 
         // ============================================================
-        // 9. LUTINS ASSISTANTS
+        // 9. LUTINS RECRUTÉS (15 LUTINS SPÉCIALISÉS SANS ROULEAU)
         // ============================================================
         function updateHelpers(dt) {
-            const spd = 210 + ((state.levels.helperSpeed || 1) - 1) * 35;
-            const hCap = Math.min(8, 2 + Math.floor(((state.levels.helperSpeed || 1) - 1) / 2));
+            const spd = 205 + ((state.levels.u_elfPower || 1) - 1) * 32;
             const convCap = getConveyorCapacity();
             const dispCap = getDisplayCapacity();
 
             helpers.forEach(h => {
                 let tx = h.x, ty = h.y;
 
-                if (h.role === 'prep') {
-                    if (h.holding.some(i => i.kind === 'flour')) {
-                        tx = stations.mixer.zoneX; ty = stations.mixer.zoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 16) {
-                            h.timer += dt;
-                            if (h.timer >= getPrepTime()) {
-                                h.timer = 0;
-                                h.holding = h.holding.map(i => i.kind === 'flour' ? { kind: 'dough', flour: i.flour, dough: getDough() } : i);
-                            }
-                        }
-                    } else if (h.holding.some(i => i.kind === 'dough')) {
-                        tx = stations.megaTable.zoneX - 15; ty = stations.megaTable.zoneY - 25;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 18 && player.holding.length < getMaxHand()) {
+                if (h.role === 'dough') {
+                    if (h.holding.length > 0) {
+                        tx = stations.cutterTable.zoneX; ty = stations.cutterTable.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 20 && player.holding.length < getMaxHand()) {
                             player.holding.push(h.holding.shift());
                             updateHUD();
                         }
                     } else {
-                        tx = stations.wheat.zoneX; ty = stations.wheat.zoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 16) {
+                        tx = stations.doughTable.zoneX; ty = stations.doughTable.zoneY;
+                        if (Math.hypot(h.x - tx, h.y - ty) < 18) {
                             h.timer += dt;
-                            if (h.timer >= getPrepTime() && h.holding.length < hCap) {
+                            if (h.timer >= getStepTime('dough')) {
                                 h.timer = 0;
-                                h.holding.push({ kind: 'flour', flour: getFlour() });
+                                h.holding.push({ kind: 'dough', dough: getDough() });
                             }
                         }
                     }
-                } else if (h.role === 'station') {
-                    // Lutin Table Tout-en-Un -> Convoyeur Carré
-                    if (h.holding.some(i => i.kind === 'finished')) {
-                        tx = stations.conveyor.dropZoneX; ty = stations.conveyor.dropZoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 18 && stations.conveyor.items.length < convCap) {
-                            const idx = h.holding.findIndex(i => i.kind === 'finished');
-                            stations.conveyor.items.push({ cookie: h.holding.splice(idx, 1)[0], t: 0.62 });
+                } else if (h.role === 'cut') {
+                    tx = stations.cutterTable.zoneX; ty = stations.cutterTable.zoneY;
+                    const idx = player.holding.findIndex(i => i.kind === 'dough');
+                    if (Math.hypot(h.x - tx, h.y - ty) < 22 && idx !== -1) {
+                        h.timer += dt;
+                        if (h.timer >= getStepTime('cut')) {
+                            h.timer = 0;
+                            player.holding[idx].kind = 'raw';
+                            player.holding[idx].shape = getShape();
+                            updateHUD();
                         }
-                    } else if (h.holding.length > 0) {
-                        tx = stations.megaTable.zoneX + 12; ty = stations.megaTable.zoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 18) {
-                            h.timer += dt;
-                            if (h.timer >= getAllInOneStepTime()) {
-                                h.timer = 0;
-                                const it = h.holding[0];
-                                const front = getFrontCustomer();
-                                if (it.kind === 'dough') it.kind = 'rolled';
-                                else if (it.kind === 'rolled') { it.kind = 'raw'; it.shape = front && front.desiredShape ? front.desiredShape : getShape(); }
-                                else if (it.kind === 'raw') it.kind = 'baked';
-                                else if (it.kind === 'baked') { it.kind = 'glazed'; it.icing = front ? front.desiredIcing : getIcing(); }
-                                else if (it.kind === 'glazed') { it.kind = 'finished'; it.confetti = getConfetti(); }
-                            }
+                    }
+                } else if (h.role === 'bake') {
+                    tx = stations.ovenTable.zoneX; ty = stations.ovenTable.zoneY;
+                    const idx = player.holding.findIndex(i => i.kind === 'raw');
+                    if (Math.hypot(h.x - tx, h.y - ty) < 22 && idx !== -1) {
+                        h.timer += dt;
+                        if (h.timer >= getStepTime('bake')) {
+                            h.timer = 0;
+                            player.holding[idx].kind = 'baked';
+                            updateHUD();
                         }
-                    } else {
-                        tx = stations.mixer.zoneX + 15; ty = stations.mixer.zoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 18) {
-                            h.timer += dt;
-                            if (h.timer >= getPrepTime() * 1.3) {
-                                h.timer = 0;
-                                h.holding.push({ kind: 'dough', flour: getFlour(), dough: getDough(), roller: getRoller() });
+                    }
+                } else if (h.role === 'glaze') {
+                    tx = stations.glazeTable.zoneX; ty = stations.glazeTable.zoneY;
+                    const idx = player.holding.findIndex(i => i.kind === 'baked');
+                    if (Math.hypot(h.x - tx, h.y - ty) < 22 && idx !== -1) {
+                        h.timer += dt;
+                        if (h.timer >= getStepTime('glaze')) {
+                            h.timer = 0;
+                            const front = getFrontCustomer();
+                            player.holding[idx].kind = 'glazed';
+                            player.holding[idx].icing = front ? front.desiredIcing : getIcing();
+                            updateHUD();
+                        }
+                    }
+                } else if (h.role === 'confetti') {
+                    tx = stations.confettiTable.zoneX; ty = stations.confettiTable.zoneY;
+                    const idx = player.holding.findIndex(i => i.kind === 'glazed');
+                    if (Math.hypot(h.x - tx, h.y - ty) < 22 && idx !== -1) {
+                        h.timer += dt;
+                        if (h.timer >= getStepTime('confetti')) {
+                            h.timer = 0;
+                            player.holding[idx].kind = 'finished';
+                            player.holding[idx].confetti = getConfetti();
+                            if (stations.conveyor.items.length < convCap) {
+                                stations.conveyor.items.push({ cookie: player.holding.splice(idx, 1)[0], t: 0.25 });
                             }
+                            updateHUD();
                         }
                     }
                 } else if (h.role === 'display') {
-                    // Lutin du Présentoir : prend sur le convoyeur carré -> remplit le Présentoir
                     if (h.holding.length > 0) {
                         tx = stations.display.zoneX; ty = stations.display.zoneY;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 18 && stations.display.boxes.length < dispCap) {
-                            stations.display.boxes.push({ cookie: h.holding.shift(), pack: getPackaging() });
+                        if (Math.hypot(h.x - tx, h.y - ty) < 20 && stations.display.boxes.length < dispCap) {
+                            stations.display.boxes.push({ cookie: h.holding.shift() });
                         }
                     } else if (stations.conveyor.items.length > 0 && stations.display.boxes.length < dispCap) {
                         const pt = getSquareConveyorPoint(stations.conveyor.items[0].t);
-                        tx = Math.min(725, pt.x + 22);
+                        tx = Math.min(725, pt.x + 20);
                         ty = pt.y;
-                        if (Math.hypot(h.x - tx, h.y - ty) < 28) {
+                        if (Math.hypot(h.x - tx, h.y - ty) < 30) {
                             const taken = stations.conveyor.items.shift();
                             if (taken) h.holding.push(taken.cookie);
                         }
                     } else {
-                        tx = 720; ty = 365;
+                        tx = 715; ty = 375;
                     }
                 }
 
@@ -1364,7 +1433,7 @@
         }
 
         // ============================================================
-        // 10. CLIENTS DU PALAIS & RAMASSAGE DE LA MONNAIE
+        // 10. CLIENTS & MONNAIE
         // ============================================================
         const PALACE_GUESTS = [
             { skin: '#ffdbac', coat: '#0284c7', hat: '#e0f2fe' },
@@ -1373,10 +1442,10 @@
             { skin: '#ffdbac', coat: '#059669', hat: '#bae6fd' }
         ];
 
-        function pickUnlocked(arrKey, catalogList) {
-            const list = state[arrKey];
+        function pickUnlockedIcing() {
+            const list = state.unlockedIcing;
             const id = list[Math.floor(Math.random() * list.length)];
-            return catalogList.find(x => x.id === id) || catalogList[0];
+            return CATALOG.icing.find(x => x.id === id) || CATALOG.icing[0];
         }
 
         let nextCustId = 1;
@@ -1391,10 +1460,9 @@
                     y: 120,
                     state: 'walkingIn',
                     desiredCount: count,
-                    desiredIcing: pickUnlocked('unlockedIcing', CATALOG.icing),
-                    desiredShape: state.unlockedShapes.length > 1 ? pickUnlocked('unlockedShapes', CATALOG.shapes) : null,
+                    desiredIcing: pickUnlockedIcing(),
+                    desiredShape: getShape(),
                     receivedCookies: [],
-                    carriedPack: null,
                     patience: 55,
                     maxPatience: 55,
                     style: st,
@@ -1446,7 +1514,7 @@
                 p.bob += dt * 4;
                 const d = Math.hypot(player.x - p.x, player.y - p.y);
                 if (d < magR && d > 10) {
-                    const pull = 310 + (state.levels.magnet || 0) * 80;
+                    const pull = 310 + (state.levels.u_magnet || 1) * 75;
                     p.x += ((player.x - p.x) / d) * pull * dt;
                     p.y += ((player.y - p.y) / d) * pull * dt;
                 }
@@ -1480,7 +1548,7 @@
         }
 
         // ============================================================
-        // 11. RENDU DU PALAIS DE CRISTAL (BEAU DÉCOR + CONVOYEUR CARRÉ)
+        // 11. RENDU DU PALAIS DE CRISTAL, DÉCORATIONS, 6 TABLES & BONHOMME
         // ============================================================
         function getIcingRenderColor(ic, nowMs) {
             if (!ic) return '#ffffff';
@@ -1492,21 +1560,7 @@
         }
 
         function drawCarriedItem(x, y, s, item, nowMs) {
-            if (item.kind === 'flour') {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.scale(s, s);
-                ctx.fillStyle = item.flour.color;
-                ctx.strokeStyle = '#0369a1';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.roundRect(-8, -9, 16, 18, 5);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = '#0284c7';
-                ctx.fillRect(-5, -3, 10, 5);
-                ctx.restore();
-            } else if (item.kind === 'dough' || item.kind === 'rolled') {
+            if (item.kind === 'dough') {
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.scale(s, s);
@@ -1514,8 +1568,7 @@
                 ctx.strokeStyle = item.dough.stroke;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                if (item.kind === 'dough') ctx.arc(0, 0, 9, 0, Math.PI * 2);
-                else ctx.ellipse(0, 0, 12, 6, 0, 0, Math.PI * 2);
+                ctx.arc(0, 0, 9, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
                 ctx.restore();
@@ -1524,6 +1577,7 @@
             }
         }
 
+        // DESSIN DISTINCT DE TOUTES LES 24 FORMES (AUCUN CARRÉ !)
         function drawCookieShape(x, y, s, cookie, nowMs) {
             ctx.save();
             ctx.translate(x, y);
@@ -1538,25 +1592,106 @@
 
             ctx.beginPath();
             if (shapeId === 's_tree') {
-                ctx.moveTo(0, -14); ctx.lineTo(12, 8); ctx.lineTo(-12, 8); ctx.closePath();
+                // Sapin de Noël
+                ctx.moveTo(0, -15); ctx.lineTo(13, 8); ctx.lineTo(-13, 8); ctx.closePath();
                 ctx.rect(-3, 8, 6, 5);
-            } else if (shapeId === 's_star') {
+            } else if (shapeId === 's_house') {
+                // Maison Pain d'Épices (toit pentu + cheminée)
+                ctx.moveTo(0, -15);
+                ctx.lineTo(13, -3);
+                ctx.lineTo(10, -3);
+                ctx.lineTo(10, 12);
+                ctx.lineTo(-10, 12);
+                ctx.lineTo(-10, -3);
+                ctx.lineTo(-13, -3);
+                ctx.closePath();
+            } else if (shapeId === 's_star' || shapeId === 's_comet') {
+                // Étoile / Comète
                 for (let i = 0; i < 10; i++) {
-                    const r = i % 2 === 0 ? 13 : 5.5;
+                    const r = i % 2 === 0 ? 14 : 5.5;
                     const a = (i * Math.PI) / 5 - Math.PI / 2;
                     if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
                     else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
                 }
                 ctx.closePath();
-            } else if (shapeId === 's_gift') {
-                ctx.roundRect(-10, -9, 20, 19, 3);
-            } else if (shapeId === 's_snowflake' || shapeId === 's_reindeer') {
-                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+            } else if (shapeId === 's_candycane') {
+                // Canne Sucre d'Orge courbée
+                ctx.arc(-1, -5, 7, Math.PI, 0, false);
+                ctx.lineTo(6, 12);
+                ctx.lineTo(1, 12);
+                ctx.lineTo(1, -5);
+                ctx.arc(-1, -5, 2, 0, Math.PI, true);
+                ctx.closePath();
+            } else if (shapeId === 's_snowflake') {
+                // Flocon à 6 branches
+                for (let i = 0; i < 6; i++) {
+                    const a = (i * Math.PI) / 3;
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(a) * 14, Math.sin(a) * 14);
+                }
+            } else if (shapeId === 's_heart') {
+                // Cœur
+                ctx.moveTo(0, 12);
+                ctx.bezierCurveTo(-15, 2, -14, -12, 0, -5);
+                ctx.bezierCurveTo(14, -12, 15, 2, 0, 12);
+            } else if (shapeId === 's_bell') {
+                // Cloche
+                ctx.moveTo(0, -14);
+                ctx.bezierCurveTo(10, -14, 10, 4, 14, 9);
+                ctx.lineTo(-14, 9);
+                ctx.bezierCurveTo(-10, 4, -10, -14, 0, -14);
+                ctx.arc(0, 10, 3, 0, Math.PI * 2);
+            } else if (shapeId === 's_stocking' || shapeId === 's_mitten') {
+                // Botte / Moufle
+                ctx.roundRect(-7, -13, 11, 20, 4);
+                ctx.roundRect(-7, 2, 17, 10, 5);
+            } else if (shapeId === 's_snowman' || shapeId === 's_bear' || shapeId === 's_penguin') {
+                // Bonhomme de neige / Ours / Pingouin
+                ctx.arc(0, -8, 6.5, 0, Math.PI * 2);
+                ctx.arc(0, 4, 9.5, 0, Math.PI * 2);
+            } else if (shapeId === 's_wreath') {
+                // Couronne ronde creuse
+                ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                ctx.moveTo(5, 0);
+                ctx.arc(0, 0, 5, 0, Math.PI * 2, true);
+            } else if (shapeId === 's_moon') {
+                // Croissant de Lune
+                ctx.arc(2, 0, 12, 0.35 * Math.PI, 1.65 * Math.PI);
+                ctx.arc(7, 0, 10, 1.5 * Math.PI, 0.5 * Math.PI, true);
+                ctx.closePath();
+            } else if (shapeId === 's_reindeer' || shapeId === 's_crown' || shapeId === 's_castle') {
+                // Couronne / Renne / Palais à pointes
+                ctx.moveTo(-12, 10);
+                ctx.lineTo(-13, -8);
+                ctx.lineTo(-6, 0);
+                ctx.lineTo(0, -12);
+                ctx.lineTo(6, 0);
+                ctx.lineTo(13, -8);
+                ctx.lineTo(12, 10);
+                ctx.closePath();
+            } else if (shapeId === 's_angel' || shapeId === 's_butterfly') {
+                // Ange / Papillon aux ailes déployées
+                ctx.ellipse(-6, -3, 7, 5, -0.4, 0, Math.PI * 2);
+                ctx.ellipse(6, -3, 7, 5, 0.4, 0, Math.PI * 2);
+                ctx.ellipse(-5, 5, 6, 4, 0.4, 0, Math.PI * 2);
+                ctx.ellipse(5, 5, 6, 4, -0.4, 0, Math.PI * 2);
             } else if (shapeId === 's_sleigh') {
-                ctx.moveTo(-13, -5); ctx.lineTo(-6, 7); ctx.lineTo(12, 7); ctx.lineTo(14, -4); ctx.closePath();
-            } else if (shapeId === 's_castle') {
-                ctx.moveTo(-12, 11); ctx.lineTo(-12, -9); ctx.lineTo(-4, -9); ctx.lineTo(-4, -14); ctx.lineTo(4, -14); ctx.lineTo(4, -9); ctx.lineTo(12, -9); ctx.lineTo(12, 11); ctx.closePath();
+                // Traîneau courbé
+                ctx.moveTo(-13, -4);
+                ctx.quadraticCurveTo(-5, 6, 12, -2);
+                ctx.lineTo(10, 8);
+                ctx.lineTo(-11, 8);
+                ctx.closePath();
+            } else if (shapeId === 'sx_dragon' || shapeId === 'sx_unicorn') {
+                // Créature Légendaire (Dragon / Licorne)
+                ctx.moveTo(0, -16);
+                ctx.lineTo(12, -4);
+                ctx.lineTo(7, 12);
+                ctx.lineTo(-7, 12);
+                ctx.lineTo(-12, -4);
+                ctx.closePath();
             } else {
+                // Bonhomme pain d'épices par défaut
                 ctx.arc(0, -10, 7, 0, Math.PI * 2);
                 ctx.roundRect(-9, -3, 18, 5, 2.5);
                 ctx.roundRect(-5, -3, 10, 11, 3);
@@ -1570,7 +1705,7 @@
                 const ic = cookie.icing || CATALOG.icing[0];
                 ctx.fillStyle = getIcingRenderColor(ic, nowMs);
                 ctx.beginPath();
-                ctx.arc(0, 0, 6, 0, Math.PI * 2);
+                ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -1589,8 +1724,46 @@
             ctx.restore();
         }
 
+        function drawPalaceDecorations(nowMs) {
+            const decos = state.unlockedDecorations || [];
+            // dec1 : Tapis Rouge Royal
+            if (decos.includes('dec1')) {
+                ctx.fillStyle = '#b91c1c';
+                ctx.strokeStyle = '#fde047';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(870, 230, 145, 310, 12);
+                ctx.fill();
+                ctx.stroke();
+            }
+            // Emplacements visuels des autres décorations dans le Palais
+            const spots = [
+                { id: 'dec2', x: 890, y: 125, icon: '🎄' },
+                { id: 'dec3', x: 960, y: 125, icon: '⛄' },
+                { id: 'dec4', x: 1030, y: 125, icon: '🍬' },
+                { id: 'dec5', x: 890, y: 585, icon: '🎁' },
+                { id: 'dec6', x: 960, y: 585, icon: '🏮' },
+                { id: 'dec7', x: 1030, y: 585, icon: '🌲' },
+                { id: 'dec8', x: 265, y: 112, icon: '🦌' },
+                { id: 'dec9', x: 755, y: 112, icon: '⛲' },
+                { id: 'dec10', x: 265, y: 615, icon: '🪑' },
+                { id: 'dec11', x: 350, y: 615, icon: '🕰️' },
+                { id: 'dec12', x: 680, y: 615, icon: '💠' },
+                { id: 'dec13', x: 760, y: 615, icon: '🛷' },
+                { id: 'dec14', x: 830, y: 185, icon: '🔮' },
+                { id: 'dec15', x: 830, y: 530, icon: '👑' },
+                { id: 'decx_tree', x: 515, y: 270, icon: '💎' }
+            ];
+            spots.forEach(sp => {
+                if (decos.includes(sp.id)) {
+                    ctx.font = '26px Fredoka, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(sp.icon, sp.x, sp.y + Math.sin(nowMs * 0.004 + sp.x) * 2);
+                }
+            });
+        }
+
         function drawCrystalPalace(nowMs) {
-            // Ciel polaire & aurore boréale douce
             const skyGrad = ctx.createLinearGradient(0, 0, WORLD_W, WORLD_H);
             skyGrad.addColorStop(0, '#071936');
             skyGrad.addColorStop(0.5, '#0f294a');
@@ -1598,66 +1771,34 @@
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, WORLD_W, WORLD_H);
 
-            // Ruban d'aurore boréale en arrière-plan
-            ctx.save();
-            ctx.globalAlpha = 0.22;
-            const auroraGrad = ctx.createLinearGradient(0, 20, WORLD_W, 90);
-            auroraGrad.addColorStop(0, '#2dd4bf');
-            auroraGrad.addColorStop(0.5, '#38bdf8');
-            auroraGrad.addColorStop(1, '#a855f7');
-            ctx.fillStyle = auroraGrad;
-            ctx.fillRect(20, 20, WORLD_W - 40, 48);
-            ctx.restore();
-
-            // Fond extérieur enneigé
             ctx.fillStyle = '#e0f2fe';
             ctx.beginPath();
             ctx.roundRect(30, 46, WORLD_W - 60, WORLD_H - 64, 24);
             ctx.fill();
 
-            // Carrelage royal : Parquet doré à gauche + Marbre bleu glacier à droite
             const tile = 48;
             for (let gx = 56; gx < 1096; gx += tile) {
                 for (let gy = 84; gy < 650; gy += tile) {
                     const isEven = ((gx + gy) / tile) % 2 === 0;
-                    if (gx < 850) {
-                        ctx.fillStyle = isEven ? '#78350f' : '#92400e';
-                    } else {
-                        ctx.fillStyle = isEven ? '#1e3a8a' : '#1d4ed8';
-                    }
+                    if (gx < 850) ctx.fillStyle = isEven ? '#78350f' : '#92400e';
+                    else ctx.fillStyle = isEven ? '#1e3a8a' : '#1d4ed8';
                     ctx.fillRect(gx, gy, tile, tile);
                 }
             }
 
-            // Colonnes de cristal décoratives
-            const pillars = [
-                { x: 295, y: 92 }, { x: 520, y: 92 }, { x: 745, y: 92 },
-                { x: 295, y: 632 }, { x: 745, y: 632 }
-            ];
-            pillars.forEach(p => {
-                ctx.fillStyle = '#bae6fd';
-                ctx.strokeStyle = '#0284c7';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 13, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            });
+            drawPalaceDecorations(nowMs);
 
-            // Murs glacés du Palais
             ctx.strokeStyle = '#0284c7';
             ctx.lineWidth = 14;
             ctx.beginPath();
             ctx.roundRect(48, 76, 1064, 584, 18);
             ctx.stroke();
 
-            // Bordure de neige sur le toit
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.roundRect(42, 48, 1076, 28, 12);
             ctx.fill();
 
-            // Guirlandes lumineuses scintillantes
             const bulbColors = ['#38bdf8', '#fde047', '#f472b6', '#34d399', '#ffffff'];
             const phase = Math.floor(nowMs / 320);
             for (let bx = 75; bx < 1085; bx += 42) {
@@ -1667,7 +1808,6 @@
                 ctx.fill();
             }
 
-            // Enseigne du Monde 4
             ctx.fillStyle = '#0f172a';
             ctx.strokeStyle = '#fde047';
             ctx.lineWidth = 2.5;
@@ -1719,85 +1859,63 @@
         }
 
         function drawStationsConveyorAndDisplay(nowMs) {
-            ['wheat', 'mixer', 'megaTable', 'display'].forEach(k => {
+            const stKeys = ['doughTable', 'cutterTable', 'ovenTable', 'glazeTable', 'confettiTable', 'display'];
+            stKeys.forEach(k => {
                 const st = stations[k];
                 drawZoneCircle(st.zoneX, st.zoneY, st.zoneR, player.activeStation === k);
             });
             const conv = stations.conveyor;
             drawZoneCircle(conv.dropZoneX, conv.dropZoneY, conv.dropZoneR, player.activeStation === 'conveyor');
 
-            // 1. SERRE À FARINE
-            const wh = stations.wheat;
-            ctx.fillStyle = '#0369a1'; ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.roundRect(wh.x, wh.y, wh.w, wh.h, 14); ctx.fill(); ctx.stroke();
-            const fl = getFlour();
-            for (let wx = 20; wx <= 80; wx += 20) {
-                ctx.strokeStyle = fl.stalkColor; ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.moveTo(wh.x + wx, wh.y + 82); ctx.lineTo(wh.x + wx + Math.sin(nowMs * 0.005 + wx) * 3, wh.y + 28); ctx.stroke();
-            }
-            drawProgressBar(wh.x + 50, wh.y - 22, 80, wh.progress, '#38bdf8');
-            drawLabel(wh.x + 50, wh.y - 7, '1. Serre Farine');
-
-            // 2. PÉTRIN À PÂTE
-            const mx = stations.mixer;
+            // 1. TABLE PÂTE
+            const dT = stations.doughTable;
             ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.roundRect(mx.x, mx.y, mx.w, mx.h, 14); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(mx.x + 50, mx.y + 52, 28, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = getDough().color; ctx.beginPath(); ctx.arc(mx.x + 50, mx.y + 52, 19, 0, Math.PI * 2); ctx.fill();
-            drawProgressBar(mx.x + 50, mx.y - 22, 80, mx.progress, '#fb923c');
-            drawLabel(mx.x + 50, mx.y - 7, '2. Pétrin Pâte');
+            ctx.beginPath(); ctx.roundRect(dT.x, dT.y, dT.w, dT.h, 13); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(dT.x + 43, dT.y + 48, 24, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = getDough().color; ctx.beginPath(); ctx.arc(dT.x + 43, dT.y + 48, 16, 0, Math.PI * 2); ctx.fill();
+            drawProgressBar(dT.x + 43, dT.y - 21, 74, dT.progress, '#fb923c');
+            drawLabel(dT.x + 43, dT.y - 6, '1. Pâte');
 
-            // 3. MÉGA TABLE TOUT-EN-UN (ROULEAU + FORME + FOUR + GLAÇAGE + CONFETTIS)
-            const mt = stations.megaTable;
-            const tableGrad = ctx.createLinearGradient(mt.x, mt.y, mt.x + mt.w, mt.y + mt.h);
-            tableGrad.addColorStop(0, '#4f46e5');
-            tableGrad.addColorStop(1, '#7e22ce');
-            ctx.fillStyle = tableGrad;
-            ctx.strokeStyle = '#fde047';
-            ctx.lineWidth = 3.5;
-            ctx.beginPath();
-            ctx.roundRect(mt.x, mt.y, mt.w, mt.h, 16);
-            ctx.fill();
-            ctx.stroke();
+            // 2. TABLE FORME (AFFICHE LA FORME ÉQUIPÉE)
+            const cT = stations.cutterTable;
+            ctx.fillStyle = '#0369a1'; ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(cT.x, cT.y, cT.w, cT.h, 13); ctx.fill(); ctx.stroke();
+            drawCookieShape(cT.x + 43, cT.y + 48, 1.35, { kind: 'raw', dough: getDough(), shape: getShape() }, nowMs);
+            drawProgressBar(cT.x + 43, cT.y - 21, 74, cT.progress, '#22d3ee');
+            drawLabel(cT.x + 43, cT.y - 6, '2. Forme');
 
-            // Icônes visuelles des 5 étapes réunies sur la même table
-            // Rouleau équipé
-            ctx.fillStyle = getRoller().color;
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.roundRect(mt.x + 18, mt.y + 20, 64, 12, 5);
-            ctx.fill();
-            ctx.stroke();
+            // 3. TABLE FOUR
+            const oT = stations.ovenTable;
+            ctx.fillStyle = '#9a3412'; ctx.strokeStyle = '#fdba74'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(oT.x, oT.y, oT.w, oT.h, 13); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.roundRect(oT.x + 16, oT.y + 20, 62, 42, 8); ctx.fill();
+            drawProgressBar(oT.x + 47, oT.y - 16, 76, oT.progress, '#ef4444');
+            drawLabel(oT.x + 47, oT.y + 12, '3. Four');
 
-            // Forme & Four miniature
-            ctx.fillStyle = '#ea580c';
-            ctx.beginPath();
-            ctx.roundRect(mt.x + 18, mt.y + 44, 64, 34, 8);
-            ctx.fill();
-            drawCookieShape(mt.x + 50, mt.y + 61, 0.85, { kind: 'raw', dough: getDough(), shape: getShape() }, nowMs);
-
-            // Glaçage & Confettis
+            // 4. TABLE GLACE
+            const gT = stations.glazeTable;
+            ctx.fillStyle = '#831843'; ctx.strokeStyle = '#f9a8d4'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(gT.x, gT.y, gT.w, gT.h, 13); ctx.fill(); ctx.stroke();
             ctx.fillStyle = getIcingRenderColor(getIcing(), nowMs);
-            ctx.beginPath();
-            ctx.arc(mt.x + 36, mt.y + 112, 14, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(gT.x + 47, gT.y + 44, 18, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            drawProgressBar(gT.x + 47, gT.y - 16, 76, gT.progress, '#f472b6');
+            drawLabel(gT.x + 47, gT.y + 12, '4. Glace');
 
-            ['#fde047', '#38bdf8', '#f472b6'].forEach((c, idx) => {
-                ctx.fillStyle = c;
+            // 5. TABLE CONFETTI
+            const cfT = stations.confettiTable;
+            ctx.fillStyle = '#581c87'; ctx.strokeStyle = '#d8b4fe'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(cfT.x, cfT.y, cfT.w, cfT.h, 13); ctx.fill(); ctx.stroke();
+            ['#fde047', '#38bdf8', '#f472b6', '#4ade80'].forEach((col, i) => {
+                ctx.fillStyle = col;
                 ctx.beginPath();
-                ctx.arc(mt.x + 65 + (idx % 2) * 10, mt.y + 105 + idx * 7, 4, 0, Math.PI * 2);
+                ctx.arc(cfT.x + 28 + i * 13, cfT.y + 44 + (i % 2) * 8, 5, 0, Math.PI * 2);
                 ctx.fill();
             });
+            drawProgressBar(cfT.x + 47, cfT.y - 16, 76, cfT.progress, '#c084fc');
+            drawLabel(cfT.x + 47, cfT.y + 12, '5. Confetti');
 
-            drawProgressBar(mt.x + 50, mt.y - 24, 92, mt.progress, '#fde047');
-            drawLabel(mt.x + 50, mt.y - 8, mt.currentSubStep || '3. Table Tout-en-Un (5 en 1)');
-
-            // ========================================================
-            // 4. GRAND CONVOYEUR CARRÉ CENTRAL (BEAU DESIGN CARRÉ)
-            // ========================================================
+            // 6. CONVOYEUR CARRÉ CENTRAL
             const convCap = getConveyorCapacity();
             const left = conv.cx - conv.halfW;
             const top = conv.cy - conv.halfH;
@@ -1805,71 +1923,53 @@
             const h = conv.halfH * 2;
 
             ctx.save();
-            // Bordure extérieure dorée du convoyeur carré
             ctx.lineJoin = 'round';
             ctx.beginPath();
-            ctx.roundRect(left, top, w, h, 22);
-            ctx.lineWidth = 44;
+            ctx.roundRect(left, top, w, h, 20);
+            ctx.lineWidth = 40;
             ctx.strokeStyle = '#0f172a';
             ctx.stroke();
 
-            // Rail lumineux animé
-            ctx.lineWidth = 40;
+            ctx.lineWidth = 36;
             ctx.strokeStyle = '#38bdf8';
             ctx.setLineDash([14, 16]);
             ctx.lineDashOffset = -conv.beltPhase * 300;
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Tapis roulant sombre intérieur
             ctx.beginPath();
-            ctx.roundRect(left, top, w, h, 22);
-            ctx.lineWidth = 28;
+            ctx.roundRect(left, top, w, h, 20);
+            ctx.lineWidth = 26;
             ctx.strokeStyle = '#1e293b';
             ctx.stroke();
 
-            // Emplacements sur le convoyeur carré
-            for (let s = 0; s < convCap; s++) {
-                const pt = getSquareConveyorPoint((s / convCap + conv.beltPhase) % 1);
-                ctx.fillStyle = 'rgba(186, 230, 253, 0.22)';
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Îlot central royal du convoyeur carré
             ctx.fillStyle = '#0f172a';
             ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2.5;
             ctx.beginPath();
-            ctx.roundRect(left + 32, top + 32, w - 64, h - 64, 16);
+            ctx.roundRect(left + 28, top + 28, w - 56, h - 56, 14);
             ctx.fill();
             ctx.stroke();
 
             ctx.fillStyle = '#fde047';
-            ctx.font = 'bold 14px Fredoka, sans-serif';
+            ctx.font = 'bold 13px Fredoka, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('🟨 CONVOYEUR CARRÉ ROYAL', conv.cx, conv.cy - 12);
+            ctx.fillText('🟨 CONVOYEUR CARRÉ', conv.cx, conv.cy - 8);
             ctx.fillStyle = '#bae6fd';
-            ctx.font = 'bold 12px Fredoka, sans-serif';
-            ctx.fillText(`Biscuits en circulation : ${conv.items.length} / ${convCap}`, conv.cx, conv.cy + 10);
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = 'bold 10px Fredoka, sans-serif';
-            ctx.fillText('Approche du bord pour reprendre un biscuit !', conv.cx, conv.cy + 28);
+            ctx.font = 'bold 11.5px Fredoka, sans-serif';
+            ctx.fillText(`Biscuits : ${conv.items.length} / ${convCap}`, conv.cx, conv.cy + 12);
             ctx.restore();
 
-            // Biscuits qui circulent sur le convoyeur carré
             conv.items.forEach(entry => {
                 const pt = getSquareConveyorPoint(entry.t);
                 drawCookieShape(pt.x, pt.y, 0.85, entry.cookie, nowMs);
             });
 
-            drawLabel(conv.dropZoneX, conv.dropZoneY + 52, '4. Poser sur Convoyeur Carré');
+            drawLabel(conv.dropZoneX, conv.dropZoneY + 48, '6. Poser sur Convoyeur Carré');
 
-            // ========================================================
-            // 5. PRÉSENTOIR ROYAL (UPGRADABLE DANS LA BOUTIQUE)
-            // ========================================================
+            // 7. PRÉSENTOIR ROYAL
             const disp = stations.display;
+            const dispCap = getDisplayCapacity();
             ctx.fillStyle = '#1e3a8a';
             ctx.strokeStyle = '#fde047';
             ctx.lineWidth = 3.5;
@@ -1878,77 +1978,118 @@
             ctx.fill();
             ctx.stroke();
 
-            // Vitre intérieure du présentoir
             ctx.fillStyle = 'rgba(186, 230, 253, 0.16)';
             ctx.beginPath();
             ctx.roundRect(disp.x + 6, disp.y + 6, disp.w - 12, disp.h - 12, 10);
             ctx.fill();
 
-            drawLabel(disp.x + disp.w * 0.5, disp.y - 12, `5. Présentoir (Niv.${(state.levels.displayCapacity || 0) + 1})`);
+            drawLabel(disp.x + disp.w * 0.5, disp.y - 12, `7. Présentoir (Niv.${(state.levels.u_displayCap || 0) + 1})`);
 
-            // Boîtes exposées sur le Présentoir (3 colonnes x 12 lignes max = 36)
             disp.boxes.forEach((box, idx) => {
                 const col = idx % 3;
                 const row = Math.floor(idx / 3);
                 const bx = disp.x + 8 + col * 20;
                 const by = disp.y + 10 + row * 19;
 
-                ctx.fillStyle = box.pack.boxColor;
-                ctx.strokeStyle = '#ffffff';
+                ctx.fillStyle = '#1d4ed8';
+                ctx.strokeStyle = '#fde047';
                 ctx.lineWidth = 1.2;
                 ctx.beginPath();
                 ctx.roundRect(bx, by, 17, 14, 3);
                 ctx.fill();
                 ctx.stroke();
-
-                ctx.fillStyle = box.pack.ribbonColor;
-                ctx.fillRect(bx + 7, by, 3, 14);
             });
 
             drawLabel(disp.x + disp.w * 0.5, disp.y + disp.h + 15, `Boîtes : ${disp.boxes.length}/${dispCap}`);
         }
 
-        function drawCharacter(ent, role, nowMs) {
+        function drawPlayerHat(hat) {
+            ctx.fillStyle = hat.color;
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 1.8;
+
+            if (hat.style === 'crown') {
+                ctx.beginPath();
+                ctx.moveTo(-11, -22); ctx.lineTo(-11, -34); ctx.lineTo(-5, -28);
+                ctx.lineTo(0, -36); ctx.lineTo(5, -28); ctx.lineTo(11, -34); ctx.lineTo(11, -22);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+            } else if (hat.style === 'elf' || hat.style === 'santa') {
+                ctx.beginPath();
+                ctx.moveTo(-11, -22); ctx.lineTo(11, -22); ctx.lineTo(2, -40);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = hat.trim;
+                ctx.beginPath(); ctx.arc(2, -41, 3.5, 0, Math.PI * 2); ctx.fill();
+            } else if (hat.style === 'tophat') {
+                ctx.fillRect(-13, -24, 26, 4);
+                ctx.fillRect(-8, -38, 16, 14);
+                ctx.fillStyle = hat.trim;
+                ctx.fillRect(-8, -28, 16, 3);
+            } else if (hat.style === 'halo') {
+                ctx.strokeStyle = hat.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(0, -33, 12, 4, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                // Toque
+                ctx.beginPath();
+                ctx.arc(0, -30, 10, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = hat.trim;
+                ctx.fillRect(-10, -26, 20, 4);
+            }
+        }
+
+        function drawCharacter(ent, isPlayer, nowMs) {
             ctx.save();
             const bob = Math.abs(Math.sin(ent.walkPhase)) * 4;
             ctx.translate(ent.x, ent.y - bob);
 
-            ctx.fillStyle = 'rgba(0,0,0,0.28)';
-            ctx.beginPath();
-            ctx.ellipse(0, 18 + bob, 15, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            if (role === 'prep') ctx.fillStyle = '#0284c7';
-            else if (role === 'station') ctx.fillStyle = '#7c3aed';
-            else if (role === 'display') ctx.fillStyle = '#16a34a';
-            else ctx.fillStyle = '#c67d3b';
-
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.roundRect(-13, -6, 26, 24, 10);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, -14, 13, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Couronne / Toque
-            if (role === 'player') {
-                ctx.fillStyle = '#ffffff';
+            // Halo lumineux sous ton bonhomme pour toujours le repérer facilement
+            if (isPlayer) {
+                ctx.strokeStyle = '#fde047';
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.arc(0, -29, 10, 0, Math.PI * 2);
+                ctx.ellipse(0, 18 + bob, 22, 9, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = 'rgba(0,0,0,0.32)';
+            ctx.beginPath();
+            ctx.ellipse(0, 18 + bob, 16, 6.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = isPlayer ? '#d97706' : (ent.color || '#0284c7');
+            ctx.strokeStyle = isPlayer ? '#ffffff' : '#0f172a';
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.roundRect(-14, -7, 28, 26, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, -15, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            if (isPlayer) {
+                drawPlayerHat(getHat());
+
+                // Badge "TOI" au-dessus du bonhomme
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.beginPath();
+                ctx.roundRect(-16, -54, 32, 13, 5);
                 ctx.fill();
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(-10, -26, 20, 5);
+                ctx.fillStyle = '#fde047';
+                ctx.font = 'bold 9px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('TOI', 0, -45);
             } else {
                 ctx.fillStyle = '#fde047';
                 ctx.beginPath();
-                ctx.moveTo(-10, -22);
-                ctx.lineTo(10, -22);
-                ctx.lineTo(0, -38);
+                ctx.moveTo(-10, -22); ctx.lineTo(10, -22); ctx.lineTo(0, -38);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -2018,22 +2159,13 @@
                     ctx.fillStyle = '#0f172a';
                     ctx.font = 'bold 10.5px Fredoka, sans-serif';
                     ctx.textAlign = 'left';
-                    const shapeIcon = c.desiredShape ? c.desiredShape.icon : '🍪';
-                    ctx.fillText(`${shapeIcon} ${c.receivedCookies.length}/${c.desiredCount}`, -18, -43);
+                    ctx.fillText(`🍪 ${c.receivedCookies.length}/${c.desiredCount}`, -18, -43);
 
                     const ratio = c.patience / c.maxPatience;
                     ctx.fillStyle = '#e2e8f0';
                     ctx.fillRect(-40, -35, 80, 4);
                     ctx.fillStyle = ratio > 0.35 ? '#22c55e' : '#ef4444';
                     ctx.fillRect(-40, -35, 80 * ratio, 4);
-                } else if (c.carriedPack) {
-                    ctx.fillStyle = c.carriedPack.boxColor;
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.roundRect(-24, -10, 18, 16, 4);
-                    ctx.fill();
-                    ctx.stroke();
                 }
 
                 ctx.restore();
@@ -2086,21 +2218,21 @@
         }
 
         // ============================================================
-        // 12. HUD, BARRES RAPIDES, BOUTIQUE & ROUE LUCKY BLOCK
+        // 12. HUD, BARRES RAPIDES & LUCKY BLOCK
         // ============================================================
         const elMoney = document.getElementById('hudMoney');
         const elPrice = document.getElementById('hudPrice');
         const elRollerName = document.getElementById('hudRollerName');
         const elShopBal = document.getElementById('shopBalance');
-        const elShopRollerBadge = document.getElementById('shopRollerBadge');
-        const elShopDisplayBadge = document.getElementById('shopDisplayBadge');
+        const elShopHatBadge = document.getElementById('shopHatBadge');
+        const elShopDecoBadge = document.getElementById('shopDecoBadge');
         const elConveyorCount = document.getElementById('hudConveyorCount');
         const elOrdersList = document.getElementById('hudOrdersList');
         const elOrderSwatch = document.getElementById('hudOrderSwatch');
         const elHandSummary = document.getElementById('hudHandSummary');
+        const shapeQuickBar = document.getElementById('shapeQuickBar');
         const glazeQuickBar = document.getElementById('glazeQuickBar');
         const confettiQuickBar = document.getElementById('confettiQuickBar');
-        const packQuickBar = document.getElementById('packQuickBar');
 
         function formatMoney(n) { return Math.round(n).toLocaleString('fr-FR') + ' $'; }
 
@@ -2109,10 +2241,23 @@
             if (item.mode === 'aurora') return 'linear-gradient(135deg,#00f5d4,#00bbf9,#9b5de5)';
             if (item.mode === 'gold24k') return 'linear-gradient(135deg,#fff200,#f59e0b,#ffd700)';
             if (item.mode === 'diamond') return 'linear-gradient(135deg,#e0f2fe,#38bdf8,#ffffff)';
-            return item.color || item.boxColor || '#ffffff';
+            return item.color || '#ffffff';
         }
 
         function renderQuickBars() {
+            shapeQuickBar.innerHTML = '';
+            state.unlockedShapes.forEach(id => {
+                const sh = CATALOG.shapes.find(s => s.id === id);
+                if (!sh) return;
+                const active = state.selectedShape === sh.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-slate-900 font-bold text-[10px] flex items-center gap-1 cursor-pointer bg-emerald-50 text-emerald-950`;
+                btn.textContent = `${sh.icon} ${sh.name.replace('★ EXCLUSIF : ', '★ ').split(' ')[0]}`;
+                btn.addEventListener('click', () => { sound.init(); selectShapeById(sh.id); });
+                shapeQuickBar.appendChild(btn);
+            });
+
             glazeQuickBar.innerHTML = '';
             state.unlockedIcing.forEach((id, idx) => {
                 const ic = CATALOG.icing.find(i => i.id === id);
@@ -2138,35 +2283,22 @@
                 btn.addEventListener('click', () => { sound.init(); selectConfettiById(cf.id); });
                 confettiQuickBar.appendChild(btn);
             });
-
-            packQuickBar.innerHTML = '';
-            state.unlockedPackaging.forEach(id => {
-                const pk = CATALOG.packaging.find(p => p.id === id);
-                if (!pk) return;
-                const active = state.selectedPackaging === pk.id;
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = `quick-pill ${active ? 'active' : ''} shrink-0 px-2 py-0.5 rounded-lg border border-slate-900 font-bold text-[10px] cursor-pointer bg-emerald-50 text-emerald-950`;
-                btn.textContent = pk.name.split(' ')[0];
-                btn.addEventListener('click', () => { sound.init(); selectPackagingById(pk.id); });
-                packQuickBar.appendChild(btn);
-            });
         }
 
         function updateHUD() {
-            const roller = getRoller();
+            const shape = getShape();
+            const hat = getHat();
             elMoney.textContent = formatMoney(state.money);
             elShopBal.textContent = formatMoney(state.money);
             elPrice.textContent = formatMoney(getCookieUnitValue());
-            elRollerName.textContent = roller.name.replace('★ EXCLUSIF : ', '★ ');
-            elShopRollerBadge.textContent = roller.name;
-            elShopDisplayBadge.textContent = `Niv. ${(state.levels.displayCapacity || 0) + 1} (${getDisplayCapacity()} boîtes • x${getDisplayValueMultiplier().toFixed(2)})`;
+            elRollerName.textContent = `${shape.icon} ${shape.name.replace('★ EXCLUSIF : ', '★ ').split(' ')[0]} • ${hat.name.split(' ')[0]}`;
+            elShopHatBadge.textContent = hat.name;
+            elShopDecoBadge.textContent = `${(state.unlockedDecorations || []).length}/16`;
             elConveyorCount.textContent = `${stations.conveyor.items.length}/${getConveyorCapacity()}`;
 
             const front = getFrontCustomer();
             if (front) {
-                const shName = front.desiredShape ? front.desiredShape.name.split(' ')[0] : 'Biscuit';
-                elOrdersList.textContent = `${front.desiredCount}x ${shName} • ${front.desiredIcing.name}`;
+                elOrdersList.textContent = `${front.desiredCount}x ${front.desiredIcing.name}`;
                 elOrderSwatch.style.background = getSwatchBackground(front.desiredIcing);
             } else {
                 elOrdersList.textContent = 'Prêt pour le client';
@@ -2176,7 +2308,7 @@
             if (player.holding.length === 0) {
                 elHandSummary.textContent = `Vide (0/${getMaxHand()})`;
             } else {
-                const labels = { flour: 'Farine', dough: 'Pâte', rolled: 'Roulée', raw: 'Forme', baked: 'Cuit', glazed: 'Glacé', finished: 'Prêt' };
+                const labels = { dough: 'Pâte', raw: 'Forme', baked: 'Cuit', glazed: 'Glacé', finished: 'Prêt' };
                 const counts = {};
                 player.holding.forEach(i => { counts[labels[i.kind]] = (counts[labels[i.kind]] || 0) + 1; });
                 const str = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ');
@@ -2185,12 +2317,12 @@
         }
 
         // ============================================================
-        // 13. SYSTÈME DE LUCKY BLOCK (ROUE DE LA FORTUNE)
+        // 13. ROUE LUCKY BLOCK
         // ============================================================
         let currentTab = 'lucky';
         let wheelAngle = 0;
         let isSpinningWheel = false;
-        let lastLuckyResultText = "Achète un Lucky Block et tourne la roue pour débloquer des Rouleaux gratuits ou EXCLUSIFS !";
+        let lastLuckyResultText = "Tourne la roue Lucky Block pour gagner des exclusivités dans TOUS les thèmes (Formes, Pâtes, Glaces, Confettis, Chapeaux, Décorations) !";
 
         function getLuckyBlockCost() {
             return Math.round(350 * Math.pow(1.45, state.luckySpinsDone || 0));
@@ -2206,8 +2338,6 @@
             const sliceAngle = (Math.PI * 2) / WHEEL_PRIZES.length;
 
             wctx.clearRect(0, 0, size, size);
-
-            // Cadre doré
             wctx.fillStyle = '#fde047';
             wctx.beginPath();
             wctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
@@ -2220,7 +2350,6 @@
             WHEEL_PRIZES.forEach((seg, i) => {
                 const startA = i * sliceAngle;
                 const endA = startA + sliceAngle;
-
                 wctx.beginPath();
                 wctx.moveTo(0, 0);
                 wctx.arc(0, 0, radius, startA, endA);
@@ -2231,7 +2360,6 @@
                 wctx.lineWidth = 2;
                 wctx.stroke();
 
-                // Texte & Icône du segment
                 wctx.save();
                 wctx.rotate(startA + sliceAngle / 2);
                 wctx.textAlign = 'right';
@@ -2240,10 +2368,8 @@
                 wctx.fillText(`${seg.icon} ${seg.label.slice(0, 17)}`, radius - 14, 4);
                 wctx.restore();
             });
-
             wctx.restore();
 
-            // Centre de la roue
             wctx.fillStyle = '#0f172a';
             wctx.strokeStyle = '#fde047';
             wctx.lineWidth = 4;
@@ -2257,7 +2383,6 @@
             wctx.textAlign = 'center';
             wctx.fillText('🎲', cx, cy + 6);
 
-            // Flèche indicatrice en haut
             wctx.fillStyle = '#ef4444';
             wctx.strokeStyle = '#ffffff';
             wctx.lineWidth = 2;
@@ -2283,10 +2408,8 @@
             const btnSpin = document.getElementById('btnSpinLucky');
             if (btnSpin) btnSpin.disabled = true;
 
-            // Choix du segment gagnant
             const chosenIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
             const sliceAngle = (Math.PI * 2) / WHEEL_PRIZES.length;
-            // La flèche est en haut (-PI / 2)
             const targetAngle = -Math.PI / 2 - (chosenIndex + 0.5) * sliceAngle;
             const extraSpins = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
             const startAngle = wheelAngle;
@@ -2299,7 +2422,6 @@
             function animateWheel(now) {
                 const elapsed = now - startTime;
                 const t = Math.min(1, elapsed / duration);
-                // Easing cubic out
                 const ease = 1 - Math.pow(1 - t, 3);
                 wheelAngle = startAngle + (finalAngle - startAngle) * ease;
 
@@ -2309,8 +2431,7 @@
                     sound.tick();
                 }
 
-                const wc = document.getElementById('luckyWheelCanvas');
-                drawLuckyWheelCanvas(wc);
+                drawLuckyWheelCanvas(document.getElementById('luckyWheelCanvas'));
 
                 if (t < 1) {
                     requestAnimationFrame(animateWheel);
@@ -2324,30 +2445,53 @@
 
         function applyWheelReward(prize) {
             sound.perfect();
-            if (prize.type === 'exclusiveRoller') {
-                const lockedExclusives = CATALOG.rollers.filter(r => r.exclusive && !state.unlockedRollers.includes(r.id));
-                if (lockedExclusives.length > 0) {
-                    const won = lockedExclusives[Math.floor(Math.random() * lockedExclusives.length)];
-                    state.unlockedRollers.push(won.id);
-                    state.selectedRoller = won.id;
-                    lastLuckyResultText = `🎉 INCROYABLE ! Tu as débloqué le rouleau exclusif : ${won.name} !`;
-                } else {
-                    const bonusCash = 15000;
-                    state.money += bonusCash;
-                    lastLuckyResultText = `👑 Tous les rouleaux exclusifs sont déjà débloqués ! Jackpot de ${formatMoney(bonusCash)} !`;
+
+            // Liste complète des objets exclusifs de TOUS les thèmes (sans rouleau)
+            const allExclusivesPool = [
+                ...CATALOG.shapes.filter(s => s.exclusive).map(item => ({ item, arrKey: 'unlockedShapes', selKey: 'selectedShape', themeName: 'Forme' })),
+                ...CATALOG.dough.filter(d => d.exclusive).map(item => ({ item, arrKey: 'unlockedDough', selKey: 'selectedDough', themeName: 'Pâte' })),
+                ...CATALOG.icing.filter(i => i.exclusive).map(item => ({ item, arrKey: 'unlockedIcing', selKey: 'selectedIcing', themeName: 'Glace' })),
+                ...CATALOG.confetti.filter(c => c.exclusive).map(item => ({ item, arrKey: 'unlockedConfetti', selKey: 'selectedConfetti', themeName: 'Confetti' })),
+                ...CATALOG.hats.filter(h => h.exclusive).map(item => ({ item, arrKey: 'unlockedHats', selKey: 'selectedHat', themeName: 'Chapeau' })),
+                ...CATALOG.decorations.filter(d => d.exclusive).map(item => ({ item, arrKey: 'unlockedDecorations', selKey: null, themeName: 'Décoration' }))
+            ];
+
+            function unlockRandomExclusiveFromPool(subset) {
+                const locked = subset.filter(entry => !(state[entry.arrKey] || []).includes(entry.item.id));
+                if (locked.length === 0) return null;
+                const chosen = locked[Math.floor(Math.random() * locked.length)];
+                state[chosen.arrKey].push(chosen.item.id);
+                if (chosen.selKey) state[chosen.selKey] = chosen.item.id;
+                return `${chosen.themeName} : ${chosen.item.name.replace('★ EXCLUSIF : ', '')}`;
+            }
+
+            if (prize.type === 'multiExclusive') {
+                const wonNames = [];
+                for (let k = 0; k < (prize.count || 2); k++) {
+                    const res = unlockRandomExclusiveFromPool(allExclusivesPool);
+                    if (res) wonNames.push(res);
                 }
-            } else if (prize.type === 'upgradeRoller') {
-                const lockedStandard = CATALOG.rollers.filter(r => !r.exclusive && !state.unlockedRollers.includes(r.id));
-                if (lockedStandard.length > 0) {
-                    // Débloque le prochain meilleur rouleau standard gratuitement !
-                    const won = lockedStandard[0];
-                    state.unlockedRollers.push(won.id);
-                    state.selectedRoller = won.id;
-                    lastLuckyResultText = `🪄 GRATUIT ! Tu as gagné et équipé : ${won.name} (sans payer ${formatMoney(won.cost)}) !`;
+                if (wonNames.length > 0) {
+                    lastLuckyResultText = `🎉 MULTI-EXCLUSIVITÉ (${wonNames.length}) : ${wonNames.join(' + ')} !`;
                 } else {
-                    const bonusCash = 6000;
-                    state.money += bonusCash;
-                    lastLuckyResultText = `✨ Tous les rouleaux standards sont débloqués ! Bonus de ${formatMoney(bonusCash)} !`;
+                    state.money += 25000;
+                    lastLuckyResultText = `👑 Toutes les exclusivités des 6 thèmes sont débloquées ! Jackpot de 25 000 $ !`;
+                }
+            } else if (prize.type === 'exclusiveTheme') {
+                let subset = allExclusivesPool;
+                if (prize.theme === 'hatOrDeco') {
+                    subset = allExclusivesPool.filter(e => e.arrKey === 'unlockedHats' || e.arrKey === 'unlockedDecorations');
+                } else if (prize.theme === 'doughOrIcing') {
+                    subset = allExclusivesPool.filter(e => e.arrKey === 'unlockedDough' || e.arrKey === 'unlockedIcing');
+                } else if (prize.theme === 'shapeOrConfetti') {
+                    subset = allExclusivesPool.filter(e => e.arrKey === 'unlockedShapes' || e.arrKey === 'unlockedConfetti');
+                }
+                const won = unlockRandomExclusiveFromPool(subset) || unlockRandomExclusiveFromPool(allExclusivesPool);
+                if (won) {
+                    lastLuckyResultText = `🌟 EXCLUSIVITÉ DÉBLOQUÉE : ${won} !`;
+                } else {
+                    state.money += 18000;
+                    lastLuckyResultText = `👑 Toutes les exclusivités sont déjà débloquées ! Bonus de 18 000 $ !`;
                 }
             } else {
                 state.money += prize.amount;
@@ -2359,7 +2503,7 @@
         }
 
         // ============================================================
-        // 14. RENDU DE LA BOUTIQUE (LUCKY BLOCKS, ROULEAUX, PRÉSENTOIR...)
+        // 14. RENDU DE LA BOUTIQUE
         // ============================================================
         const shopModal = document.getElementById('shopModal');
         const shopBody = document.getElementById('shopBody');
@@ -2396,11 +2540,9 @@
             updateHUD();
             renderQuickBars();
 
-            // ONGLET 1 : LUCKY BLOCKS (ROUE DE LA CHANCE)
             if (currentTab === 'lucky') {
                 const cost = getLuckyBlockCost();
                 const canSpin = !isSpinningWheel && state.money >= cost;
-
                 const wrap = document.createElement('div');
                 wrap.className = 'flex flex-col lg:flex-row items-center justify-center gap-6 py-2';
                 wrap.innerHTML = `
@@ -2412,19 +2554,11 @@
                             <span class="text-3xl">🎲</span>
                             <div>
                                 <h3 class="text-lg font-bold text-slate-950">Lucky Block Royal</h3>
-                                <p class="text-xs text-slate-600">Tourne la roue pour débloquer gratuitement les meilleurs Rouleaux et des <strong>Rouleaux Exclusifs</strong> introuvables en boutique !</p>
+                                <p class="text-xs text-slate-600">Tourne la roue pour débloquer jusqu'à <strong>3 Exclusivités d'un coup</strong> dans tous les thèmes !</p>
                             </div>
                         </div>
                         <div class="bg-sky-100 border border-sky-300 rounded-xl p-3 text-xs font-bold text-sky-950">
                             ${lastLuckyResultText}
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px]">
-                            <div class="bg-amber-100 p-2 rounded-lg border border-amber-300 font-bold text-amber-950">
-                                ★ 4 Rouleaux Exclusifs à gagner
-                            </div>
-                            <div class="bg-emerald-100 p-2 rounded-lg border border-emerald-300 font-bold text-emerald-950">
-                                🪄 Rouleaux Gratuits sans payer
-                            </div>
                         </div>
                         <button id="btnSpinLucky" ${!canSpin ? 'disabled' : ''} class="btn-gold w-full py-3 rounded-xl font-bold text-amber-950 text-sm cursor-pointer">
                             🎲 Ouvrir un Lucky Block • ${formatMoney(cost)}
@@ -2432,39 +2566,45 @@
                     </div>
                 `;
                 shopBody.appendChild(wrap);
-
-                const wc = document.getElementById('luckyWheelCanvas');
-                drawLuckyWheelCanvas(wc);
-
+                drawLuckyWheelCanvas(document.getElementById('luckyWheelCanvas'));
                 const btnSpin = document.getElementById('btnSpinLucky');
-                if (btnSpin && canSpin) {
-                    btnSpin.addEventListener('click', spinLuckyWheel);
-                }
+                if (btnSpin && canSpin) btnSpin.addEventListener('click', spinLuckyWheel);
                 return;
             }
 
-            // GRILLE STANDARD POUR LES AUTRES ONGLETS
             const grid = document.createElement('div');
             grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3';
             shopBody.appendChild(grid);
 
-            if (currentTab === 'rollers') {
-                CATALOG.rollers.forEach((item, idx) => {
-                    const unlocked = state.unlockedRollers.includes(item.id);
-                    const equipped = state.selectedRoller === item.id;
+            const equipTabs = {
+                shapes: { list: CATALOG.shapes, unlockedKey: 'unlockedShapes', selectedKey: 'selectedShape', icon: '🍪' },
+                dough: { list: CATALOG.dough, unlockedKey: 'unlockedDough', selectedKey: 'selectedDough', icon: '🥣' },
+                icing: { list: CATALOG.icing, unlockedKey: 'unlockedIcing', selectedKey: 'selectedIcing', icon: '🎨' },
+                confetti: { list: CATALOG.confetti, unlockedKey: 'unlockedConfetti', selectedKey: 'selectedConfetti', icon: '✨' },
+                hats: { list: CATALOG.hats, unlockedKey: 'unlockedHats', selectedKey: 'selectedHat', icon: '👑' }
+            };
+
+            if (equipTabs[currentTab]) {
+                const cfg = equipTabs[currentTab];
+                cfg.list.forEach((item, idx) => {
+                    const unlocked = state[cfg.unlockedKey].includes(item.id);
+                    const equipped = state[cfg.selectedKey] === item.id;
                     const canBuy = !unlocked && !item.exclusive && state.money >= item.cost;
 
                     const card = document.createElement('div');
                     card.className = `${item.exclusive ? 'exclusive-card' : 'snow-card'} rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${equipped ? 'ring-4 ring-yellow-400' : ''}`;
+                    const swatch = item.color ? `<span class="inline-block w-4 h-4 rounded-full border border-slate-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>` : '';
+                    const displayIcon = item.icon ? item.icon : (item.exclusive ? '🌟' : cfg.icon);
+
                     card.innerHTML = `
                         <div class="flex items-start gap-2">
-                            <span class="text-2xl">${item.exclusive ? '🌟' : '🪄'}</span>
+                            <span class="text-2xl">${displayIcon}</span>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1">
-                                    <span class="font-bold text-xs sm:text-sm truncate">${item.name}</span>
-                                    <span class="w-4 h-4 rounded-full border border-slate-900 shrink-0" style="background:${item.color}"></span>
+                                    <span class="font-bold text-xs sm:text-sm truncate">${item.exclusive ? item.name : '#' + (idx + 1) + ' ' + item.name}</span>
+                                    ${swatch}
                                 </div>
-                                <p class="text-[11px] text-slate-700 mt-1">${item.desc}</p>
+                                <p class="text-[11px] text-slate-600 mt-1">${item.desc}</p>
                             </div>
                         </div>
                         <button ${(!unlocked && !canBuy) ? 'disabled' : ''} class="${equipped ? 'bg-amber-400 text-amber-950' : (unlocked ? 'bg-sky-200 hover:bg-sky-300 text-sky-950' : 'btn-emerald text-white')} w-full py-1.5 rounded-xl font-bold text-xs cursor-pointer">
@@ -2474,65 +2614,8 @@
                     const btn = card.querySelector('button');
                     if (unlocked || canBuy) {
                         btn.addEventListener('click', () => {
-                            if (!unlocked) {
-                                state.money -= item.cost;
-                                state.unlockedRollers.push(item.id);
-                                sound.upgrade();
-                            } else sound.pop();
-                            state.selectedRoller = item.id;
-                            saveGame(true);
-                            renderShop();
-                        });
-                    }
-                    grid.appendChild(card);
-                });
-                return;
-            }
-
-            const recipeTabs = {
-                flour: { list: CATALOG.flour, unlockedKey: 'unlockedFlour', selectedKey: 'selectedFlour', icon: '🌾' },
-                dough: { list: CATALOG.dough, unlockedKey: 'unlockedDough', selectedKey: 'selectedDough', icon: '🥣' },
-                shapes: { list: CATALOG.shapes, unlockedKey: 'unlockedShapes', selectedKey: 'selectedShape', icon: null },
-                icing: { list: CATALOG.icing, unlockedKey: 'unlockedIcing', selectedKey: 'selectedIcing', icon: '🎨' },
-                confetti: { list: CATALOG.confetti, unlockedKey: 'unlockedConfetti', selectedKey: 'selectedConfetti', icon: '✨' },
-                packaging: { list: CATALOG.packaging, unlockedKey: 'unlockedPackaging', selectedKey: 'selectedPackaging', icon: '🎁' }
-            };
-
-            if (recipeTabs[currentTab]) {
-                const cfg = recipeTabs[currentTab];
-                cfg.list.forEach((item, idx) => {
-                    const unlocked = state[cfg.unlockedKey].includes(item.id);
-                    const equipped = state[cfg.selectedKey] === item.id;
-                    const canBuy = !unlocked && state.money >= item.cost;
-
-                    const card = document.createElement('div');
-                    card.className = `snow-card rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${equipped ? 'ring-4 ring-yellow-400' : ''}`;
-                    const swatchColor = item.color || item.boxColor;
-                    const swatch = swatchColor ? `<span class="inline-block w-4 h-4 rounded-full border border-slate-900 shrink-0" style="background:${getSwatchBackground(item)}"></span>` : '';
-
-                    card.innerHTML = `
-                        <div class="flex items-start gap-2">
-                            <span class="text-2xl">${item.icon || cfg.icon}</span>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span class="font-bold text-xs sm:text-sm truncate">#${idx + 1} ${item.name}</span>
-                                    ${swatch}
-                                </div>
-                                <p class="text-[11px] text-slate-600 mt-1">${item.desc}</p>
-                            </div>
-                        </div>
-                        <button ${(!unlocked && !canBuy) ? 'disabled' : ''} class="${equipped ? 'bg-amber-400 text-amber-950' : (unlocked ? 'bg-sky-200 hover:bg-sky-300 text-sky-950' : 'btn-emerald text-white')} w-full py-1.5 rounded-xl font-bold text-xs cursor-pointer">
-                            ${equipped ? '✓ Équipé' : (unlocked ? 'Sélectionner' : `Acheter • ${formatMoney(item.cost)}`)}
-                        </button>
-                    `;
-                    const btn = card.querySelector('button');
-                    if (unlocked || canBuy) {
-                        btn.addEventListener('click', () => {
-                            if (!unlocked) {
-                                state.money -= item.cost;
-                                state[cfg.unlockedKey].push(item.id);
-                                sound.upgrade();
-                            } else sound.pop();
+                            if (!unlocked) { state.money -= item.cost; state[cfg.unlockedKey].push(item.id); sound.upgrade(); }
+                            else sound.pop();
                             state[cfg.selectedKey] = item.id;
                             saveGame(true);
                             renderShop();
@@ -2543,12 +2626,11 @@
                 return;
             }
 
-            if (currentTab === 'display' || currentTab === 'upgrades') {
-                const list = currentTab === 'display' ? CATALOG.displayAndConveyor : CATALOG.upgrades;
-                list.forEach(up => {
+            if (currentTab === 'upgrades') {
+                CATALOG.upgrades.forEach(up => {
                     const lvl = state.levels[up.id] || 0;
                     const isMax = lvl >= up.max;
-                    const zeroBased = ['displayCapacity', 'displayValueMult', 'conveyorPlaces', 'magnet'].includes(up.id);
+                    const zeroBased = ['u_displayCap', 'u_displayVal', 'u_convCap'].includes(up.id);
                     const exp = zeroBased ? lvl : Math.max(0, lvl - 1);
                     const cost = Math.round(up.baseCost * Math.pow(up.mult, exp));
                     const canBuy = !isMax && state.money >= cost;
@@ -2582,45 +2664,80 @@
                     }
                     grid.appendChild(card);
                 });
+                return;
+            }
 
-                // Ajoute les lutins assistants dans l'onglet upgrades
-                if (currentTab === 'upgrades') {
-                    CATALOG.staff.forEach(st => {
-                        const owned = !!state.staff[st.id];
-                        const canBuy = !owned && state.money >= st.cost;
-                        const card = document.createElement('div');
-                        card.className = `snow-card rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${owned ? 'ring-4 ring-emerald-500' : ''}`;
-                        card.innerHTML = `
-                            <div class="flex items-start gap-2">
-                                <span class="text-2xl">${st.icon}</span>
-                                <div>
-                                    <div class="font-bold text-xs sm:text-sm">${st.name}</div>
-                                    <p class="text-[11px] text-slate-600 mt-1">${st.desc}</p>
-                                </div>
+            if (currentTab === 'elves') {
+                CATALOG.elves.forEach(elf => {
+                    const owned = (state.unlockedElves || []).includes(elf.id);
+                    const canBuy = !owned && state.money >= elf.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `snow-card rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${owned ? 'ring-4 ring-emerald-500' : ''}`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2">
+                            <span class="text-2xl">🧝</span>
+                            <div class="flex-1">
+                                <div class="font-bold text-xs sm:text-sm">${elf.name}</div>
+                                <p class="text-[11px] text-slate-600 mt-1">${elf.desc}</p>
                             </div>
-                            <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-emerald w-full py-1.5 rounded-xl text-white font-bold text-xs cursor-pointer">
-                                ${owned ? '✓ Lutin Actif' : `Recruter • ${formatMoney(st.cost)}`}
-                            </button>
-                        `;
-                        const btn = card.querySelector('button');
-                        if (canBuy) {
-                            btn.addEventListener('click', () => {
-                                state.money -= st.cost;
-                                state.staff[st.id] = true;
-                                syncHelpers();
-                                sound.upgrade();
-                                saveGame(true);
-                                renderShop();
-                            });
-                        }
-                        grid.appendChild(card);
-                    });
-                }
+                        </div>
+                        <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-emerald w-full py-1.5 rounded-xl text-white font-bold text-xs cursor-pointer">
+                            ${owned ? '✓ Lutin Actif' : `Recruter • ${formatMoney(elf.cost)}`}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= elf.cost;
+                            state.unlockedElves.push(elf.id);
+                            syncHelpers();
+                            sound.upgrade();
+                            saveGame(true);
+                            renderShop();
+                        });
+                    }
+                    grid.appendChild(card);
+                });
+                return;
+            }
+
+            if (currentTab === 'decorations') {
+                CATALOG.decorations.forEach(dec => {
+                    const owned = (state.unlockedDecorations || []).includes(dec.id);
+                    const canBuy = !owned && !dec.exclusive && state.money >= dec.cost;
+
+                    const card = document.createElement('div');
+                    card.className = `${dec.exclusive ? 'exclusive-card' : 'snow-card'} rounded-2xl p-3 text-slate-900 flex flex-col justify-between gap-2 ${owned ? 'ring-4 ring-amber-400' : ''}`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2">
+                            <span class="text-2xl">${dec.icon}</span>
+                            <div class="flex-1">
+                                <div class="font-bold text-xs sm:text-sm">${dec.name}</div>
+                                <p class="text-[11px] text-slate-600 mt-1">${dec.desc}</p>
+                            </div>
+                        </div>
+                        <button ${(!canBuy || owned) ? 'disabled' : ''} class="btn-emerald w-full py-1.5 rounded-xl text-white font-bold text-xs cursor-pointer">
+                            ${owned ? '✓ Installée dans le Palais' : (dec.exclusive ? '🎲 Uniquement Lucky Block' : `Acheter • ${formatMoney(dec.cost)}`)}
+                        </button>
+                    `;
+                    const btn = card.querySelector('button');
+                    if (canBuy) {
+                        btn.addEventListener('click', () => {
+                            state.money -= dec.cost;
+                            state.unlockedDecorations.push(dec.id);
+                            sound.upgrade();
+                            saveGame(true);
+                            renderShop();
+                        });
+                    }
+                    grid.appendChild(card);
+                });
             }
         }
 
         // ============================================================
-        // 15. ÉVÉNEMENTS CLASSEMENT, AUDIO & RÉINITIALISATION
+        // 15. CLASSEMENT, SON & RÉINITIALISATION
         // ============================================================
         const leaderboardModal = document.getElementById('leaderboardModal');
         const playerNameInput = document.getElementById('playerNameInput');
@@ -2632,12 +2749,10 @@
             leaderboardModal.classList.add('flex');
             fetchLeaderboard();
         });
-
         document.getElementById('btnCloseLeaderboard').addEventListener('click', () => {
             leaderboardModal.classList.add('hidden');
             leaderboardModal.classList.remove('flex');
         });
-
         document.getElementById('btnSavePseudo').addEventListener('click', () => {
             const val = playerNameInput.value.trim();
             if (val.length >= 2) {
@@ -2647,11 +2762,7 @@
                 fetchLeaderboard();
             }
         });
-
-        document.getElementById('btnRefreshLeaderboard').addEventListener('click', () => {
-            sound.pop();
-            fetchLeaderboard();
-        });
+        document.getElementById('btnRefreshLeaderboard').addEventListener('click', () => { sound.pop(); fetchLeaderboard(); });
 
         const btnSound = document.getElementById('btnSound');
         btnSound.addEventListener('click', () => {
@@ -2660,14 +2771,8 @@
         });
 
         const resetModal = document.getElementById('resetModal');
-        document.getElementById('btnOpenReset').addEventListener('click', () => {
-            resetModal.classList.remove('hidden');
-            resetModal.classList.add('flex');
-        });
-        document.getElementById('btnCancelReset').addEventListener('click', () => {
-            resetModal.classList.add('hidden');
-            resetModal.classList.remove('flex');
-        });
+        document.getElementById('btnOpenReset').addEventListener('click', () => { resetModal.classList.remove('hidden'); resetModal.classList.add('flex'); });
+        document.getElementById('btnCancelReset').addEventListener('click', () => { resetModal.classList.add('hidden'); resetModal.classList.remove('flex'); });
         document.getElementById('btnConfirmReset').addEventListener('click', () => {
             localStorage.removeItem(SAVE_KEY);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -2686,7 +2791,6 @@
             shopModal.classList.remove('flex');
         });
 
-        // Synchronisation périodique automatique avec Firebase toutes les 25 secondes
         setInterval(() => syncPlayerToFirebase(false), 25000);
 
         // ============================================================
@@ -2708,9 +2812,9 @@
 
             drawCrystalPalace(nowMs);
             drawStationsConveyorAndDisplay(nowMs);
-            helpers.forEach(h => drawCharacter(h, h.role, nowMs));
+            helpers.forEach(h => drawCharacter(h, false, nowMs));
             drawCustomers(nowMs);
-            drawCharacter(player, 'player', nowMs);
+            drawCharacter(player, true, nowMs);
             drawMoneySnowAndEffects();
 
             ctx.restore();
@@ -2719,10 +2823,9 @@
 
         updateHUD();
         renderQuickBars();
-        window.onload = function() {
-            syncPlayerToFirebase(true);
-            requestAnimationFrame(gameLoop);
-        };
+        syncPlayerToFirebase(true);
+        loadCloudSaveIfNewer();
+        requestAnimationFrame(gameLoop);
     })();
     </script>
 </body>
