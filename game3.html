@@ -2634,6 +2634,119 @@
         };
     })();
     </script>
+    <!-- ============================================================ -->
+<!-- SYSTÈME DE REBIRTH UNIQUE (1 000 000 $) -> DÉBLOQUE MONDE 3  -->
+<!-- ============================================================ -->
+<div id="rebirthModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="icing-card rounded-3xl p-6 max-w-sm w-full text-center text-amber-950">
+        <div class="text-4xl mb-2">♻️</div>
+        <h3 class="text-xl font-bold mb-2">Faire le Rebirth ?</h3>
+        <p class="text-sm text-amber-800 mb-4">
+            Coût : <strong>50 000 000 $</strong><br>
+            Ta caisse, tes améliorations et tes recettes seront remises à zéro, et tu débloqueras définitivement l'accès au <strong>🌍 Monde 4</strong> !
+        </p>
+        <div class="flex gap-3">
+            <button id="btnCancelRebirth" class="flex-1 py-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 font-bold text-amber-950 cursor-pointer">Annuler</button>
+            <button id="btnConfirmRebirth" class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold text-white cursor-pointer">Débloquer Monde 4 !</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const REBIRTH_COST = 50000000;
+    const SAVE_KEY = 'gingerbread_mart_2_save_v1';
+
+    const btnOpenShop = document.getElementById('btnOpenShop');
+    const shopContainer = btnOpenShop.parentElement;
+
+    // Création du bouton Rebirth (avant Rebirth)
+    const btnRebirth = document.createElement('button');
+    btnRebirth.id = 'btnRebirth';
+    btnRebirth.className = 'ginger-panel rounded-2xl px-3.5 py-2 font-bold text-amber-100 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer hover:brightness-110';
+    btnRebirth.innerHTML = '<span>♻️</span><span id="btnRebirthLabel">Rebirth (50M $)</span>';
+
+    // Création du bouton Monde 3 (remplace Rebirth une fois débloqué)
+    const btnWorld3 = document.createElement('a');
+    btnWorld3.id = 'btnWorld4';
+    btnWorld3.href = 'game4.html'; // <-- Mets ici le nom de ton fichier HTML du Monde 3
+    btnWorld3.className = 'hidden btn-mint rounded-2xl px-4 py-2 font-bold text-white text-xs sm:text-sm items-center gap-1.5 cursor-pointer shadow-lg';
+    btnWorld3.innerHTML = '<span>🌍</span><span>Monde 4</span>';
+
+    // Insère les boutons directement sur la même ligne à gauche de "Atelier & Boutique"
+    shopContainer.insertBefore(btnRebirth, btnOpenShop);
+    shopContainer.insertBefore(btnWorld3, btnOpenShop);
+
+    const btnRebirthLabel = document.getElementById('btnRebirthLabel');
+    const rebirthModal = document.getElementById('rebirthModal');
+
+    function getSave() {
+        try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); }
+        catch (e) { return {}; }
+    }
+
+    function refreshRebirthUI() {
+        const data = getSave();
+        const money = data.money || 0;
+        const unlocked = !!data.world3Unlocked || (data.rebirths || 0) >= 1;
+
+        if (unlocked) {
+            // Une fois le 1er Rebirth fait : on cache le bouton Rebirth et on affiche Monde 3 à côté de la boutique
+            btnRebirth.classList.add('hidden');
+            btnRebirth.classList.remove('flex');
+            btnWorld3.classList.remove('hidden');
+            btnWorld3.classList.add('flex');
+        } else {
+            btnRebirth.classList.remove('hidden');
+            btnRebirth.classList.add('flex');
+            btnWorld3.classList.add('hidden');
+            btnWorld3.classList.remove('flex');
+
+            if (money >= REBIRTH_COST) {
+                btnRebirth.style.background = 'linear-gradient(180deg, #a855f7 0%, #6b21a8 100%)';
+                btnRebirthLabel.textContent = 'Rebirth DISPO ! (1M $)';
+            } else {
+                btnRebirth.style.background = '';
+                btnRebirthLabel.textContent = 'Rebirth (1M $)';
+            }
+        }
+    }
+
+    btnRebirth.addEventListener('click', () => {
+        const data = getSave();
+        const money = data.money || 0;
+        if (money < REBIRTH_COST) {
+            alert(`Il te faut 50 000 000 $ pour faire le Rebirth ! (Tu as actuellement ${money.toLocaleString('fr-FR')} $)`);
+            return;
+        }
+        rebirthModal.classList.remove('hidden');
+        rebirthModal.classList.add('flex');
+    });
+
+    document.getElementById('btnCancelRebirth').addEventListener('click', () => {
+        rebirthModal.classList.add('hidden');
+        rebirthModal.classList.remove('flex');
+    });
+
+    document.getElementById('btnConfirmRebirth').addEventListener('click', () => {
+        const data = getSave();
+        if ((data.money || 0) < REBIRTH_COST) return;
+
+        // Réinitialise la progression et débloque définitivement le Monde 3 (1 seul Rebirth)
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            money: 50,
+            boxesSold: 0,
+            cookiesSold: 0,
+            rebirths: 1,
+            world3Unlocked: true
+        }));
+        location.reload();
+    });
+
+    setInterval(refreshRebirthUI, 500);
+    refreshRebirthUI();
+})();
+</script>
 </body>
 </html>
 
